@@ -766,6 +766,7 @@ body select.unit-select option {
                     <div class="col-md-3">
                         <label class="form-label" id="algorithmLabel">算法:</label>
                         <select id="algorithmSelector" class="form-select form-select-sm">
+                            <option value="AutoBest">自動最慳料</option>
                             <option value="BFD">BFD</option>
                             <option value="FFD">FFD</option>
                             <option value="SizeGrouping">智能優化</option>
@@ -842,7 +843,7 @@ body select.unit-select option {
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label cutQtyLabel">數量:</label>
-                                <input type="number" class="cutQty form-control form-control-sm" value="0" min="0">
+                                <input type="number" class="cutQty form-control form-control-sm" placeholder="例如：0" min="0">
                                 <div class="small-hint cutQtyHint">例如：5</div>
                             </div>
                             <div class="col-md-4 purpose-col">
@@ -2362,6 +2363,58 @@ body select.unit-select option {
                 const algorithm = document.getElementById("algorithmSelector").value || "BFD";
                 let optimizedResult;
 
+                // ===== AutoBest: 同時計算三算法，選擇總餘料最少者 =====
+                if (algorithm === 'AutoBest') {
+                    const resFFD = optimizeCutsFFD(cuttingItems, materialItems, sawThickness.value, 'FFD');
+                    const resBFD = optimizeCutsBFD(cuttingItems, materialItems, sawThickness.value, 'BFD');
+                    const resSG  = optimizeCutsSizeGrouping(cuttingItems, materialItems, sawThickness.value, 'SizeGrouping');
+
+                    const st = Number(sawThickness.value) || 0;
+                    function evaluate(bins) {
+                        let totalWaste = 0;
+                        let usedBars = 0;
+                        bins.forEach(bin => {
+                            if (!bin) return;
+                            usedBars++;
+                            const usedLength = (bin.cuts || []).reduce((sum, c) => sum + (Number(c.length) || 0), 0);
+                            const kerfLength = (bin.cuts && bin.cuts.length > 0) ? (bin.cuts.length - 1) * st : 0;
+                            const waste = (Number(bin.length) || 0) - (usedLength + kerfLength);
+                            totalWaste += Math.max(0, waste);
+                        });
+                        return { totalWaste, usedBars };
+                    }
+
+                    const scoreFFD = evaluate(resFFD);
+                    const scoreBFD = evaluate(resBFD);
+                    const scoreSG  = evaluate(resSG);
+
+                    function better(a, b) {
+                        if (a.totalWaste !== b.totalWaste) return a.totalWaste < b.totalWaste;
+                        return a.usedBars < b.usedBars;
+                    }
+
+                    let bestAlgo = 'FFD';
+                    let bestRes = resFFD;
+                    let bestScore = scoreFFD;
+                    if (better(scoreBFD, bestScore)) { bestAlgo = 'BFD'; bestRes = resBFD; bestScore = scoreBFD; }
+                    if (better(scoreSG,  bestScore)) { bestAlgo = 'SizeGrouping'; bestRes = resSG;  bestScore = scoreSG;  }
+
+                    optimizedResult = bestRes;
+
+                    const resultDetails = document.getElementById('resultDetails');
+                    if (resultDetails) {
+                        const banner = document.createElement('div');
+                        banner.style.margin = '12px 0';
+                        banner.style.padding = '10px';
+                        banner.style.backgroundColor = '#e8f5e9';
+                        banner.style.border = '1px solid #c8e6c9';
+                        banner.style.borderRadius = '6px';
+                        banner.style.color = '#2e7d32';
+                        banner.innerHTML = `<strong>自動最慳料</strong> 已選擇：<code>${bestAlgo}</code>｜總餘料：<code>${bestScore.totalWaste.toFixed(3)}</code>｜用料支數：<code>${bestScore.usedBars}</code>`;
+                        resultDetails.prepend(banner);
+                    }
+                } else {
+
                 switch (algorithm) {
                     case "FFD":
                         optimizedResult = optimizeCutsFFD(cuttingItems, materialItems, sawThickness.value, algorithm);
@@ -2373,6 +2426,8 @@ body select.unit-select option {
                     default:
                         optimizedResult = optimizeCutsBFD(cuttingItems, materialItems, sawThickness.value, algorithm);
                         break;
+                }
+
                 }
 
                 renderCuttingResults(optimizedResult, sawThickness.value);
@@ -3479,6 +3534,121 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   };
 })();
+</script>
+
+<script>
+// ===== Usability fix: auto clear default zero & remove leading zeros =====
+(function(){
+  const selectors = [
+    '.cutQty',
+    '.materialQty'
+  ];
+
+  function normalizeNumericString(v){
+    const s = v.trim();
+    if (s === '') return '';
+    // Integer -> remove leading zeros
+    if (/^\d+$/.test(s)) return String(Number(s));
+    // Decimal that starts with 0. -> keep as is (e.g., 0.5)
+    if (/^0\.[0-9]+$/.test(s)) return s;
+    // General numeric normalization
+    const num = Number(s);
+    if (!Number.isNaN(num)) return String(num);
+    return s; // non-numeric: leave it
+  }
+
+  function getDefaultFor(el){
+    // custom defaults by field
+    if (el.classList && el.classList.contains('materialQty')) return '1';
+    return '0';
+  }
+
+  function setup(el){
+    // Focus: if value is exactly "0", clear for easy input
+    el.addEventListener('focus', function(){
+      // 只在第一次聚焦且值為"0"時清空，避免後續編輯時干擾
+      if (this.value === '0' && !this.dataset._clearedOnce) {
+        this.value = '';
+        this.dataset._clearedOnce = '1';
+      }
+    });
+
+    // Input: live cleanup of leading zeros for integers
+    el.addEventListener('input', function(){
+      const v = this.value;
+      // 只對純整數去除前導零，盡量不改變用家輸入的小數格式
+      if (/^\d+$/.test(v)) {
+        const normalized = String(Number(v));
+        if (normalized !== v) this.value = normalized;
+      }
+    });
+
+    // Blur: restore default if empty; otherwise normalize number format
+    el.addEventListener('blur', function(){
+      const v = this.value.trim();
+      if (v === '') {
+        this.value = getDefaultFor(this);
+      } else {
+        this.value = normalizeNumericString(v);
+      }
+    });
+  }
+
+  function init(){
+    selectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(setup);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+// ===== End usability fix =====
+</script>
+<script>
+// ===== Imperial unit focus fix: clear single zero on first focus =====
+(function(){
+  function isImperialContext(el){
+    // check nearest unit-select inside same group, fallback to global #unit
+    const group = el.closest('.length-input-group') || el.closest('.saw-thickness-input') || document;
+    const localSelect = group.querySelector('.unit-select');
+    const unit = localSelect ? localSelect.value : (document.getElementById('unit') ? document.getElementById('unit').value : 'metric');
+    return unit === 'imperial' || unit === 'imperial_decimal';
+  }
+
+  function setupImperialZeroClear(selector){
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('focus', function(){
+        if (!isImperialContext(this)) return;
+        // 只在英制情境下，且首次聚焦值為 "0" 時清空，避免輸入被追加在 0 後面
+        if (this.value === '0' && !this.dataset._imperialClearedOnce) {
+          this.value = '';
+          this.dataset._imperialClearedOnce = '1';
+        } else if (this.value === '0') {
+          // 第二次以後：選取全部，讓輸入覆蓋 0
+          try { this.select(); } catch(e) {}
+        }
+      });
+    });
+  }
+
+  function init(){
+    // 針對切割項目及材料的英制長度欄位（分拆為 ft/in/eighth），以及鋸片厚度輸入
+    setupImperialZeroClear('.cutLengthPart');
+    setupImperialZeroClear('.materialLengthPart');
+    setupImperialZeroClear('#sawThickness');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+// ===== End Imperial unit focus fix =====
 </script>
 
 </body>
