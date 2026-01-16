@@ -1,6 +1,26 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+    <style>
+      /* Equalize height and look for algorithm select and saw thickness input */
+      #algorithmSelector.equal-height,
+      #sawThickness.equal-height { height: 40px !important; }
+      /* Use input-group to keep unit label same height */
+      .equalize .form-control,
+      .equalize .input-group-text { height: 40px !important; }
+      .equalize .input-group-text { background-color: #f8f9fa; border-color: #ccc; color: #212529; }
+      /* Make select visually consistent */
+      #algorithmSelector.equal-height { padding-top: .25rem !important; padding-bottom: .25rem !important; font-size: 1rem !important; }
+
+      /* Mobile: place Algorithm and Saw Thickness on same row (50% each) */
+      @media (max-width: 767.98px) {
+        #settings-card .row.g-3:nth-of-type(1) > .col-md-3:nth-child(3),
+        #settings-card .row.g-3:nth-of-type(1) > .col-md-3:nth-child(4) {
+          flex: 0 0 50% !important;
+          max-width: 50% !important;
+        }
+      }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>鋁材切割排版</title>
@@ -385,7 +405,8 @@
         }
 
         .unit-select {
-            max-width: 80px;
+            max-width: 160px;
+            white-space: nowrap;
         }
 
         @media (max-width: 767.98px) {
@@ -396,7 +417,8 @@
             }
 
             .unit-select {
-                max-width: 60px;
+                max-width: 140px;
+                white-space: nowrap;
             }
         }
 
@@ -706,7 +728,44 @@
             border-color: #d39e00;
             color: #212529;
         }
-    </style>
+    /* 讓切割項目中的「尺/寸/分」三欄水平排列並等寬 */
+
+
+/* 控制切割項目第三行（新增｜清除｜單位）為同排且不換行，並避免按鈕文字換行造成高度不一致 */
+#cuttingItems .controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
+#cuttingItems .controls-row .btn { flex: 1 1 0; white-space: nowrap; padding: .5rem .75rem; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+#cuttingItems .controls-row .unit-select { max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; font-size: 1rem !important; text-align: center !important; padding: 0.2rem 0.1rem !important; box-sizing: border-box !important; }
+@media (max-width: 390px) {
+  #cuttingItems .controls-row { gap: 6px; }
+  #cuttingItems .controls-row .unit-select { max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; }
+}
+
+        /* 控制第三行（新增｜清除｜單位）固定同一行且不出界 */
+        .controls-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+        .controls-row .btn {
+            flex: 1 1 0;
+            min-width: 86px; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; }
+        .controls-row .unit-select {
+            flex: 0 0 auto;
+            min-width: 45px !important;
+            max-width: 45px !important; width: 45px !important; height: 38px !important; font-size: 1rem !important; text-align: center !important; padding: 0.2rem 0.1rem !important; box-sizing: border-box !important;
+            white-space: nowrap;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        /* 進一步約束第三行寬度（單位更細、兩邊按鈕保持較大）*/
+        @media (max-width: 767.98px) {
+            .controls-row { gap: 6px; }
+            .controls-row .btn { font-size: .95rem; padding: .40rem .60rem; white-space: nowrap; flex: 1 1 0; min-width: 90px; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; }
+            /* 單位下拉極限縮細：字體、內距、寬度更小 */
+            .controls-row .unit-select { width: auto !important; flex: 0 0 clamp(72px, 18vw, 96px); max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; box-sizing: border-box !important; white-space: nowrap; font-size: 1rem; text-align: center; padding: 0 !important; line-height: 38px !important; -webkit-appearance: none; appearance: none; display: inline-flex; align-items: center; justify-content: center; }
+        }
+</style>
 
 <style>
 /* 強制覆蓋 Bootstrap 樣式 - 提高權重 */
@@ -714,20 +773,109 @@ body select.unit-select.metric-active {
     background-color: #198754 !important; /* Bootstrap success green - 深綠 */
     color: white !important;
     border-color: #157347 !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-image: none !important;
 }
 
 body select.unit-select.imperial-active {
     background-color: #0d6efd !important; /* Bootstrap primary blue - 深藍 */
     color: white !important;
     border-color: #0a58ca !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-image: none !important;
 }
 body select.unit-select option {
     background-color: white;
     color: black;
 }
-</style>
+
+    /* 單位選擇器的3D效果 */
+    select.unit-select.btn-3d,
+    #globalCutUnit,
+    #globalMaterialUnit {
+        text-align: center !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        padding: 0.25rem 0.1rem !important;
+        height: 38px !important;
+        width: 45px !important;
+        max-width: 45px !important;
+        min-width: 45px !important;
+        box-sizing: border-box !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        background-image: none !important;
+        line-height: 1.2 !important;
+        /* 3D效果 */
+        transition: all 50ms ease-in-out !important;
+        box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .6), 
+                    inset -2px -2px 0 rgba(0, 0, 0, .4), 
+                    0 2px 3px rgba(0, 0, 0, .4) !important;
+        position: relative !important;
+        border: 2px solid #495057 !important;
+    }
+
+    /* 設置頁面的單位選擇器稍大一點 */
+    #unit {
+        width: 60px !important;
+        max-width: 60px !important;
+        min-width: 60px !important;
+        font-size: 1.1rem !important;
+        text-align: center !important;
+        font-weight: 700 !important;
+        padding: 0.25rem 0.1rem !important;
+        height: 38px !important;
+        box-sizing: border-box !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        background-image: none !important;
+        line-height: 1.2 !important;
+    }
+
+    select.unit-select.btn-3d:active,
+    #unit:active,
+    #globalCutUnit:active,
+    #globalMaterialUnit:active {
+        transform: translateY(2px) !important;
+        box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .5), 
+                    inset -2px -2px 0 rgba(255, 255, 255, .3), 
+                    inset 0 0 3px rgba(0, 0, 0, .6) !important;
+    }
+
+    /* 移除inline style的影響 */
+    #globalCutUnit[style],
+    #globalMaterialUnit[style] {
+        min-width: 45px !important;
+        max-width: 45px !important;
+        width: 45px !important;
+    }
+    
+        #unitLabel { font-weight: 400 !important; font-size: 0.875rem !important; margin-bottom: 0.5rem !important; display: block !important; text-align: left !important; }
+        #unit.unit-select { height: 40px !important; width: 40px !important; min-width: 40px !important; max-width: 40px !important; font-size: 1rem !important; font-weight: 500 !important; text-align: center !important; text-align-last: center !important; padding: 0 !important; line-height: 40px !important; border-radius: 6px !important; cursor: pointer !important; box-sizing: border-box !important; }
+        #unit.unit-select option { text-align: center; padding: 8px; }
+        select.unit-select:not(#unit), .unit-select:not(#unit) { text-align: center !important; text-align-last: center !important; padding-left: 0 !important; padding-right: 0 !important; line-height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
+        </style>
+    <style>
+      /* Optional note styling for non-required fields */
+      .optional-note { font-size: .85em; color: #ffc107; margin-left: 0; }
+      /* In light sections ensure readable color */
+      .card-body-light .optional-note { color: #d39e00; }
+    </style>
+    <style>
+      /* Force Algorithm + Saw Thickness to sit side‑by‑side on phones */
+      @media (max-width: 767.98px) {
+        #settings-card .row.g-3 > .col-6.col-md-3 { display: inline-block !important; width: 50% !important; vertical-align: top; }
+      }
+    </style>
+    <style>
+      /* Align saw-thickness unit text without boxed chip (mobile + desktop) */
+      .saw-thickness-input { display:flex; align-items:center; gap:6px; }
+.saw-thickness-input .form-control { flex: 1 1 auto; }
+.saw-thickness-input .unit-label { flex: 0 0 auto; white-space: nowrap; font-size: .95rem; margin-left: 0; line-height: 40px; height: 40px; }
+/* 避免單位換行壓住提示文字 */
+#sawThicknessLabel + .saw-thickness-input + #sawThicknessHint { margin-top: 6px; }
+      .saw-thickness-input .form-control { height:40px !important; }
+      .saw-thickness-input .unit-label { height:40px; line-height:40px; padding:0 4px; border:0; background:transparent; color:#212529; }
+      #algorithmSelector.equal-height { height:40px !important; padding-top:.25rem !important; padding-bottom:.25rem !important; font-size:1rem !important; }
+    </style>
 </head>
 
 <body>
@@ -756,26 +904,28 @@ body select.unit-select option {
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label" id="unitLabel">顯示單位:</label>
-                        <select id="unit" class="form-select form-select-sm unit-select" onchange="updateInputLabels()">
-                            <option value="metric" selected="selected">公制 (mm)</option>
-                            <option value="imperial">英制 (in, eighth)</option>
-                            <option value="imperial_decimal">英制 (十進位/Decimal)</option>
-                        </select>
+                        <div class="d-flex flex-column align-items-start">
+                            <label class="form-label mb-2" id="unitLabel" style="font-size: 0.875rem;">顯示單位:</label>
+                            <select id="unit" class="form-select unit-select" onchange="updateInputLabels()" style="height: 40px; width: 40px; font-size: 1rem; font-weight: 500;">
+                                <option value="metric" selected="selected">公</option>
+                                <option value="imperial">英</option>
+                                <option value="imperial_decimal">英(D)</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <label class="form-label" id="algorithmLabel">算法:</label>
-                        <select id="algorithmSelector" class="form-select form-select-sm">
+                        <select id="algorithmSelector" class="form-select equal-height">
                             <option value="AutoBest">自動最慳料</option>
                             <option value="BFD">BFD</option>
                             <option value="FFD">FFD</option>
                             <option value="SizeGrouping">智能優化</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-6 col-md-3">
                         <label class="form-label" id="sawThicknessLabel">鋸片厚度:</label>
-                        <div class="saw-thickness-input">
-                            <input class="form-control" id="sawThickness" placeholder="例如: 3.2">
+                        <div class="saw-thickness-input equalize">
+                            <input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;">
                             <span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
                         </div>
                         <div class="small-hint" id="sawThicknessHint">例如: 3.2 (毫米) 或 1/8 (分)</div>
@@ -810,47 +960,57 @@ body select.unit-select option {
                 <div id="cuttingItems">
                     <div class="cutting-item">
                         <div class="row g-3 align-items-center">
-                            <div class="col-md-4">
+                            <div class="col-md-12">
                                 <label class="form-label cutLengthLabel">長度:</label>
-                                <div class="row g-2 length-input-group">
-                                    <div class="col-md-2">
+                                <div class="row g-2 length-input-group d-flex align-items-end">
+                                    <div class="col">
                                         <input type="number" step="0.001" inputmode="decimal"
                                             class="form-control form-control-lg cutLengthPart" data-part="ft"
                                             placeholder="0">
                                         <label class="small-hint cutLengthHint">米</label>
                                         <div class="error-message cutLengthError"></div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col">
                                         <input type="number" step="0.001" inputmode="decimal"
                                             class="form-control form-control-lg cutLengthPart" data-part="in"
                                             placeholder="0">
                                         <label class="small-hint cutLengthHint">厘米</label>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col">
                                         <input type="number" step="0.001" inputmode="decimal"
                                             class="form-control form-control-lg cutLengthPart" data-part="eighth"
                                             placeholder="0">
                                         <label class="small-hint cutLengthHint">毫米</label>
                                     </div>
-                                    <div class="col-md-1">
-                                        <select
-                                            class="form-select form-select-sm unit-select cutLengthUnit">
-                                            <option value="metric" selected="selected">公制</option>
-                                            <option value="imperial">英制</option>
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label cutQtyLabel">數量:</label>
-                                <input type="number" class="cutQty form-control form-control-sm" placeholder="例如：0" min="0">
-                                <div class="small-hint cutQtyHint">例如：5</div>
+                            <!-- 第二行：數量｜用途 -->
+                            <div class="row g-2 mt-2">
+                                <div class="col-6">
+                                    <label class="form-label cutQtyLabel">數量:</label>
+                                    <input type="number" class="cutQty form-control form-control-sm" placeholder="0" min="0">
+                                    <div class="small-hint cutQtyHint">例如：5</div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label cutPurposeLabel">用途:</label>
+                                    <input class="cutPurpose form-control form-control-sm" placeholder="">
+                                    <div class="small-hint cutPurposeHint">例如：邊框</div>
+                                </div>
                             </div>
-                            <div class="col-md-4 purpose-col">
-                                <label class="form-label cutPurposeLabel">用途:</label>
-                                <input class="cutPurpose form-control form-control-sm" placeholder="">
-                                <div class="small-hint cutPurposeHint">例如：邊框</div>
+                            <!-- 第三行：新增｜清除｜單位（固定同一行） -->
+                            <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+                                <button class="btn btn-success btn-sm flex-fill" onclick="addCuttingItem()" id="addCuttingButton">
+                                    <i class="fas fa-plus me-1"></i>新增項目
+                                </button>
+                                <button class="btn btn-secondary btn-sm flex-fill" onclick="clearCuttingInputs()" id="clearCuttingButton">
+                                    <i class="fas fa-times me-1"></i>清除輸入
+                                </button>
+                                <select id="globalCutUnit" class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" style="min-width:110px; max-width:160px; white-space:nowrap">
+                                    <option value="metric" selected="selected">公</option>
+                                    <option value="imperial">英</option>
+                                    </select>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -866,21 +1026,15 @@ body select.unit-select option {
                     <tbody></tbody>
                 </table>
                 <div class="d-flex gap-2 mt-2">
-                    <button class="btn btn-success btn-sm" onclick="addCuttingItem()" id="addCuttingButton">
-                        <i class="fas fa-plus me-1"></i>新增項目
-                    </button>
                     <button class="btn btn-warning btn-sm update-btn" onclick="updateCuttingItem()" id="updateCuttingButton" style="display:none">
                         <i class="fas fa-edit me-1"></i>更新項目
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="clearCuttingInputs()" id="clearCuttingButton">
-                        <i class="fas fa-times me-1"></i>清除輸入
                     </button>
                 </div>
                 <input type="hidden" id="editingCuttingIndex" value="-1">
             </div>
         </div>
 
-        <div class="card" id="materials-card">
+        <div class="card mt-3" id="materials-card">
             <div class="card-body card-body-light">
                 <div class="section-header">
                     <div class="section-title">
@@ -892,41 +1046,50 @@ body select.unit-select option {
                 <div id="materialItems">
                     <div class="material-item">
                         <div class="row g-3 align-items-center">
-                            <div class="col-md-5">
+                            <div class="col-md-12">
                                 <label class="form-label materialLengthLabel">材料長度:</label>
-                                <div class="row g-2 length-input-group">
-                                    <div class="col-md-2">
+                                <div class="row g-2 length-input-group d-flex align-items-end">
+                                    <div class="col">
                                         <input type="number" step="0.001" inputmode="decimal"
                                             class="form-control form-control-lg materialLengthPart" data-part="ft"
                                             placeholder="0">
                                         <label class="small-hint materialLengthHint">米</label>
                                         <div class="error-message materialLengthError"></div>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col">
                                         <input type="number" step="0.001" inputmode="decimal"
                                             class="form-control form-control-lg materialLengthPart" data-part="in"
                                             placeholder="0">
                                         <label class="small-hint materialLengthHint">厘米</label>
                                     </div>
-                                    <div class="col-md-2">
+                                    <div class="col">
                                         <input type="number" step="0.001" inputmode="decimal"
                                             class="form-control form-control-lg materialLengthPart" data-part="eighth"
                                             placeholder="0">
                                         <label class="small-hint materialLengthHint">毫米</label>
                                     </div>
-                                    <div class="col-md-1">
-                                        <select
-                                            class="form-select form-select-sm unit-select materialLengthUnit">
-                                            <option value="metric" selected="selected">公制</option>
-                                            <option value="imperial">英制</option>
-                                        </select>
-                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-5">
-                                <label class="form-label materialQtyLabel">數量:</label>
-                                <input type="number" class="materialQty form-control form-control-sm" value="1" min="1">
-                                <div class="small-hint materialQtyHint">例如：10</div>
+                            <!-- 數量 -->
+                            <div class="row g-2 mt-2">
+                                <div class="col-6">
+                                    <label class="form-label materialQtyLabel">數量:</label>
+                                    <input type="number" class="materialQty form-control form-control-sm" value="1" min="1">
+                                    <div class="small-hint materialQtyHint">10</div>
+                                </div>
+                            </div>
+                            <!-- 控制按鈕行 -->
+                            <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+                                <button class="btn btn-success btn-sm flex-fill" onclick="addMaterialItem()" id="addMaterialButton">
+                                    <i class="fas fa-plus me-1"></i>
+                                </button>
+                                <button class="btn btn-secondary btn-sm flex-fill" onclick="clearMaterialInputs()" id="clearMaterialButton">
+                                    <i class="fas fa-times me-1"></i>
+                                </button>
+                                <select id="globalMaterialUnit" class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0 btn-3d">
+                                    <option value="metric" selected="selected">公</option>
+                                    <option value="imperial">英</option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -942,14 +1105,8 @@ body select.unit-select option {
                     <tbody></tbody>
                 </table>
                 <div class="d-flex gap-2 mt-2">
-                    <button class="btn btn-success btn-sm" onclick="addMaterialItem()" id="addMaterialButton">
-                        <i class="fas fa-plus me-1"></i>新增材料
-                    </button>
                     <button class="btn btn-warning btn-sm update-btn" onclick="updateMaterialItem()" id="updateMaterialButton" style="display:none">
                         <i class="fas fa-edit me-1"></i>更新材料
-                    </button>
-                    <button class="btn btn-secondary btn-sm" onclick="clearMaterialInputs()" id="clearMaterialButton">
-                        <i class="fas fa-times me-1"></i>清除輸入
                     </button>
                 </div>
                 <input type="hidden" id="editingMaterialIndex" value="-1">
@@ -1145,6 +1302,17 @@ body select.unit-select option {
         let M_TO_MM = 1000;
         let CM_TO_MM = 10;
         let EIGHTH_TO_MM = INCH_TO_MM / 8;
+
+        // 全域安全轉義（防止 DOM XSS），供所有模板使用
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+        }
 
         // 全局變量，用於記錄編輯狀態
         let editingCuttingIndex = -1;
@@ -1385,7 +1553,8 @@ body select.unit-select option {
 
         // 更新輸入標籤
         function updateInputLabels() {
-            const unit = document.getElementById("unit").value;
+            const unitElem = document.getElementById("globalCutUnit") || document.getElementById("unit");
+            const unit = unitElem ? unitElem.value : "metric";
             const lang = document.getElementById("language").value;
 
             const labels = {
@@ -1398,15 +1567,16 @@ body select.unit-select option {
             const cuttingEditMode = document.querySelector("#cuttingItems .cutting-item.edit-mode");
             const materialEditMode = document.querySelector("#materialItems .material-item.edit-mode");
 
-            // 更新單位選擇器的樣式
-            document.querySelectorAll(".unit-select").forEach(select => {
-                // 如果是編輯模式，跳過更新
-                if (select.closest('.edit-mode')) {
-                    return;
+            // 更新設置頁面的單位選擇器樣式
+            const settingsUnitSelect = document.getElementById("unit");
+            if (settingsUnitSelect) {
+                settingsUnitSelect.classList.remove("metric-active", "imperial-active");
+                if (settingsUnitSelect.value === "metric") {
+                    settingsUnitSelect.classList.add("metric-active");
+                } else {
+                    settingsUnitSelect.classList.add("imperial-active");
                 }
-                select.classList.remove("metric-active", "imperial-active");
-                select.value === "metric" ? select.classList.add("metric-active") : select.classList.add("imperial-active");
-            });
+            }
 
             // 更新長度輸入提示
             document.querySelectorAll(".length-input-group").forEach(group => {
@@ -1414,7 +1584,7 @@ body select.unit-select option {
                 if (group.closest('.edit-mode')) {
                     return;
                 }
-                const unitSelect = group.querySelector(".unit-select");
+                const unitSelect = group.querySelector(".unit-select") || document.querySelector("#cuttingItems .unit-select");
                 const unitType = unitSelect ? unitSelect.value : "metric";
                 const hintLabels = labels[unitType] || labels.metric;
 
@@ -1445,7 +1615,8 @@ body select.unit-select option {
         function parseSawThickness() {
             const input = document.getElementById("sawThickness").value.trim();
             const errorElement = document.getElementById("sawThicknessError");
-            const unit = document.getElementById("unit").value;
+            const unitElem = document.getElementById("globalCutUnit") || document.getElementById("unit");
+            const unit = unitElem ? unitElem.value : "metric";
             const lang = document.getElementById("language").value;
 
             if (!input) {
@@ -1489,7 +1660,7 @@ body select.unit-select option {
 
         // 解析長度
         function parseLength(lengthInputGroup) {
-            const unitSelect = lengthInputGroup.querySelector(".unit-select");
+            const unitSelect = lengthInputGroup.querySelector(".unit-select") || document.querySelector("#cuttingItems .unit-select");
             const unit = unitSelect ? unitSelect.value : "metric";
             const inputs = lengthInputGroup.querySelectorAll(".form-control");
             const lang = document.getElementById("language").value;
@@ -1826,9 +1997,9 @@ body select.unit-select option {
             const rowIndex = tbody.children.length;
             
             row.innerHTML = `
-                <td>${display}</td>
+                <td>${escapeHTML(display)}</td>
                 <td>${quantity}</td>
-                <td>${purpose || "-"}</td>
+                <td>${escapeHTML(purpose || "-")}</td>
                 <td class="text-center">
                     <div class="action-buttons">
                         <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(${rowIndex})" title="編輯">
@@ -2140,7 +2311,7 @@ body select.unit-select option {
                 for (let i = 0; i < bins.length; i++) {
                     const bin = bins[i];
                     const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-                    const kerfLength = bin.cuts.length > 0 ? bin.cuts.length * sawThickness : 0;
+                    const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
 
                     if (usedLength + kerfLength + cut.length + (bin.cuts.length > 0 ? sawThickness : 0) <= bin.length) {
                         bin.cuts.push(cut);
@@ -2198,7 +2369,7 @@ body select.unit-select option {
                 for (let i = 0; i < bins.length; i++) {
                     const bin = bins[i];
                     const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-                    const kerfLength = bin.cuts.length > 0 ? bin.cuts.length * sawThickness : 0;
+                    const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
                     const required = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
                     const remaining = bin.length - (usedLength + kerfLength + required);
 
@@ -2270,7 +2441,7 @@ body select.unit-select option {
                     for (let i = 0; i < bins.length; i++) {
                         const bin = bins[i];
                         const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-                        const kerfLength = bin.cuts.length > 0 ? bin.cuts.length * sawThickness : 0;
+                        const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
 
                         let count = 0;
                         let currentLength = usedLength + kerfLength;
@@ -2727,6 +2898,13 @@ body select.unit-select option {
                         if (modalEl) {
                             const modal = bootstrap.Modal.getInstance(modalEl);
                             if (modal) modal.hide();
+                    // 滾動到計算區域
+                    setTimeout(function() {
+                        const resultsCard = document.getElementById('results-card');
+                        if (resultsCard) {
+                            resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    }, 500);
                         }
 
                         // 3. 載入數據到輸入框
@@ -2784,7 +2962,7 @@ body select.unit-select option {
             } else {
                 schemesList.innerHTML = savedSchemes.map((scheme, index) => `
                     <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                        <span style="color:#212529">${scheme.name}</span>
+                        <span style="color:#212529">${escapeHTML(scheme.name)}</span>
                         <div>
                             <button class="btn btn-sm btn-primary me-2" onclick="loadSchemeData(${index})">
                                 ${lang === "zh" ? "載入" : "Load"}
@@ -2942,6 +3120,39 @@ body select.unit-select option {
             updateLanguage();
             updateInputLabels();
 
+            // 初始化所有單位選擇器的顏色
+            setTimeout(function() {
+                const settingsUnit = document.getElementById("unit");
+                if (settingsUnit) {
+                    settingsUnit.classList.remove("metric-active", "imperial-active");
+                    if (settingsUnit.value === "metric") {
+                        settingsUnit.classList.add("metric-active");
+                    } else {
+                        settingsUnit.classList.add("imperial-active");
+                    }
+                }
+
+                const initCutUnit = document.getElementById("globalCutUnit");
+                if (initCutUnit) {
+                    initCutUnit.classList.remove("metric-active", "imperial-active");
+                    if (initCutUnit.value === "metric") {
+                        initCutUnit.classList.add("metric-active");
+                    } else {
+                        initCutUnit.classList.add("imperial-active");
+                    }
+                }
+
+                const initMaterialUnit = document.getElementById("globalMaterialUnit");
+                if (initMaterialUnit) {
+                    initMaterialUnit.classList.remove("metric-active", "imperial-active");
+                    if (initMaterialUnit.value === "metric") {
+                        initMaterialUnit.classList.add("metric-active");
+                    } else {
+                        initMaterialUnit.classList.add("imperial-active");
+                    }
+                }
+            }, 50);
+
             // 關閉模態框
             bootstrap.Modal.getInstance(document.getElementById("loadSchemeModal")).hide();
         }
@@ -2988,6 +3199,39 @@ body select.unit-select option {
             // 更新界面
             updateLanguage();
             updateInputLabels();
+
+            // 初始化所有單位選擇器的顏色
+            setTimeout(function() {
+                const settingsUnit = document.getElementById("unit");
+                if (settingsUnit) {
+                    settingsUnit.classList.remove("metric-active", "imperial-active");
+                    if (settingsUnit.value === "metric") {
+                        settingsUnit.classList.add("metric-active");
+                    } else {
+                        settingsUnit.classList.add("imperial-active");
+                    }
+                }
+
+                const initCutUnit = document.getElementById("globalCutUnit");
+                if (initCutUnit) {
+                    initCutUnit.classList.remove("metric-active", "imperial-active");
+                    if (initCutUnit.value === "metric") {
+                        initCutUnit.classList.add("metric-active");
+                    } else {
+                        initCutUnit.classList.add("imperial-active");
+                    }
+                }
+
+                const initMaterialUnit = document.getElementById("globalMaterialUnit");
+                if (initMaterialUnit) {
+                    initMaterialUnit.classList.remove("metric-active", "imperial-active");
+                    if (initMaterialUnit.value === "metric") {
+                        initMaterialUnit.classList.add("metric-active");
+                    } else {
+                        initMaterialUnit.classList.add("imperial-active");
+                    }
+                }
+            }, 50);
         }
 
         // 顯示列印選項
@@ -3109,6 +3353,53 @@ body select.unit-select option {
         document.addEventListener("DOMContentLoaded", function () {
             updateLanguage();
             updateInputLabels();
+
+            // 初始化所有單位選擇器的顏色
+            setTimeout(function() {
+                const settingsUnit = document.getElementById("unit");
+                if (settingsUnit) {
+                    settingsUnit.classList.remove("metric-active", "imperial-active");
+                    if (settingsUnit.value === "metric") {
+                        settingsUnit.classList.add("metric-active");
+                    } else {
+                        settingsUnit.classList.add("imperial-active");
+                    }
+                }
+
+                const initCutUnit = document.getElementById("globalCutUnit");
+                if (initCutUnit) {
+                    initCutUnit.classList.remove("metric-active", "imperial-active");
+                    if (initCutUnit.value === "metric") {
+                        initCutUnit.classList.add("metric-active");
+                    } else {
+                        initCutUnit.classList.add("imperial-active");
+                    }
+                }
+
+                const initMaterialUnit = document.getElementById("globalMaterialUnit");
+                if (initMaterialUnit) {
+                    initMaterialUnit.classList.remove("metric-active", "imperial-active");
+                    if (initMaterialUnit.value === "metric") {
+                        initMaterialUnit.classList.add("metric-active");
+                    } else {
+                        initMaterialUnit.classList.add("imperial-active");
+                    }
+                }
+            }, 50);
+            // 綁定切割項目區的全局單位下拉，以即時更新尺/寸/分提示
+            const gUnit = document.getElementById("globalCutUnit");
+            if (gUnit) {
+                gUnit.addEventListener("change", function(){
+                    updateCuttingUnitOnly();
+                });
+            }
+
+            const gMaterialUnit = document.getElementById("globalMaterialUnit");
+            if (gMaterialUnit) {
+                gMaterialUnit.addEventListener("change", function(){
+                    updateMaterialUnitOnly();
+                });
+            }
 
             // 設置默認鋸片厚度
             const unit = document.getElementById("unit").value;
@@ -3313,9 +3604,9 @@ window.enterCuttingEditMode = function(index) {
     template.querySelector(".cutQty").value = row.dataset.quantity;
     template.querySelector(".cutPurpose").value = row.dataset.purpose || "";
 
-    document.getElementById("addCuttingBtn").style.display = "none";
-    document.getElementById("updateCuttingBtn").style.display = "inline-block";
-    document.getElementById("cancelCuttingEditBtn").style.display = "inline-block";
+    document.getElementById("addCuttingButton").style.display = "none";
+    document.getElementById("updateCuttingButton").style.display = "inline-block";
+    /* cancelCuttingEditBtn removed: use clearCuttingButton if needed */
 };
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -3377,7 +3668,7 @@ document.addEventListener("DOMContentLoaded", function() {
           for(let i = 0; i < bins.length; i++) {
             const bin = bins[i];
             const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-            const kerfLength = bin.cuts.length > 0 ? bin.cuts.length * sawThickness : 0;
+            const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
             if(usedLength + kerfLength + cut.length + (bin.cuts.length > 0 ? sawThickness : 0) <= bin.length) {
               bin.cuts.push(cut);
               placed = true;
@@ -3411,7 +3702,7 @@ document.addEventListener("DOMContentLoaded", function() {
             for(let i = 0; i < bins.length; i++) {
               const bin = bins[i];
               const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-              const kerfLength = bin.cuts.length > 0 ? bin.cuts.length * sawThickness : 0;
+              const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
               let count = 0, currentLength = usedLength + kerfLength;
               for(let j = 0; j < groupCuts.length; j++) {
                 const required = length + (bin.cuts.length + count > 0 ? sawThickness : 0);
@@ -3462,7 +3753,7 @@ document.addEventListener("DOMContentLoaded", function() {
           for(let i = 0; i < bins.length; i++) {
             const bin = bins[i];
             const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-            const kerfLength = bin.cuts.length > 0 ? bin.cuts.length * sawThickness : 0;
+            const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
             const required = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
             const remaining = bin.length - (usedLength + kerfLength + required);
             if(remaining >= 0 && remaining < bestRemaining) {
@@ -3651,5 +3942,466 @@ document.addEventListener("DOMContentLoaded", function() {
 // ===== End Imperial unit focus fix =====
 </script>
 
+<script>
+// 自動重算：頁面載入後，若已有清單資料則自動以新公式重算
+(function(){
+  function autoRecalc(){
+    try {
+      const hasData = document.querySelector('#cuttingItemsTable tbody tr') || document.querySelector('#materialItemsTable tbody tr');
+      if (hasData && typeof calculate === 'function') {
+        calculate();
+      }
+    } catch(e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoRecalc);
+  } else {
+    setTimeout(autoRecalc, 50);
+  }
+})();
+</script>
+
+
+    <script>
+    // 智能自動滾動功能 - 滾動到section標題
+    document.addEventListener('DOMContentLoaded', function() {
+        // 切割項目的長度輸入框 - 滾動到切割項目的標題
+        const cuttingScrollInputs = 
+                        }
+                    }
+                }, 300);
+            });
+        });
+
+        // 材料的長度輸入框 - 滾動到材料的標題
+        const materialScrollInputs = document.querySelectorAll('.auto-scroll-material');
+
+        materialScrollInputs.forEach(function(input) {
+            input.addEventListener('focus', function() {
+                setTimeout(function() {
+                    // 找到材料卡片的section-header
+                    const materialCard = document.getElementById('materials-card');
+                    if (materialCard) {
+                        const sectionHeader = materialCard.querySelector('.section-header');
+                        if (sectionHeader) {
+                            // 滾動到標題位置，讓標題出現在螢幕頂部偏下一點
+                            const rect = sectionHeader.getBoundingClientRect();
+                            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                            const targetY = rect.top + scrollTop - 20; // 距離頂部20px
+
+                            window.scrollTo({
+                                top: targetY,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                }, 300);
+            });
+        });
+    });
+    </script>
+    
+    <script>
+    // 只更新切割項目的單位
+    function updateCuttingUnitOnly() {
+        const cutUnit = document.getElementById('globalCutUnit');
+        if (!cutUnit) return;
+
+        const unit = cutUnit.value;
+        const lang = document.getElementById('language').value;
+
+        cutUnit.classList.remove('metric-active', 'imperial-active');
+        if (unit === 'metric') {
+            cutUnit.classList.add('metric-active');
+        } else {
+            cutUnit.classList.add('imperial-active');
+        }
+
+        const labels = {
+            imperial: lang === 'zh' ? ['尺', '寸', '分'] : ['ft', 'in', 'eighth'],
+            metric: lang === 'zh' ? ['米', '厘米', '毫米'] : ['m', 'cm', 'mm']
+        };
+        const hintLabels = labels[unit] || labels.metric;
+
+        const cuttingItems = document.getElementById('cuttingItems');
+        if (cuttingItems) {
+            const groups = cuttingItems.querySelectorAll('.length-input-group');
+            groups.forEach(group => {
+                if (group.closest('.edit-mode')) return;
+                const inputs = group.querySelectorAll('.form-control');
+                inputs.forEach((input, index) => {
+                    const hint = input.nextElementSibling;
+                    if (hint && hint.classList.contains('small-hint')) {
+                        hint.textContent = hintLabels[index] || '';
+                    }
+                });
+            });
+        }
+    }
+
+    // 只更新材料的單位
+    function updateMaterialUnitOnly() {
+        const materialUnit = document.getElementById('globalMaterialUnit');
+        if (!materialUnit) return;
+
+        const unit = materialUnit.value;
+        const lang = document.getElementById('language').value;
+
+        materialUnit.classList.remove('metric-active', 'imperial-active');
+        if (unit === 'metric') {
+            materialUnit.classList.add('metric-active');
+        } else {
+            materialUnit.classList.add('imperial-active');
+        }
+
+        const labels = {
+            imperial: lang === 'zh' ? ['尺', '寸', '分'] : ['ft', 'in', 'eighth'],
+            metric: lang === 'zh' ? ['米', '厘米', '毫米'] : ['m', 'cm', 'mm']
+        };
+        const hintLabels = labels[unit] || labels.metric;
+
+        const materialItems = document.getElementById('materialItems');
+        if (materialItems) {
+            const groups = materialItems.querySelectorAll('.length-input-group');
+            groups.forEach(group => {
+                if (group.closest('.edit-mode')) return;
+                const inputs = group.querySelectorAll('.form-control');
+                inputs.forEach((input, index) => {
+                    const hint = input.nextElementSibling;
+                    if (hint && hint.classList.contains('small-hint')) {
+                        hint.textContent = hintLabels[index] || '';
+                    }
+                });
+            });
+        }
+    }
+
+    // 載入方案後滾動到計算區域的輔助函數
+    window.scrollToCalculate = function() {
+        setTimeout(function() {
+            const resultsCard = document.getElementById('results-card');
+            if (resultsCard) {
+                const header = resultsCard.querySelector('.section-header');
+                if (header) {
+                    header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }, 300);
+    };
+    
+// ========================================
+// 自動滾動功能 - 正確版本（找 section-header）
+// ========================================
+(function() {
+    console.log('初始化自動滾動功能...');
+
+    // 使用事件委託監聽所有 focus 事件
+    document.addEventListener('focus', function(event) {
+        const target = event.target;
+
+        // 檢查是否是輸入欄或選擇器
+        const isInput = target.matches('input[type="number"], input[type="text"], textarea, select');
+
+        if (isInput) {
+            console.log('輸入欄被點擊:', target.tagName, target.id || target.name);
+
+            // 向上查找最近的 card 容器
+            let card = target.closest('.card');
+
+            if (card) {
+                // 在這個 card 內找 section-header（正確的class名稱！）
+                let sectionHeader = card.querySelector('.section-header');
+
+                if (sectionHeader) {
+                    console.log('找到標題區域:', sectionHeader.textContent.trim().substring(0, 20));
+
+                    // 獲取標題當前位置
+                    const headerRect = sectionHeader.getBoundingClientRect();
+                    const headerTop = headerRect.top;
+
+                    // 如果標題不在頂部（超過5px），就滾動
+                    if (headerTop > 5 || headerTop < 0) {
+                        // 計算需要滾動的距離
+                        const scrollAmount = window.pageYOffset + headerTop - 5;
+
+                        console.log('滾動到位置:', scrollAmount, '(距離頂部5px)');
+
+                        window.scrollTo({
+                            top: scrollAmount,
+                            behavior: 'smooth'
+                        });
+                    } else {
+                        console.log('已經在正確位置，無需滾動');
+                    }
+                } else {
+                    console.log('找不到 .section-header');
+                }
+            } else {
+                console.log('找不到 .card');
+            }
+        }
+    }, true); // 使用捕獲階段
+
+    console.log('✅ 自動滾動功能已啟動（使用 .section-header）');
+})();
+</script>
+    <script>
+    // Auto-hide results when inputs change to avoid showing stale screenshot/results
+    (function(){
+      function hideResults(){
+        const ids = [
+          'resultDetails','cuttingCanvas','colorLegend','progressBar',
+          'schemeSelector','printOptionsButton','printButton'
+        ];
+        ids.forEach(id => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (id === 'progressBar') {
+            el.style.display = 'none';
+          } else {
+            el.style.display = 'none';
+          }
+        });
+      }
+      function bind(el){
+        if (!el) return;
+        el.addEventListener('input', hideResults);
+        el.addEventListener('change', hideResults);
+      }
+      function attachAutoHide(){
+        // Basic selectors that impact results
+        ['#language','#unit','#algorithmSelector','#sawThickness',
+         '#globalCutUnit','#globalMaterialUnit']
+         .forEach(sel => document.querySelectorAll(sel).forEach(bind));
+        // Cutting inputs
+        document.querySelectorAll('.cutLengthPart,.cutQty,.cutPurpose')
+          .forEach(bind);
+        // Material inputs
+        document.querySelectorAll('.materialLengthPart,.materialQty')
+          .forEach(bind);
+        // Buttons that change data
+        ['#addCuttingButton','#clearCuttingButton','#updateCuttingButton',
+         '#addMaterialButton','#clearMaterialButton','#updateMaterialButton']
+         .forEach(id => { const b=document.querySelector(id); if(b){ b.addEventListener('click', hideResults); }});
+        // Table action buttons (edit/delete)
+        document.addEventListener('click', function(e){
+          const btn = e.target.closest('.action-buttons button');
+          if(btn) hideResults();
+        });
+        // Expose for manual use if needed
+        window.hideCuttingResults = hideResults;
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', attachAutoHide);
+      } else {
+        attachAutoHide();
+      }
+    })();
+    </script>
+      <script>
+    // Add small colored optional note to Purpose label (用途)
+    (function(){
+      function applyOptionalNote(){
+        try {
+          var langSel = document.getElementById('language');
+          var lang = langSel ? langSel.value : 'zh';
+          var baseLabel = (lang === 'zh') ? '用途:' : 'Purpose:';
+          var noteText = (lang === 'zh') ? '(非必填)' : '(optional)';
+          document.querySelectorAll('.cutPurposeLabel').forEach(function(lbl){
+            // Avoid duplicate notes by resetting to base then append note
+            lbl.innerHTML = baseLabel + ' <span class="optional-note">' + noteText + '</span>';
+          });
+        } catch(e) {}
+      }
+      // Patch updateLanguage to re-apply note after language switch
+      var __origUpdateLanguage = window.updateLanguage;
+      if (typeof __origUpdateLanguage === 'function') {
+        window.updateLanguage = function(){
+          __origUpdateLanguage();
+          applyOptionalNote();
+        };
+      }
+      // Run on first load as well
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', applyOptionalNote);
+      } else {
+        applyOptionalNote();
+      }
+      // Also re-apply when entering edit mode (UI may re-render labels)
+      document.addEventListener('click', function(ev){
+        if (ev.target && (ev.target.id === 'addCuttingButton' || ev.target.id === 'updateCuttingButton' || ev.target.id === 'clearCuttingButton')) {
+          setTimeout(applyOptionalNote, 0);
+        }
+      });
+      window.applyOptionalPurposeNote = applyOptionalNote; // expose
+    })();
+  </script>
 </body>
 </html>
+<style>
+/* Fix unit label overflow near right edge and on mobile */
+.saw-thickness-input { position: relative; }
+.saw-thickness-input .unit-label { order: -1; margin-right: 6px; margin-left: 0 !important; }
+@media (max-width: 767.98px) {
+  .saw-thickness-input .form-control { max-width: 90px !important; }
+  .saw-thickness-input .unit-label { font-size: .9rem; }
+}
+</style>
+
+<style>
+/* v3: Keep unit label on RIGHT side within the field, no overflow */
+.saw-thickness-input { position: relative; }
+.saw-thickness-input .unit-label {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0 !important;
+  padding: 0 4px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  background: transparent !important;
+  white-space: nowrap !important;
+}
+/* Prevent overlap: add right padding inside input to make room for the unit label */
+.saw-thickness-input .form-control {
+  padding-right: 48px !important;
+  height: 40px !important;
+}
+@media (max-width: 767.98px) {
+  .saw-thickness-input .unit-label { right: 6px; font-size: .9rem; }
+  .saw-thickness-input .form-control { padding-right: 52px !important; }
+}
+</style>
+
+<script>
+// i18n fixes: update unit select option texts and help button when language changes
+(function(){
+  function updateUnitOptionTexts(){
+    var langElem = document.getElementById('language');
+    var lang = langElem ? langElem.value : 'zh';
+    var labelText = {
+      metric: lang === 'zh' ? '公' : 'Metric',
+      imperial: lang === 'zh' ? '英' : 'Imperial',
+      imperial_decimal: lang === 'zh' ? '英(D)' : 'Imperial (Decimal)'
+    };
+    // Update all unit-select dropdowns
+    document.querySelectorAll('select.unit-select').forEach(function(sel){
+      sel.querySelectorAll('option').forEach(function(opt){
+        if (labelText[opt.value]) { opt.textContent = labelText[opt.value]; }
+      });
+    });
+    // Also update the Settings unit selector (#unit) if present
+    var unitSel = document.getElementById('unit');
+    if (unitSel) {
+      unitSel.querySelectorAll('option').forEach(function(opt){
+        if (labelText[opt.value]) { opt.textContent = labelText[opt.value]; }
+      });
+    }
+  }
+  function updateHelpButton(){
+    var langElem = document.getElementById('language');
+    var lang = langElem ? langElem.value : 'zh';
+    var btn = document.getElementById('helpButton');
+    if (btn) {
+      btn.innerHTML = (lang === 'zh'
+        ? '<i class="fas fa-question-circle me-2"></i>使用說明'
+        : '<i class="fas fa-question-circle me-2"></i>User Guide');
+    }
+  }
+  function runFixes(){
+    updateUnitOptionTexts();
+    updateHelpButton();
+  }
+  document.addEventListener('DOMContentLoaded', runFixes);
+  var langSel = document.getElementById('language');
+  if (langSel) { langSel.addEventListener('change', runFixes); }
+  window.addEventListener('load', runFixes);
+})();
+</script>
+
+<script>
+// v2 i18n: tables, algorithm options, load/help modals
+(function(){
+  function getLang(){
+    var el = document.getElementById('language');
+    return el ? el.value : 'zh';
+  }
+  function updateAlgorithmOptions(){
+    var lang = getLang();
+    var sel = document.getElementById('algorithmSelector');
+    if (!sel) return;
+    var labels = (lang === 'zh')
+      ? { AutoBest: '自動最慳料', BFD: 'BFD', FFD: 'FFD', SizeGrouping: '智能優化' }
+      : { AutoBest: 'Auto Best Saving', BFD: 'BFD', FFD: 'FFD', SizeGrouping: 'Smart Optimization' };
+    Array.from(sel.options).forEach(function(opt){
+      if (labels[opt.value]) opt.textContent = labels[opt.value];
+    });
+  }
+  function updateTableHeaders(){
+    var lang = getLang();
+    var cutHead = document.querySelector('#cuttingItemsTable thead');
+    if (cutHead) {
+      var ths = cutHead.querySelectorAll('th');
+      if (ths.length >= 4) {
+        if (lang === 'zh') {
+          ths[0].textContent = '長度';
+          ths[1].textContent = '數量';
+          ths[2].textContent = '用途';
+          ths[3].textContent = '操作';
+        } else {
+          ths[0].textContent = 'Length';
+          ths[1].textContent = 'Quantity';
+          ths[2].textContent = 'Purpose';
+          ths[3].textContent = 'Action';
+        }
+      }
+    }
+    var matHead = document.querySelector('#materialItemsTable thead');
+    if (matHead) {
+      var ths2 = matHead.querySelectorAll('th');
+      if (ths2.length >= 3) {
+        if (lang === 'zh') {
+          ths2[0].textContent = '材料長度';
+          ths2[1].textContent = '數量';
+          ths2[2].textContent = '操作';
+        } else {
+          ths2[0].textContent = 'Material Length';
+          ths2[1].textContent = 'Quantity';
+          ths2[2].textContent = 'Action';
+        }
+      }
+    }
+  }
+  function updateLoadModalTexts(){
+    var lang = getLang();
+    var label = document.getElementById('loadSchemeModalLabel');
+    if (label) label.textContent = (lang === 'zh') ? '載入方案' : 'Load Scheme';
+    var body = document.querySelector('#loadSchemeModal .modal-body');
+    if (body) {
+      var h6s = body.querySelectorAll('h6');
+      if (h6s[0]) h6s[0].textContent = (lang === 'zh') ? '📁 從檔案上載方案' : '📁 Upload scheme from file';
+      if (h6s[1]) h6s[1].textContent = (lang === 'zh') ? '📋 已儲存的方案' : '📋 Saved schemes';
+      var uploadBtn = body.querySelector('button.btn.btn-primary');
+      if (uploadBtn) uploadBtn.innerHTML = (lang === 'zh') ? '📤 上載' : '📤 Upload';
+    }
+    var footerCancel = document.querySelector('#loadSchemeModal .modal-footer .btn.btn-secondary');
+    if (footerCancel) footerCancel.textContent = (lang === 'zh') ? '取消' : 'Cancel';
+  }
+  function updateHelpModalFooter(){
+    var lang = getLang();
+    var closeBtn = document.querySelector('#helpModal .modal-footer .btn.btn-secondary');
+    if (closeBtn) closeBtn.textContent = (lang === 'zh') ? '關閉' : 'Close';
+  }
+  function runAll(){
+    updateAlgorithmOptions();
+    updateTableHeaders();
+    updateLoadModalTexts();
+    updateHelpModalFooter();
+  }
+  document.addEventListener('DOMContentLoaded', runAll);
+  window.addEventListener('load', runAll);
+  var langSel = document.getElementById('language');
+  if (langSel) langSel.addEventListener('change', runAll);
+})();
+</script>
