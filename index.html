@@ -1553,7 +1553,8 @@ body select.unit-select option {
 
         // 更新輸入標籤
         function updateInputLabels() {
-            const unitElem = document.getElementById("globalCutUnit") || document.getElementById("unit");
+            // Prefer settings unit (#unit); fallback to globalCutUnit
+            const unitElem = document.getElementById("unit") || document.getElementById("globalCutUnit");
             const unit = unitElem ? unitElem.value : "metric";
             const lang = document.getElementById("language").value;
 
@@ -1578,33 +1579,40 @@ body select.unit-select option {
                 }
             }
 
-            // 更新長度輸入提示
-            document.querySelectorAll(".length-input-group").forEach(group => {
-                // 如果是編輯模式，跳過更新
-                if (group.closest('.edit-mode')) {
-                    return;
+            // 更新長度輸入提示（切割與材料單位各自獨立）
+            document.querySelectorAll('.length-input-group').forEach(group => {
+                if (group.closest('.edit-mode')) return; // 編輯中跳過
+                // 判斷所屬區域：切割或材料
+                let unitSelect = group.querySelector('.unit-select');
+                if (!unitSelect) {
+                    if (group.closest('#cuttingItems')) unitSelect = document.getElementById('globalCutUnit');
+                    else if (group.closest('#materialItems')) unitSelect = document.getElementById('globalMaterialUnit');
                 }
-                const unitSelect = group.querySelector(".unit-select") || document.querySelector("#cuttingItems .unit-select");
-                const unitType = unitSelect ? unitSelect.value : "metric";
+                const unitType = unitSelect ? unitSelect.value : 'metric';
                 const hintLabels = labels[unitType] || labels.metric;
-
-                group.querySelectorAll(".form-control").forEach((input, index) => {
+                group.querySelectorAll('.form-control').forEach((input, index) => {
                     const hint = input.nextElementSibling;
-                    if (hint && hint.classList.contains("small-hint")) {
-                        hint.textContent = hintLabels[index] || "";
+                    if (hint && hint.classList.contains('small-hint')) {
+                        hint.textContent = hintLabels[index] || '';
                     }
                 });
             });
 
-            // 更新鋸片厚度單位標籤
+            // 更新鋸片厚度單位與範例
             const sawThicknessInput = document.getElementById("sawThickness");
-            if (unit === "imperial") {
-                document.getElementById("sawThicknessUnitLabel").textContent = lang === "zh" ? "分" : "eighth";
+            const sawThicknessUnit = document.getElementById("sawThicknessUnitLabel");
+            if (unit === "imperial" || unit === "imperial_decimal") {
+                // 單位顯示「分」（英文為 eighth），範例/placeholder 顯示 1/8
+                if (SawThicknessUnit) {}
+                sawThicknessUnit.textContent = lang === "zh" ? "分" : "eighth";
+                sawThicknessInput.setAttribute("placeholder", "1/8");
                 if (!sawThicknessInput.value || sawThicknessInput.value === "3.2") {
                     sawThicknessInput.value = "1/8";
                 }
             } else {
-                document.getElementById("sawThicknessUnitLabel").textContent = lang === "zh" ? "毫米" : "mm";
+                // 公制顯示毫米，範例/placeholder 顯示 3.2
+                sawThicknessUnit.textContent = lang === "zh" ? "毫米" : "mm";
+                sawThicknessInput.setAttribute("placeholder", "3.2");
                 if (!sawThicknessInput.value || sawThicknessInput.value === "1/8") {
                     sawThicknessInput.value = "3.2";
                 }
@@ -1615,7 +1623,7 @@ body select.unit-select option {
         function parseSawThickness() {
             const input = document.getElementById("sawThickness").value.trim();
             const errorElement = document.getElementById("sawThicknessError");
-            const unitElem = document.getElementById("globalCutUnit") || document.getElementById("unit");
+            const unitElem = document.getElementById("unit") || document.getElementById("globalCutUnit");
             const unit = unitElem ? unitElem.value : "metric";
             const lang = document.getElementById("language").value;
 
@@ -1660,8 +1668,13 @@ body select.unit-select option {
 
         // 解析長度
         function parseLength(lengthInputGroup) {
-            const unitSelect = lengthInputGroup.querySelector(".unit-select") || document.querySelector("#cuttingItems .unit-select");
-            const unit = unitSelect ? unitSelect.value : "metric";
+            // 根據所屬區域使用對應的全域單位，避免互相影響
+            let unitSelect = lengthInputGroup.querySelector('.unit-select');
+            if (!unitSelect) {
+                if (lengthInputGroup.closest('#cuttingItems')) unitSelect = document.getElementById('globalCutUnit');
+                else if (lengthInputGroup.closest('#materialItems')) unitSelect = document.getElementById('globalMaterialUnit');
+            }
+            const unit = unitSelect ? unitSelect.value : 'metric';
             const inputs = lengthInputGroup.querySelectorAll(".form-control");
             const lang = document.getElementById("language").value;
 
@@ -4405,3 +4418,126 @@ document.addEventListener("DOMContentLoaded", function() {
   if (langSel) langSel.addEventListener('change', runAll);
 })();
 </script>
+
+<script>
+// Ensure saw thickness unit updates when unit changes or on load
+(function(){
+  function bind(){
+    document.addEventListener('DOMContentLoaded', function(){ updateInputLabels(); });
+    window.addEventListener('load', function(){ updateInputLabels(); });
+    var u = document.getElementById('unit');
+    if (u) u.addEventListener('change', updateInputLabels);
+    var g = document.getElementById('globalCutUnit');
+    if (g) g.addEventListener('change', updateInputLabels);
+  }
+  bind();
+})();
+</script>
+
+<script>
+// v5: Robust sync for saw thickness unit label
+(function(){
+  function getUnit(){
+    var u = document.getElementById('unit');
+    if (u && u.value) return u.value;
+    var g = document.getElementById('globalCutUnit');
+    return g && g.value ? g.value : 'metric';
+  }
+  function getLang(){
+    var l = document.getElementById('language');
+    return l && l.value ? l.value : 'zh';
+  }
+  function applySawUnit(){
+    var unit = getUnit();
+    var lang = getLang();
+    var label = document.getElementById('sawThicknessUnitLabel');
+    var input = document.getElementById('sawThickness');
+    if (!label || !input) return;
+    if (unit === 'imperial' || unit === 'imperial_decimal'){
+      label.textContent = (lang === 'zh') ? '分' : 'eighth';
+      input.setAttribute('placeholder','1/8');
+    } else {
+      label.textContent = (lang === 'zh') ? '毫米' : 'mm';
+      input.setAttribute('placeholder','3.2');
+    }
+  }
+  function bind(){
+    document.addEventListener('DOMContentLoaded', applySawUnit);
+    window.addEventListener('load', applySawUnit);
+    var u = document.getElementById('unit');
+    if (u) u.addEventListener('change', applySawUnit);
+    var g = document.getElementById('globalCutUnit');
+    if (g) g.addEventListener('change', applySawUnit);
+    var l = document.getElementById('language');
+    if (l) l.addEventListener('change', applySawUnit);
+    // Safety: periodic sync to avoid other code overwriting
+    setInterval(applySawUnit, 500);
+  }
+  bind();
+})();
+</script>
+
+<style>
+/* Increase vertical spacing between input blocks in Cutting Items and Materials */
+#cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.25rem; padding-bottom: 1.5rem; }
+#cutting-items-card { margin-bottom: 1.25rem !important; }
+#materials-card { margin-top: 1.25rem !important; margin-bottom: 1.25rem !important; }
+/* Add extra spacing between each input row */
+#cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1rem; }
+#cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 0.75rem; }
+/* Extra bottom space after controls row */
+#cuttingItems .controls-row { margin-top: 0.75rem; margin-bottom: 1.25rem; }
+/* Make overall section taller on mobile */
+@media (max-width: 767.98px) {
+  #cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.5rem; padding-bottom: 2rem; }
+  #cutting-items-card { margin-bottom: 2.5rem !important; }
+  #materials-card { margin-top: 2.5rem !important; margin-bottom: 2.5rem !important; }
+  #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.25rem; }
+}
+</style>
+
+<style>
+/* v2: Increase vertical spacing further for Cutting Items and Materials sections */
+#cutting-items-card .card-body, #materials-card .card-body { padding-top: 2rem !important; padding-bottom: 2.5rem !important; }
+#cutting-items-card { margin-bottom: 3rem !important; }
+#materials-card { margin-top: 3rem !important; margin-bottom: 3rem !important; }
+/* Increase spacing between each input row */
+#cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.5rem !important; }
+#cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 1.25rem !important; }
+/* Extra spacing after controls row */
+#cuttingItems .controls-row { margin-top: 1rem !important; margin-bottom: 1.75rem !important; }
+/* Mobile: even more generous spacing */
+@media (max-width: 767.98px) {
+  #cutting-items-card .card-body, #materials-card .card-body { padding-top: 2.25rem !important; padding-bottom: 3rem !important; }
+  #cutting-items-card { margin-bottom: 3.25rem !important; }
+  #materials-card { margin-top: 3.25rem !important; margin-bottom: 3.25rem !important; }
+  #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.75rem !important; }
+}
+</style>
+
+<style>
+/* v3: Precisely adjust spacing as requested */
+/* 1) Increase gap BETWEEN the length row (horizontal) and the next quantity row */
+#cutting-items-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
+#cutting-items-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
+
+#materials-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
+#materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
+
+/* 2) Minimize bottom spacing of both sections (as small as possible) */
+#cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
+#cutting-items-card { margin-bottom: 0 !important; }
+#materials-card { margin-bottom: 0 !important; }
+
+/* Optional: keep controls-row compact at bottom */
+#cuttingItems .controls-row { margin-bottom: 0.5rem !important; }
+
+/* Mobile: keep the same focus—big gap between the two rows, tiny bottom space */
+@media (max-width: 767.98px) {
+  #cutting-items-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
+  #cutting-items-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
+  #materials-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
+  #materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
+  #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
+}
+</style>
