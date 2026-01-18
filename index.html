@@ -3007,6 +3007,16 @@ body select.unit-select option {
             // 清空當前表格
             document.querySelector("#cuttingItemsTable tbody").innerHTML = "";
             document.querySelector("#materialItemsTable tbody").innerHTML = "";
+            // 額外保險：清空頁面上所有表格的 tbody
+            document.querySelectorAll('table tbody').forEach(function(tb){ tb.innerHTML = ""; });
+            // 清空方案選擇器內容
+            var schemeSel = document.getElementById("schemeSelector");
+            if (schemeSel) { schemeSel.innerHTML = ""; schemeSel.style.display = "none"; }
+            // 清空任何可能的結果表或區域
+            ["resultsTable","binsTable","resultsWrapper","cuttingResults"].forEach(function(id){
+              var el = document.getElementById(id);
+              if (el) { el.innerHTML = ""; el.style.display = "none"; }
+            });
 
             // 設置輸入部分的單位選擇器
             const cuttingUnitSelect = document.querySelector("#cuttingItems .unit-select");
@@ -3129,9 +3139,11 @@ body select.unit-select option {
             exitCuttingEditMode();
             exitMaterialEditMode();
 
-            // 更新界面
-            updateLanguage();
-            updateInputLabels();
+            // 更新界面（避免立即重算或重新顯示結果）
+            // 注：reset 完不立即刷新語言或單位，以免某些監聽把表格或結果再重建
+            // 如需刷新，可另行手動切換語言/單位按鈕
+            // updateLanguage();
+            // updateInputLabels();
 
             // 初始化所有單位選擇器的顏色
             setTimeout(function() {
@@ -3184,68 +3196,14 @@ body select.unit-select option {
 
         // 重置
         function reset() {
-            // 退出編輯模式
-            exitCuttingEditMode();
-            exitMaterialEditMode();
+    const lang = document.getElementById("language").value;
+    const confirmMsg = lang === "zh" ? "確定要重置所有資料嗎？" : "Are you sure you want to reset all data?";
 
-            // 清空表格
-            document.querySelector("#cuttingItemsTable tbody").innerHTML = "";
-            document.querySelector("#materialItemsTable tbody").innerHTML = "";
-
-            // 清除輸入
-            clearCuttingInputs();
-            clearMaterialInputs();
-
-            // 隱藏結果區域
-            document.getElementById("resultDetails").style.display = "none";
-            document.getElementById("cuttingCanvas").style.display = "none";
-            document.getElementById("colorLegend").style.display = "none";
-            document.getElementById("progressBar").style.display = "none";
-            document.getElementById("schemeSelector").style.display = "none";
-            document.getElementById("printOptionsButton").style.display = "none";
-            document.getElementById("printButton").style.display = "none";
-
-            // 重置鋸片厚度
-            const unit = document.getElementById("unit").value;
-            document.getElementById("sawThickness").value = unit === "imperial" ? "1/8" : "3.2";
-
-            // 更新界面
-            updateLanguage();
-            updateInputLabels();
-
-            // 初始化所有單位選擇器的顏色
-            setTimeout(function() {
-                const settingsUnit = document.getElementById("unit");
-                if (settingsUnit) {
-                    settingsUnit.classList.remove("metric-active", "imperial-active");
-                    if (settingsUnit.value === "metric") {
-                        settingsUnit.classList.add("metric-active");
-                    } else {
-                        settingsUnit.classList.add("imperial-active");
-                    }
-                }
-
-                const initCutUnit = document.getElementById("globalCutUnit");
-                if (initCutUnit) {
-                    initCutUnit.classList.remove("metric-active", "imperial-active");
-                    if (initCutUnit.value === "metric") {
-                        initCutUnit.classList.add("metric-active");
-                    } else {
-                        initCutUnit.classList.add("imperial-active");
-                    }
-                }
-
-                const initMaterialUnit = document.getElementById("globalMaterialUnit");
-                if (initMaterialUnit) {
-                    initMaterialUnit.classList.remove("metric-active", "imperial-active");
-                    if (initMaterialUnit.value === "metric") {
-                        initMaterialUnit.classList.add("metric-active");
-                    } else {
-                        initMaterialUnit.classList.add("imperial-active");
-                    }
-                }
-            }, 50);
-        }
+    if (confirm(confirmMsg)) {
+        // 直接重新載入頁面，這樣所有數據都會回到初始狀態
+        location.reload();
+    }
+}
 
         // 顯示列印選項
         function showPrintOptions() {
@@ -3969,7 +3927,8 @@ document.addEventListener("DOMContentLoaded", function() {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', autoRecalc);
   } else {
-    setTimeout(autoRecalc, 50);
+    // 若重置中則不自動重算
+    if (!window.__suppressAutoRecalc) setTimeout(autoRecalc, 50);
   }
 })();
 </script>
