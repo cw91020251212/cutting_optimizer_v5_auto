@@ -2977,7 +2977,7 @@ body select.unit-select option {
                     <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
                         <span style="color:#212529">${escapeHTML(scheme.name)}</span>
                         <div>
-                            <button class="btn btn-sm btn-primary me-2" onclick="loadSchemeData(${index})">
+                            <button class="btn btn-sm btn-primary me-2" data-bs-dismiss="modal" onclick="loadSchemeData(${index})">
                                 ${lang === "zh" ? "載入" : "Load"}
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="deleteScheme(${index})">
@@ -3623,21 +3623,140 @@ document.addEventListener("DOMContentLoaded", function() {
           allCuts.push({length: item.length, purpose: item.purpose, display: item.display || ""});
         }
       });
-
       if(algoType !== 'SizeGrouping') {
         allCuts.sort((a, b) => b.length - a.length);
       }
-
-      let bins = [];
-      let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item.length)).sort((a, b) => b - a);
-      const defaultLength = materials.length > 0 ? materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
-
-      if(algoType === 'FFD') {
-        // First Fit Decreasing
-        allCuts.forEach(cut => {
+      let materialGroups = {};
+      materials.forEach(mat => {
+        if(!materialGroups[mat.length]) {
+          materialGroups[mat.length] = [];
+        }
+        for(let i = 0; i < mat.quantity; i++) {
+          materialGroups[mat.length].push({length: mat.length, display: mat.display});
+        }
+      });
+      let allBins = [];
+      let remainingCuts = [...allCuts];
+      Object.keys(materialGroups).sort((a, b) => Number(b) - Number(a)).forEach(matLength => {
+        let matsInGroup = materialGroups[matLength];
+        if(matsInGroup.length === 0 || remainingCuts.length === 0) return;
+        let binsForThisMaterial = [];
+        if(algoType === 'FFD') {
+          remainingCuts.forEach(cut => {
+            let placed = false;
+            for(let i = 0; i < binsForThisMaterial.length; i++) {
+              const bin = binsForThisMaterial[i];
+              const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
+              const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
+              if(usedLength + kerfLength + cut.length + (bin.cuts.length > 0 ? sawThickness : 0) <= bin.length) {
+                bin.cuts.push(cut);
+                placed = true;
+                break;
+              }
+            }
+            if(!placed && matsInGroup.length > 0) {
+              let mat = matsInGroup.shift();
+              binsForThisMaterial.push({length: mat.length, cuts: [cut], materialDisplay: mat.display});
+            }
+          });
+        } else if(algoType === 'BFD') {
+          remainingCuts.forEach(cut => {
+            let bestBin = null;
+            let bestRemaining = Infinity;
+            for(let i = 0; i < binsForThisMaterial.length; i++) {
+              const bin = binsForThisMaterial[i];
+              const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
+              const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
+              const required = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
+              const remaining = bin.length - usedLength - kerfLength - required;
+              if(remaining >= 0 && remaining < bestRemaining) {
+                bestRemaining = remaining;
+                bestBin = bin;
+              }
+            }
+            if(bestBin) {
+              bestBin.cuts.push(cut);
+            } else if(matsInGroup.length > 0) {
+              let mat = matsInGroup.shift();
+              binsForThisMaterial.push({length: mat.length, cuts: [cut], materialDisplay: mat.display});
+            }
+          });
+        } else if(algoType === 'SizeGrouping') {
+          let lengthGroups = {};
+          remainingCuts.forEach(cut => {
+            if(!lengthGroups[cut.length]) lengthGroups[cut.length] = [];
+            lengthGroups[cut.length].push(cut);
+          });
+          const sortedLengths = Object.keys(lengthGroups).map(Number).sort((a, b) => b - a);
+          sortedLengths.forEach(length => {
+            let groupCuts = lengthGroups[length];
+            while(groupCuts.length > 0) {
+              let bestBin = null;
+              let bestCount = 0;
+              for(let i = 0; i < binsForThisMaterial.length; i++) {
+                const bin = binsForThisMaterial[i];
+                const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
+                const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
+                let count = 0;
+                let currentLength = usedLength + kerfLength;
+                for(let j = 0; j < groupCuts.length; j++) {
+                  const required = length + (bin.cuts.length + count > 0 ? sawThickness : 0);
+                  if(currentLength + required <= bin.length) {
+                    count++;
+                    currentLength += required;
+                  } else {
+                    break;
+                  }
+                }
+                if(count > bestCount) {
+                  bestCount = count;
+                  bestBin = bin;
+                }
+              }
+              if(bestBin && bestCount > 0) {
+                for(let k = 0; k < bestCount; k++) {
+                  bestBin.cuts.push(groupCuts.shift());
+                }
+              } else if(matsInGroup.length > 0) {
+                let mat = matsInGroup.shift();
+                const newBin = {length: mat.length, cuts: [], materialDisplay: mat.display};
+                let remainingLength = mat.length;
+                while(groupCuts.length > 0) {
+                  const cut = groupCuts[0];
+                  const required = cut.length + (newBin.cuts.length > 0 ? sawThickness : 0);
+                  if(required <= remainingLength) {
+                    newBin.cuts.push(groupCuts.shift());
+                    remainingLength -= required;
+                  } else {
+                    break;
+                  }
+                }
+                binsForThisMaterial.push(newBin);
+              } else {
+                break;
+              }
+            }
+          });
+        }
+        binsForThisMaterial.forEach(bin => {
+          bin.cuts.forEach(cut => {
+            const idx = remainingCuts.findIndex(rc => 
+              rc.length === cut.length && 
+              rc.purpose === cut.purpose && 
+              rc.display === cut.display
+            );
+            if(idx !== -1) remainingCuts.splice(idx, 1);
+          });
+        });
+        allBins.push(...binsForThisMaterial);
+      });
+      if(remainingCuts.length > 0) {
+        const defaultLength = materials.length > 0 ? 
+          materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
+        remainingCuts.forEach(cut => {
           let placed = false;
-          for(let i = 0; i < bins.length; i++) {
-            const bin = bins[i];
+          for(let i = 0; i < allBins.length; i++) {
+            const bin = allBins[i];
             const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
             const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
             if(usedLength + kerfLength + cut.length + (bin.cuts.length > 0 ? sawThickness : 0) <= bin.length) {
@@ -3647,109 +3766,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
           }
           if(!placed) {
-            let binLength, autoAdded = false;
-            if(availableMaterials.length > 0) {
-              binLength = availableMaterials.shift();
-            } else {
-              binLength = defaultLength;
-              autoAdded = true;
-            }
-            bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded});
-          }
-        });
-      } else if(algoType === 'SizeGrouping') {
-        // Size Grouping
-        let lengthGroups = {};
-        allCuts.forEach(cut => {
-          if(!lengthGroups[cut.length]) lengthGroups[cut.length] = [];
-          lengthGroups[cut.length].push(cut);
-        });
-        const sortedLengths = Object.keys(lengthGroups).map(Number).sort((a, b) => b - a);
-
-        sortedLengths.forEach(length => {
-          let groupCuts = lengthGroups[length];
-          while(groupCuts.length > 0) {
-            let bestBin = null, bestCount = 0;
-            for(let i = 0; i < bins.length; i++) {
-              const bin = bins[i];
-              const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-              const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
-              let count = 0, currentLength = usedLength + kerfLength;
-              for(let j = 0; j < groupCuts.length; j++) {
-                const required = length + (bin.cuts.length + count > 0 ? sawThickness : 0);
-                if(currentLength + required <= bin.length) {
-                  count++;
-                  currentLength += required;
-                } else {
-                  break;
-                }
-              }
-              if(count > 0 && count > bestCount) {
-                bestCount = count;
-                bestBin = bin;
-              }
-            }
-
-            if(bestBin) {
-              for(let k = 0; k < bestCount; k++) bestBin.cuts.push(groupCuts.shift());
-            } else {
-              let binLength, autoAdded = false;
-              if(availableMaterials.length > 0) {
-                binLength = availableMaterials.shift();
-              } else {
-                binLength = defaultLength;
-                autoAdded = true;
-              }
-              const newBin = {length: binLength, cuts: [], autoAdded: autoAdded};
-              let remainingLength = binLength;
-              while(groupCuts.length > 0) {
-                const cut = groupCuts[0];
-                const required = cut.length + (newBin.cuts.length > 0 ? sawThickness : 0);
-                if(required <= remainingLength) {
-                  newBin.cuts.push(groupCuts.shift());
-                  remainingLength -= required;
-                } else {
-                  break;
-                }
-              }
-              bins.push(newBin);
-            }
-          }
-        });
-      } else {
-        // BFD (Best Fit Decreasing) - default
-        allCuts.forEach(cut => {
-          let bestBin = null;
-          let bestRemaining = Infinity;
-          for(let i = 0; i < bins.length; i++) {
-            const bin = bins[i];
-            const usedLength = bin.cuts.reduce((sum, c) => sum + c.length, 0);
-            const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
-            const required = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
-            const remaining = bin.length - (usedLength + kerfLength + required);
-            if(remaining >= 0 && remaining < bestRemaining) {
-              bestRemaining = remaining;
-              bestBin = bin;
-            }
-          }
-
-          if(bestBin) {
-            bestBin.cuts.push(cut);
-          } else {
-            let binLength, autoAdded = false;
-            if(availableMaterials.length > 0) {
-              binLength = availableMaterials.shift();
-            } else {
-              binLength = defaultLength;
-              autoAdded = true;
-            }
-            bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded});
+            allBins.push({length: defaultLength, cuts: [cut], autoAdded: true});
           }
         });
       }
-      return bins;
-    };
-  };
+      return allBins;
+    }
 
   window.optimizeCutsBFD = createOptimizer('BFD');
   window.optimizeCutsFFD = createOptimizer('FFD');
