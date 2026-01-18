@@ -1,4 +1,25 @@
 
+User Guide
+Settings: Select language and display unit, enter saw thickness
+Cutting Items: Enter required lengths, quantities and purposes, click "Add Item" to add to list
+Edit Items: Click "Edit" button in table to load item back to input fields, modify and click "Update Item" to save
+Materials: Enter available material lengths and quantities, click "Add Material" to add to list
+Edit Materials: Click "Edit" button in table to load material back to input fields, modify and click "Update Material" to save
+Calculate: Click Calculate button to get optimal cutting plan
+Results: View cutting details and graphical visualization
+Save and load frequently used schemes
+Click "Print Report" to print current scheme
+Tips:
+
+Use meters/cm/mm for metric units
+Use feet/inches/eighths for imperial units
+Saw thickness affects material utilization
+System calculates remnants and optimizes plan
+Smart optimization scheme groups same-size cuts together for better efficiency
+Click "Clear Input" button to quickly clear input fields
+After adding or updating items, input fields will automatically reset to zero for next entry
+When editing items, the input field units will follow the original unit (metric/imperial) of that item
+
 鋁材切割排
 
 使用說明
