@@ -2308,10 +2308,10 @@ body select.unit-select option {
                 }
             });
 
-            allCuts.sort((a, b) => b.length - a.length);
+            allCuts.sort((a, b) => a.length - b.length);
 
             let bins = [];
-            let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => b.length - a.length);
+            let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => a.length - b.length);
 
             const defaultLength = materials.length > 0 ?
                 materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
@@ -2363,10 +2363,10 @@ body select.unit-select option {
                 }
             });
 
-            allCuts.sort((a, b) => b.length - a.length);
+            allCuts.sort((a, b) => a.length - b.length);
 
             let bins = [];
-            let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => b.length - a.length);
+            let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => a.length - b.length);
 
             const defaultLength = materials.length > 0 ?
                 materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
@@ -2433,7 +2433,7 @@ body select.unit-select option {
             const sortedLengths = Object.keys(lengthGroups).map(Number).sort((a, b) => b - a);
 
             let bins = [];
-            let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => b.length - a.length);
+            let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => a.length - b.length);
 
             const defaultLength = materials.length > 0 ?
                 materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
@@ -3619,11 +3619,11 @@ document.addEventListener("DOMContentLoaded", function() {
       });
 
       if(algoType !== 'SizeGrouping') {
-        allCuts.sort((a, b) => b.length - a.length);
+        allCuts.sort((a, b) => a.length - b.length);
       }
 
       let bins = [];
-      let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => b.length - a.length);
+      let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => a.length - b.length);
       const defaultLength = materials.length > 0 ? materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
 
       if(algoType === 'FFD') {
@@ -4390,65 +4390,8 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 })();
 </script>
-<script>
-// Skip insufficient materials: mark as "不使用" and do not include in calculation
-(function(){
-  function isAutoSupplyOn(){ var el=document.getElementById('autoSupplyToggle'); return !!(el && el.checked); }
-  function safeGetCuts(){ try{ return (typeof getCuttingItems==='function')?getCuttingItems():[]; }catch(e){ return []; } }
-  function safeGetMaterials(){ try{ return (typeof getMaterialItems==='function')?getMaterialItems():[]; }catch(e){ return []; } }
-  function formatLen(mm){ try{ var unit=document.getElementById('unit')?document.getElementById('unit').value:'metric'; if(typeof formatLengthForDisplay==='function') return formatLengthForDisplay(mm,unit); }catch(e){} return (mm||0).toFixed(2)+' mm'; }
-  function showBanner(title, lines){ var container=document.getElementById('resultDetails'); if(!container) return; var box=document.createElement('div'); box.style.margin='12px 0'; box.style.padding='10px'; box.style.background='#fff3cd'; box.style.border='1px solid #f0ad4e'; box.style.borderRadius='6px'; box.style.color='#856404'; box.innerHTML = '<strong>'+title+'</strong> '+ (lines||[]).join('，'); container.style.display='block'; container.insertBefore(box, container.firstChild); }
-  var _origCalc = window.calculate;
-  window.calculate = function(){
-    try{
-      var cuts = safeGetCuts();
-      var mats = safeGetMaterials();
-      // compute max requested cut length
-      var requestedMax = 0; cuts.forEach(function(it){ var len=Number(it.length)||0; var qty=Number(it.quantity)||0; if(qty>0) requestedMax=Math.max(requestedMax,len); });
-      // split materials by sufficiency against requestedMax
-      var usable = [], unusable = [];
-      mats.forEach(function(m){ var len=Number(m.length)||0; if(len>=requestedMax) usable.push(m); else unusable.push(m); });
-      if(unusable.length){
-        var lines = unusable.map(function(m){ return (m.display?m.display+' ':'') + '('+formatLen(Number(m.length)||0)+') 不使用'; });
-        showBanner('以下材料長度不足，已標記為「不使用」：', lines);
-      }
-      // If no usable materials and auto-supply is OFF, stop and ask for longer materials
-      if(usable.length===0 && !isAutoSupplyOn()){
-        showBanner('無可用材料：', ['請增加更長材料。']);
-        var resultsCard=document.getElementById('results-card'); if(resultsCard) resultsCard.scrollIntoView({behavior:'smooth'});
-        return;
-      }
-      // Temporarily replace getMaterialItems to return only usable list during this calculation
-      var origGetMaterials = window.getMaterialItems;
-      window.getMaterialItems = function(){ return usable; };
-      try{ if(typeof _origCalc==='function') _origCalc(); } finally { window.getMaterialItems = origGetMaterials; }
-    }catch(e){ alert('計算出錯：'+e.message); }
-  };
-})();
-</script>
-<script>
-// Enhanced partial-insufficiency prompt: always show banner and badge for short materials
-(function(){
-  function getUnit(){ try{ return document.getElementById('unit')?.value || 'metric'; }catch(e){ return 'metric'; } }
-  function fmt(mm){ try{ if(typeof formatLengthForDisplay==='function') return formatLengthForDisplay(mm, getUnit()); }catch(e){} return (Number(mm)||0).toFixed(2)+' mm'; }
-  function getCuts(){ try{ return (typeof getCuttingItems==='function')?getCuttingItems():[]; } catch(e){ return []; } }
-  function getMaterials(){ try{ return (typeof getMaterialItems==='function')?getMaterialItems():[]; } catch(e){ return []; } }
-  function ensureResultDetails(){ var rd=document.getElementById('resultDetails'); if(!rd){ var card=document.getElementById('results-card'); if(!card) return null; rd=document.createElement('div'); rd.id='resultDetails'; rd.className='result-details text-start'; card.appendChild(rd);} rd.style.display='block'; return rd; }
-  function showBanner(title, lines){ var rd=ensureResultDetails(); if(!rd) { alert((title+' '+(lines||[]).join('，')).replace(/<[^>]+>/g,'')); return; } var box=document.createElement('div'); box.style.margin='12px 0'; box.style.padding='10px'; box.style.background='#fff3cd'; box.style.border='1px solid #f0ad4e'; box.style.borderRadius='6px'; box.style.color='#856404'; box.innerHTML='<strong>'+title+'</strong> '+(lines||[]).join('，'); rd.insertBefore(box, rd.firstChild); }
-  function markUnusableRows(requestedMax){ try{ var rows=document.querySelectorAll('#materialItemsTable tbody tr'); rows.forEach(function(row){ var len=Number(row.dataset.length)||0; var badge=row.querySelector('.unusable-badge'); if(len<requestedMax){ if(!badge){ var b=document.createElement('span'); b.className='unusable-badge'; b.style.marginLeft='8px'; b.style.color='#a00'; b.style.fontSize='0.9em'; b.textContent='(不使用)'; var firstCell=row.querySelector('td'); if(firstCell){ firstCell.appendChild(b);} } } else { if(badge){ badge.remove(); } } }); }catch(e){} }
-  function summarizeUnusable(requestedMax){ var mats=getMaterials(); var unusable=mats.filter(function(m){ return (Number(m.length)||0) < requestedMax; }); if(unusable.length){ var lines=unusable.map(function(m){ return (m.display?m.display+' ':'')+'('+fmt(Number(m.length)||0)+') 不使用'; }); showBanner('以下材料長度不足，已標記為「不使用」：', lines); markUnusableRows(requestedMax); }
-  }
-  var _origCalc = window.calculate;
-  window.calculate = function(){
-    try{
-      var cuts=getCuts(); var reqMax=0; cuts.forEach(function(it){ var len=Number(it.length)||0; var qty=Number(it.quantity)||0; if(qty>0) reqMax=Math.max(reqMax,len); });
-      summarizeUnusable(reqMax);
-      // proceed original calculation (it may still skip using short materials by previous patch)
-      if(typeof _origCalc==='function') return _origCalc();
-    }catch(e){ alert('計算出錯：'+e.message); }
-  };
-})();
-</script>
+
+
 </html>
 <style>
 /* Fix unit label overflow near right edge and on mobile */
@@ -4740,3 +4683,101 @@ document.addEventListener("DOMContentLoaded", function() {
   #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
 }
 </style>
+
+<script>
+// 修正策略：當需要開新支時，先嘗試「最細但足夠」的在手材料；找不到才自動補料
+(function(){
+  function selectSmallestAdequate(availableMaterials, requiredLen){
+    // availableMaterials 應為按長度升序排列的單支列表（展開 quantity）
+    for(var i=0;i<availableMaterials.length;i++){
+      var m = availableMaterials[i];
+      if((m.length||0) >= requiredLen){
+        // 拎走呢支材料
+        availableMaterials.splice(i,1);
+        return m.length||0;
+      }
+    }
+    return null; // 無合適在手材料
+  }
+  function expandCuts(cuts){ var arr=[]; cuts.forEach(function(it){ var q=Number(it.quantity||0); for(var i=0;i<q;i++){ arr.push({length:it.length, display:it.display||'', purpose:it.purpose||''}); } }); return arr; }
+  function expandMaterials(mats){ var arr=[]; mats.forEach(function(m){ var q=Number(m.quantity||0); for(var i=0;i<q;i++){ arr.push({length:Number(m.length)||0, display:m.display||''}); } }); return arr; }
+
+  function createOptimizerFixed(algo){
+    return function(cuts, materials, sawThickness){
+      var allCuts = expandCuts(cuts);
+      // FFD/BFD 用降序、SizeGrouping 由群組處理（保持原行為）
+      if(algo!=='SizeGrouping') allCuts.sort(function(a,b){ return b.length-a.length; });
+      var availableMaterials = expandMaterials(materials).sort(function(a,b){ return a.length-b.length; }); // 升序：由細到大
+      var defaultLen = materials && materials.length ? Math.max.apply(null, materials.map(function(m){ return m.length||0; })) : 6000;
+      var bins=[];
+
+      function placeIntoExisting(cut){
+        var best=null, bestRem=Infinity;
+        for(var i=0;i<bins.length;i++){
+          var bin=bins[i];
+          var used=bin.cuts.reduce(function(s,c){return s+c.length;},0);
+          var kerf = bin.cuts.length>0 ? (bin.cuts.length-1)*sawThickness : 0;
+          var req = cut.length + (bin.cuts.length>0 ? sawThickness : 0);
+          var rem = bin.length - (used+kerf+req);
+          if(rem>=0 && rem<bestRem){ bestRem=rem; best=bin; }
+        }
+        if(best){ best.cuts.push(cut); return true; }
+        return false;
+      }
+
+      if(algo==='FFD'){
+        allCuts.forEach(function(cut){
+          if(placeIntoExisting(cut)) return;
+          // 需要新支：先試最細但足夠的在手材料
+          var reqLen = cut.length; // 新支第一刀只需 cut.length（無前 kerf）
+          var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
+          if(takeLen===null){ takeLen = defaultLen; bins.push({length: takeLen, cuts:[cut], autoAdded:true}); }
+          else { bins.push({length: takeLen, cuts:[cut], autoAdded:false}); }
+        });
+      } else if(algo==='SizeGrouping'){
+        var groups={}; allCuts.forEach(function(c){ (groups[c.length]=groups[c.length]||[]).push(c); });
+        Object.keys(groups).map(Number).sort(function(a,b){ return b-a; }).forEach(function(len){
+          var group=groups[len];
+          while(group.length){
+            // 優先嘗試放入現有 bins 的最佳位置
+            var best=null, bestCount=0;
+            for(var i=0;i<bins.length;i++){
+              var bin=bins[i];
+              var used=bin.cuts.reduce(function(s,c){return s+c.length;},0);
+              var kerf = bin.cuts.length>0 ? (bin.cuts.length-1)*sawThickness : 0;
+              var count=0, curr=used+kerf;
+              for(var j=0;j<group.length;j++){
+                var req=len+(bin.cuts.length+count>0? sawThickness:0);
+                if(curr+req<=bin.length){ count++; curr+=req; } else break;
+              }
+              if(count>0 && count>bestCount){ bestCount=count; best=bin; }
+            }
+            if(best){ for(var k=0;k<bestCount;k++) best.cuts.push(group.shift()); }
+            else {
+              // 需要新支：先試最細但足夠的在手材料
+              var reqLen = len; // 新支第一刀
+              var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
+              var newBin = { length: (takeLen===null? defaultLen: takeLen), cuts: [], autoAdded: (takeLen===null) };
+              var remaining = newBin.length;
+              while(group.length){ var cut=group[0]; var req=cut.length+(newBin.cuts.length>0? sawThickness:0); if(req<=remaining){ newBin.cuts.push(group.shift()); remaining-=req; } else break; }
+              bins.push(newBin);
+            }
+          }
+        });
+      } else { // BFD
+        allCuts.forEach(function(cut){
+          if(placeIntoExisting(cut)) return;
+          var reqLen = cut.length;
+          var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
+          if(takeLen===null){ bins.push({length: defaultLen, cuts:[cut], autoAdded:true}); }
+          else { bins.push({length: takeLen, cuts:[cut], autoAdded:false}); }
+        });
+      }
+      return bins;
+    };
+  }
+  window.optimizeCutsFFD = createOptimizerFixed('FFD');
+  window.optimizeCutsBFD = createOptimizerFixed('BFD');
+  window.optimizeCutsSizeGrouping = createOptimizerFixed('SizeGrouping');
+})();
+</script>
