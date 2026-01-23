@@ -1,7 +1,8 @@
 <!DOCTYPE html>
+
 <html lang="zh">
 <head>
-    <style>
+<style>
       /* Equalize height and look for algorithm select and saw thickness input */
       #algorithmSelector.equal-height,
       #sawThickness.equal-height { height: 40px !important; }
@@ -21,12 +22,12 @@
         }
       }
     </style>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>鋁材切割排版</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>鋁材切割排版 (間距修正完成)</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
         /* ... 保持原有的CSS樣式不變 ... */
         body {
             background-color: #2c3e50;
@@ -766,7 +767,6 @@
             .controls-row .unit-select { width: auto !important; flex: 0 0 clamp(72px, 18vw, 96px); max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; box-sizing: border-box !important; white-space: nowrap; font-size: 1rem; text-align: center; padding: 0 !important; line-height: 38px !important; -webkit-appearance: none; appearance: none; display: inline-flex; align-items: center; justify-content: center; }
         }
 </style>
-
 <style>
 /* 強制覆蓋 Bootstrap 樣式 - 提高權重 */
 body select.unit-select.metric-active {
@@ -853,19 +853,19 @@ body select.unit-select option {
         #unit.unit-select option { text-align: center; padding: 8px; }
         select.unit-select:not(#unit), .unit-select:not(#unit) { text-align: center !important; text-align-last: center !important; padding-left: 0 !important; padding-right: 0 !important; line-height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
         </style>
-    <style>
+<style>
       /* Optional note styling for non-required fields */
       .optional-note { font-size: .85em; color: #ffc107; margin-left: 0; }
       /* In light sections ensure readable color */
       .card-body-light .optional-note { color: #d39e00; }
     </style>
-    <style>
+<style>
       /* Force Algorithm + Saw Thickness to sit side‑by‑side on phones */
       @media (max-width: 767.98px) {
         #settings-card .row.g-3 > .col-6.col-md-3 { display: inline-block !important; width: 50% !important; vertical-align: top; }
       }
     </style>
-    <style>
+<style>
       /* Align saw-thickness unit text without boxed chip (mobile + desktop) */
       .saw-thickness-input { display:flex; align-items:center; gap:6px; }
 .saw-thickness-input .form-control { flex: 1 1 auto; }
@@ -876,425 +876,419 @@ body select.unit-select option {
       .saw-thickness-input .unit-label { height:40px; line-height:40px; padding:0 4px; border:0; background:transparent; color:#212529; }
       #algorithmSelector.equal-height { height:40px !important; padding-top:.25rem !important; padding-bottom:.25rem !important; font-size:1rem !important; }
     </style>
-</head>
-
+<style>
+/* CLEANUP FIX 2026-01-23 */
+/* 1. Ensure Standard Card Spacing (Matches Settings Card) */
+.card {
+    margin-bottom: 15px !important; /* The gold standard */
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(0,0,0,0.125);
+}
+/* 2. Reset ID-specific margins that might hide in other places */
+#cutting-items-card, #materials-card, #settings-card {
+    margin-top: 0 !important;
+    margin-bottom: 15px !important;
+}
+/* 3. Header Fixes */
+.section-header {
+    border-radius: 0 !important;
+    margin-bottom: 0 !important;
+    width: 100%;
+}
+.card-body {
+    padding-top: 1.5rem !important;
+}
+</style></head>
 <body>
-    <div class="container-fluid">
-        <h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
-            <i class="fa-solid fa-layer-group fa-2x me-2"></i>
-            <span id="titleText">鋁材切割排版</span>
-            <i class="fa-solid fa-ruler-combined fa-2x ms-2 ruler-anim"></i>
-        </h2>
+<div class="container-fluid">
+<h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
+<i class="fa-solid fa-layer-group fa-2x me-2"></i>
+<span id="titleText">鋁材切割排版</span>
+<i class="fa-solid fa-ruler-combined fa-2x ms-2 ruler-anim"></i>
+</h2>
+<div class="card" id="settings-card"><div class="section-header">
+<div class="section-title">
+<i class="fa-solid fa-gear fa-lg me-2"></i>
+<span id="settingsTitle">設置</span>
+</div>
+<span class="step-indicator">1/4</span>
+</div>
+<div class="card-body card-body-light">
 
-        <div class="card" id="settings-card">
-            <div class="card-body card-body-light">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fa-solid fa-gear fa-lg me-2"></i>
-                        <span id="settingsTitle">設置</span>
-                    </div>
-                    <span class="step-indicator">1/4</span>
-                </div>
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label" id="languageLabel">語言:</label>
-                        <select id="language" class="form-select form-select-sm" onchange="updateLanguage()">
-                            <option value="zh">中文</option>
-                            <option value="en">English</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="d-flex flex-column align-items-start">
-                            <label class="form-label mb-2" id="unitLabel" style="font-size: 0.875rem;">顯示單位:</label>
-                            <select id="unit" class="form-select unit-select" onchange="updateInputLabels()" style="height: 40px; width: 40px; font-size: 1rem; font-weight: 500;">
-                                <option value="metric" selected="selected">公</option>
-                                <option value="imperial">英</option>
-                                <option value="imperial_decimal">英(D)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <label class="form-label" id="algorithmLabel">算法:</label>
-                        <select id="algorithmSelector" class="form-select equal-height">
-                            <option value="AutoBest">自動最慳料</option>
-                            <option value="BFD">BFD</option>
-                            <option value="FFD">FFD</option>
-                            <option value="SizeGrouping">智能優化</option>
-                        </select>
-                    </div>
-                    <div class="col-6 col-md-3">
-                        <label class="form-label" id="sawThicknessLabel">鋸片厚度:</label>
-                        <div class="saw-thickness-input equalize">
-                            <input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;">
-                            <span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
-                        </div>
-                        <div class="small-hint" id="sawThicknessHint">例如: 3.2 (毫米) 或 1 (分)</div>
-                        <div class="error-message" id="sawThicknessError"></div>
-                    </div>
-                </div>
-                <div class="row g-3 mt-2">
-                    <div class="col-md-12">
-                        <label class="form-label" id="schemeManagementLabel">方案管理:</label>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm save-scheme-btn" onclick="saveScheme()" id="saveSchemeButton">
-                                <i class="fas fa-save me-1"></i>儲存方案
+<div class="row g-3">
+<div class="col-md-3">
+<label class="form-label" id="languageLabel">語言:</label>
+<select class="form-select form-select-sm" id="language" onchange="updateLanguage()">
+<option value="zh">中文</option>
+<option value="en">English</option>
+</select>
+</div>
+<div class="col-md-3">
+<div class="d-flex flex-column align-items-start">
+<label class="form-label mb-2" id="unitLabel" style="font-size: 0.875rem;">顯示單位:</label>
+<select class="form-select unit-select" id="unit" onchange="updateInputLabels()" style="height: 40px; width: 40px; font-size: 1rem; font-weight: 500;">
+<option selected="selected" value="metric">公</option>
+<option value="imperial">英</option>
+<option value="imperial_decimal">英(D)</option>
+</select>
+</div>
+</div>
+<div class="col-6 col-md-3">
+<label class="form-label" id="algorithmLabel">算法:</label>
+<select class="form-select equal-height" id="algorithmSelector">
+<option value="AutoBest">自動最慳料</option>
+<option value="BFD">BFD</option>
+<option value="FFD">FFD</option>
+<option value="SizeGrouping">智能優化</option>
+</select>
+</div>
+<div class="col-6 col-md-3">
+<label class="form-label" id="sawThicknessLabel">鋸片厚度:</label>
+<div class="saw-thickness-input equalize">
+<input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;"/>
+<span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
+</div>
+<div class="small-hint" id="sawThicknessHint">例如: 3.2 (毫米) 或 1 (分)</div>
+<div class="error-message" id="sawThicknessError"></div>
+</div>
+</div>
+<div class="row g-3 mt-2">
+<div class="col-md-12">
+<label class="form-label" id="schemeManagementLabel">方案管理:</label>
+<div class="d-flex gap-2">
+<button class="btn btn-sm save-scheme-btn" id="saveSchemeButton" onclick="saveScheme()">
+<i class="fas fa-save me-1"></i>儲存方案
                             </button>
-                            <button class="btn btn-sm load-scheme-btn" onclick="loadScheme()" id="loadSchemeButton">
-                                <i class="fas fa-folder-open me-1"></i>載入方案
+<button class="btn btn-sm load-scheme-btn" id="loadSchemeButton" onclick="loadScheme()">
+<i class="fas fa-folder-open me-1"></i>載入方案
                             </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card" id="cutting-items-card"><div class="section-header">
+<div class="section-title">
+<i class="fa-solid fa-list-check fa-lg me-2"></i>
+<span id="cuttingItemsTitle">切割項目</span>
+</div>
+<span class="step-indicator">2/4</span>
+</div>
+<div class="card-body card-body-light">
 
-        <div class="card" id="cutting-items-card">
-            <div class="card-body card-body-light">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fa-solid fa-list-check fa-lg me-2"></i>
-                        <span id="cuttingItemsTitle">切割項目</span>
-                    </div>
-                    <span class="step-indicator">2/4</span>
-                </div>
-                <div id="cuttingItems">
-                    <div class="cutting-item">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-12">
-                                <label class="form-label cutLengthLabel">長度:</label>
-                                <div class="row g-2 length-input-group d-flex align-items-end">
-                                    <div class="col">
-                                        <input type="number" step="0.001" inputmode="decimal"
-                                            class="form-control form-control-lg cutLengthPart" data-part="ft"
-                                            placeholder="0">
-                                        <label class="small-hint cutLengthHint">米</label>
-                                        <div class="error-message cutLengthError"></div>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number" step="0.001" inputmode="decimal"
-                                            class="form-control form-control-lg cutLengthPart" data-part="in"
-                                            placeholder="0">
-                                        <label class="small-hint cutLengthHint">厘米</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number" step="0.001" inputmode="decimal"
-                                            class="form-control form-control-lg cutLengthPart" data-part="eighth"
-                                            placeholder="0">
-                                        <label class="small-hint cutLengthHint">毫米</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 第二行：數量｜用途 -->
-                            <div class="row g-2 mt-2">
-                                <div class="col-6">
-                                    <label class="form-label cutQtyLabel">數量:</label>
-                                    <input type="number" class="cutQty form-control form-control-sm" placeholder="0" min="0">
-                                    <div class="small-hint cutQtyHint">例如：5</div>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label cutPurposeLabel">用途:</label>
-                                    <input class="cutPurpose form-control form-control-sm" placeholder="">
-                                    <div class="small-hint cutPurposeHint">例如：邊框</div>
-                                </div>
-                            </div>
-                            <!-- 第三行：新增｜清除｜單位（固定同一行） -->
-                            <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-                                <button class="btn btn-success btn-sm flex-fill" onclick="addCuttingItem()" id="addCuttingButton">
-                                    <i class="fas fa-plus me-1"></i>新增項目
+<div id="cuttingItems">
+<div class="cutting-item">
+<div class="row g-3 align-items-center">
+<div class="col-md-12">
+<label class="form-label cutLengthLabel">長度:</label>
+<div class="row g-2 length-input-group d-flex align-items-end">
+<div class="col">
+<input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint cutLengthHint">米</label>
+<div class="error-message cutLengthError"></div>
+</div>
+<div class="col">
+<input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint cutLengthHint">厘米</label>
+</div>
+<div class="col">
+<input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint cutLengthHint">毫米</label>
+</div>
+</div>
+</div>
+<!-- 第二行：數量｜用途 -->
+<div class="row g-2 mt-2">
+<div class="col-6">
+<label class="form-label cutQtyLabel">數量:</label>
+<input class="cutQty form-control form-control-sm" min="0" placeholder="0" type="number"/>
+<div class="small-hint cutQtyHint">例如：5</div>
+</div>
+<div class="col-6">
+<label class="form-label cutPurposeLabel">用途:</label>
+<input class="cutPurpose form-control form-control-sm" placeholder=""/>
+<div class="small-hint cutPurposeHint">例如：邊框</div>
+</div>
+</div>
+<!-- 第三行：新增｜清除｜單位（固定同一行） -->
+<div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+<button class="btn btn-success btn-sm flex-fill" id="addCuttingButton" onclick="addCuttingItem()">
+<i class="fas fa-plus me-1"></i>新增項目
                                 </button>
-                                <button class="btn btn-secondary btn-sm flex-fill" onclick="clearCuttingInputs()" id="clearCuttingButton">
-                                    <i class="fas fa-times me-1"></i>清除輸入
+<button class="btn btn-secondary btn-sm flex-fill" id="clearCuttingButton" onclick="clearCuttingInputs()">
+<i class="fas fa-times me-1"></i>清除輸入
                                 </button>
-                                <select id="globalCutUnit" class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" style="min-width:110px; max-width:160px; white-space:nowrap">
-                                    <option value="metric" selected="selected">公</option>
-                                    <option value="imperial">英</option>
-                                    </select>
-                            </div>
-                            
-                        </div>
-                    </div>
-                </div>
-                <table id="cuttingItemsTable" class="table table-sm table-hover mt-3">
-                    <thead>
-                        <tr class="table-active">
-                            <th>長度</th>
-                            <th>數量</th>
-                            <th>用途</th>
-                            <th class="text-center" style="width:100px">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <div class="d-flex gap-2 mt-2">
-                    <button class="btn btn-warning btn-sm update-btn" onclick="updateCuttingItem()" id="updateCuttingButton" style="display:none">
-                        <i class="fas fa-edit me-1"></i>更新項目
+<select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="min-width:110px; max-width:160px; white-space:nowrap">
+<option selected="selected" value="metric">公</option>
+<option value="imperial">英</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<table class="table table-sm table-hover mt-3" id="cuttingItemsTable">
+<thead>
+<tr class="table-active">
+<th>長度</th>
+<th>數量</th>
+<th>用途</th>
+<th class="text-center" style="width:100px">操作</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<div class="d-flex gap-2 mt-2">
+<button class="btn btn-warning btn-sm update-btn" id="updateCuttingButton" onclick="updateCuttingItem()" style="display:none">
+<i class="fas fa-edit me-1"></i>更新項目
                     </button>
-                </div>
-                <input type="hidden" id="editingCuttingIndex" value="-1">
-            </div>
-        </div>
+</div>
+<input id="editingCuttingIndex" type="hidden" value="-1"/>
+</div>
+</div>
+<div class="card mt-3" id="materials-card"><div class="section-header">
+<div class="section-title">
+<i class="fa-solid fa-ruler-combined fa-lg me-2"></i>
+<span id="materialTitle">材料</span>
+</div>
+<span class="step-indicator">3/4</span>
+</div>
+<div class="card-body card-body-light">
 
-        <div class="card mt-3" id="materials-card">
-            <div class="card-body card-body-light">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fa-solid fa-ruler-combined fa-lg me-2"></i>
-                        <span id="materialTitle">材料</span>
-                    </div>
-                    <span class="step-indicator">3/4</span>
-                </div>
-                <div id="materialItems">
-                    <div class="material-item">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-12">
-                                <label class="form-label materialLengthLabel">材料長度:</label>
-                                <div class="row g-2 length-input-group d-flex align-items-end">
-                                    <div class="col">
-                                        <input type="number" step="0.001" inputmode="decimal"
-                                            class="form-control form-control-lg materialLengthPart" data-part="ft"
-                                            placeholder="0">
-                                        <label class="small-hint materialLengthHint">米</label>
-                                        <div class="error-message materialLengthError"></div>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number" step="0.001" inputmode="decimal"
-                                            class="form-control form-control-lg materialLengthPart" data-part="in"
-                                            placeholder="0">
-                                        <label class="small-hint materialLengthHint">厘米</label>
-                                    </div>
-                                    <div class="col">
-                                        <input type="number" step="0.001" inputmode="decimal"
-                                            class="form-control form-control-lg materialLengthPart" data-part="eighth"
-                                            placeholder="0">
-                                        <label class="small-hint materialLengthHint">毫米</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- 數量 -->
-                            <div class="row g-2 mt-2">
-                                <div class="col-6">
-                                    <label class="form-label materialQtyLabel">數量:</label>
-                                    <input type="number" class="materialQty form-control form-control-sm" value="1" min="1">
-                                    <div class="small-hint materialQtyHint">10</div>
-                                </div>
-                            </div>
-                            <!-- 控制按鈕行 -->
-                            <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-                                <button class="btn btn-success btn-sm flex-fill" onclick="addMaterialItem()" id="addMaterialButton">
-                                    <i class="fas fa-plus me-1"></i>
-                                </button>
-                                <button class="btn btn-secondary btn-sm flex-fill" onclick="clearMaterialInputs()" id="clearMaterialButton">
-                                    <i class="fas fa-times me-1"></i>
-                                </button>
-                                <select id="globalMaterialUnit" class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0 btn-3d">
-                                    <option value="metric" selected="selected">公</option>
-                                    <option value="imperial">英</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <table id="materialItemsTable" class="table table-sm table-hover mt-3">
-                    <thead>
-                        <tr class="table-active">
-                            <th>材料長度</th>
-                            <th>數量</th>
-                            <th class="text-center" style="width:100px">操作</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                <div class="d-flex gap-2 mt-2">
-                    <button class="btn btn-warning btn-sm update-btn" onclick="updateMaterialItem()" id="updateMaterialButton" style="display:none">
-                        <i class="fas fa-edit me-1"></i>更新材料
+<div id="materialItems">
+<div class="material-item">
+<div class="row g-3 align-items-center">
+<div class="col-md-12">
+<label class="form-label materialLengthLabel">材料長度:</label>
+<div class="row g-2 length-input-group d-flex align-items-end">
+<div class="col">
+<input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint materialLengthHint">米</label>
+<div class="error-message materialLengthError"></div>
+</div>
+<div class="col">
+<input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint materialLengthHint">厘米</label>
+</div>
+<div class="col">
+<input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint materialLengthHint">毫米</label>
+</div>
+</div>
+</div>
+<!-- 數量 -->
+<div class="row g-2 mt-2">
+<div class="col-6">
+<label class="form-label materialQtyLabel">數量:</label>
+<input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
+<div class="small-hint materialQtyHint">10</div>
+</div>
+</div>
+<!-- 控制按鈕行 -->
+<div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+<button class="btn btn-success btn-sm flex-fill" id="addMaterialButton" onclick="addMaterialItem()">
+<i class="fas fa-plus me-1"></i>
+</button>
+<button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
+<i class="fas fa-times me-1"></i>
+</button>
+<select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0 btn-3d" id="globalMaterialUnit">
+<option selected="selected" value="metric">公</option>
+<option value="imperial">英</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<table class="table table-sm table-hover mt-3" id="materialItemsTable">
+<thead>
+<tr class="table-active">
+<th>材料長度</th>
+<th>數量</th>
+<th class="text-center" style="width:100px">操作</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+<div class="d-flex gap-2 mt-2">
+<button class="btn btn-warning btn-sm update-btn" id="updateMaterialButton" onclick="updateMaterialItem()" style="display:none">
+<i class="fas fa-edit me-1"></i>更新材料
                     </button>
-                </div>
-                <input type="hidden" id="editingMaterialIndex" value="-1">
-            </div>
-        </div>
+</div>
+<input id="editingMaterialIndex" type="hidden" value="-1"/>
+</div>
+</div>
+<div class="card" id="results-card"><div class="section-header">
+<div class="section-title">
+<i class="fa-solid fa-chart-bar fa-lg me-2"></i>
+<span id="resultTitle">切割結果</span>
+</div>
+<span class="step-indicator">4/4</span>
+</div>
+<div class="card-body text-center">
 
-        <div class="card" id="results-card">
-            <div class="card-body text-center">
-                <div class="section-header">
-                    <div class="section-title">
-                        <i class="fa-solid fa-chart-bar fa-lg me-2"></i>
-                        <span id="resultTitle">切割結果</span>
-                    </div>
-                    <span class="step-indicator">4/4</span>
-                </div>
-                <div class="button-group">
-                    <button class="btn btn-primary" onclick="calculate()" id="calculateButton">
-                        <i class="fas fa-calculator me-2"></i>計算
+<div class="button-group">
+<button class="btn btn-primary" id="calculateButton" onclick="calculate()">
+<i class="fas fa-calculator me-2"></i>計算
                     </button>
-                    <button class="btn btn-danger" onclick="reset()" id="resetButton">
-                        <i class="fas fa-undo me-2"></i>重置
+<button class="btn btn-danger" id="resetButton" onclick="reset()">
+<i class="fas fa-undo me-2"></i>重置
                     </button>
-                    <button class="btn btn-success" onclick="showPrintOptions()" id="printOptionsButton"
-                        style="display:none">
-                        <i class="fas fa-print me-2"></i>列印選項
+<button class="btn btn-success" id="printOptionsButton" onclick="showPrintOptions()" style="display:none">
+<i class="fas fa-print me-2"></i>列印選項
                     </button>
-                    <button class="btn btn-success" onclick="triggerPrint()" id="printButton" style="display:none">
-                        <i class="fas fa-print me-2"></i>列印報告
+<button class="btn btn-success" id="printButton" onclick="triggerPrint()" style="display:none">
+<i class="fas fa-print me-2"></i>列印報告
                     </button>
-                    <button class="btn help-btn" onclick="showHelp()" id="helpButton">
-                        <i class="fas fa-question-circle me-2"></i>使用說明
+<button class="btn help-btn" id="helpButton" onclick="showHelp()">
+<i class="fas fa-question-circle me-2"></i>使用說明
                     </button>
-                </div>
-                <div class="progress mt-3" id="progressBar" style="display:none">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                        style="width:0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" id="progressBarInner">
-                    </div>
-                    <span class="progress-text" id="progressText"></span>
-                </div>
-                <div class="scheme-selector" id="schemeSelector" style="display:none">
-                    <h5 id="schemeTitle">選擇切割方案:</h5>
-                    <div id="schemeButtons"></div>
-                </div>
-                <div class="result-details text-start" id="resultDetails" style="display:none">
-                    <div id="optimizationResults"></div>
-                    <div class="quantity-needed" id="quantityNeededMessage" style="display:none"></div>
-                </div>
-                <canvas id="cuttingCanvas" class="mt-3" style="display:none"></canvas>
-                <div id="colorLegend" style="display:none">
-                    <h4><span id="colorLegendTitle"><i class="fa-solid fa-palette me-2"></i>顏色圖例</span></h4>
-                    <div id="colorLegendItems"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 列印選項模態框 -->
-    <div class="modal fade" id="printOptionsModal" tabindex="-1" aria-labelledby="printOptionsModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="printOptionsModalLabel">列印選項</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <p>選擇要列印的內容:</p>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="printSettings" checked="checked">
-                        <label class="form-check-label" for="printSettings">
+</div>
+<div class="progress mt-3" id="progressBar" style="display:none">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="progress-bar progress-bar-striped progress-bar-animated" id="progressBarInner" role="progressbar" style="width:0%">
+</div>
+<span class="progress-text" id="progressText"></span>
+</div>
+<div class="scheme-selector" id="schemeSelector" style="display:none">
+<h5 id="schemeTitle">選擇切割方案:</h5>
+<div id="schemeButtons"></div>
+</div>
+<div class="result-details text-start" id="resultDetails" style="display:none">
+<div id="optimizationResults"></div>
+<div class="quantity-needed" id="quantityNeededMessage" style="display:none"></div>
+</div>
+<canvas class="mt-3" id="cuttingCanvas" style="display:none"></canvas>
+<div id="colorLegend" style="display:none">
+<h4><span id="colorLegendTitle"><i class="fa-solid fa-palette me-2"></i>顏色圖例</span></h4>
+<div id="colorLegendItems"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- 列印選項模態框 -->
+<div aria-hidden="true" aria-labelledby="printOptionsModalLabel" class="modal fade" id="printOptionsModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="printOptionsModalLabel">列印選項</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<p>選擇要列印的內容:</p>
+<div class="form-check">
+<input checked="checked" class="form-check-input" id="printSettings" type="checkbox"/>
+<label class="form-check-label" for="printSettings">
                             設置
                             <span class="description">語言、顯示單位、鋸片厚度</span>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="printCuttingItems" checked="checked">
-                        <label class="form-check-label" for="printCuttingItems">
+</label>
+</div>
+<div class="form-check">
+<input checked="checked" class="form-check-input" id="printCuttingItems" type="checkbox"/>
+<label class="form-check-label" for="printCuttingItems">
                             切割項目
                             <span class="description">所有輸入的切割長度、數量和用途</span>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="printMaterials" checked="checked">
-                        <label class="form-check-label" for="printMaterials">
+</label>
+</div>
+<div class="form-check">
+<input checked="checked" class="form-check-input" id="printMaterials" type="checkbox"/>
+<label class="form-check-label" for="printMaterials">
                             材料
                             <span class="description">所有輸入的材料長度和數量</span>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="printResults" checked="checked">
-                        <label class="form-check-label" for="printResults">
+</label>
+</div>
+<div class="form-check">
+<input checked="checked" class="form-check-input" id="printResults" type="checkbox"/>
+<label class="form-check-label" for="printResults">
                             切割結果 (包含摘要)
                             <span class="description">優化後的切割方案詳情</span>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="printVisualization" checked="checked">
-                        <label class="form-check-label" for="printVisualization">
+</label>
+</div>
+<div class="form-check">
+<input checked="checked" class="form-check-input" id="printVisualization" type="checkbox"/>
+<label class="form-check-label" for="printVisualization">
                             視覺化圖表
                             <span class="description">切割方案的圖形化展示</span>
-                        </label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="printLegend" checked="checked">
-                        <label class="form-check-label" for="printLegend">
+</label>
+</div>
+<div class="form-check">
+<input checked="checked" class="form-check-input" id="printLegend" type="checkbox"/>
+<label class="form-check-label" for="printLegend">
                             顏色圖例
                             <span class="description">切割件長度對應顏色說明</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="triggerPrint()">確認列印</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 儲存方案模態框 -->
-    <div class="modal fade" id="saveSchemeModal" tabindex="-1" aria-labelledby="saveSchemeModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="saveSchemeModalLabel">儲存方案</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="schemeName" class="form-label">方案名稱:</label>
-                        <input class="form-control" id="schemeName" placeholder="輸入方案名稱">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="confirmSaveScheme()">確認儲存</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 載入方案模態框 -->
-    <div class="modal fade" id="loadSchemeModal" tabindex="-1" aria-labelledby="loadSchemeModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="loadSchemeModalLabel">載入方案</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #ddd">
-                        <h6>📁 從檔案上載方案</h6>
-                        <input type="file" id="schemeFileInput" accept=".json" style="margin-top:10px">
-                        <button type="button" class="btn btn-primary" onclick="uploadSchemeFile()"
-                            style="margin-top:10px;background-color:#0056b3;color:#fff;font-weight:700;font-size:15px;padding:8px 18px;border:none;border-radius:4px">📤
+</label>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">取消</button>
+<button class="btn btn-primary" onclick="triggerPrint()" type="button">確認列印</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 儲存方案模態框 -->
+<div aria-hidden="true" aria-labelledby="saveSchemeModalLabel" class="modal fade" id="saveSchemeModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="saveSchemeModalLabel">儲存方案</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="mb-3">
+<label class="form-label" for="schemeName">方案名稱:</label>
+<input class="form-control" id="schemeName" placeholder="輸入方案名稱"/>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">取消</button>
+<button class="btn btn-primary" onclick="confirmSaveScheme()" type="button">確認儲存</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 載入方案模態框 -->
+<div aria-hidden="true" aria-labelledby="loadSchemeModalLabel" class="modal fade" id="loadSchemeModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="loadSchemeModalLabel">載入方案</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #ddd">
+<h6>📁 從檔案上載方案</h6>
+<input accept=".json" id="schemeFileInput" style="margin-top:10px" type="file"/>
+<button class="btn btn-primary" onclick="uploadSchemeFile()" style="margin-top:10px;background-color:#0056b3;color:#fff;font-weight:700;font-size:15px;padding:8px 18px;border:none;border-radius:4px" type="button">📤
                             上載</button>
-                    </div>
-                    <div>
-                        <h6>📋 已儲存的方案</h6>
-                        <div id="savedSchemesList"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 使用說明模態框 -->
-    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="helpModalLabel">使用說明</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="helpContent"></div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+</div>
+<div>
+<h6>📋 已儲存的方案</h6>
+<div id="savedSchemesList"></div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">取消</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 使用說明模態框 -->
+<div aria-hidden="true" aria-labelledby="helpModalLabel" class="modal fade" id="helpModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="helpModalLabel">使用說明</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body" id="helpContent"></div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">關閉</button>
+</div>
+</div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
         // 常數定義
         let INCH_TO_MM = 25.4;
         let MM_TO_INCH = 1 / INCH_TO_MM;
@@ -3412,7 +3406,6 @@ body select.unit-select option {
             });
         });
     </script>
-
 <script>
 
 // Version 5 Fixes
@@ -3604,7 +3597,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 </script>
-
 <script>
 // ===== 自動補料功能注入 (只加功能，唔改外觀) =====
 (function(){
@@ -3791,7 +3783,6 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 })();
 </script>
-
 <script>
 // ===== Usability fix: auto clear default zero & remove leading zeros =====
 (function(){
@@ -3906,7 +3897,6 @@ document.addEventListener("DOMContentLoaded", function() {
 })();
 // ===== End Imperial unit focus fix =====
 </script>
-
 <script>
 // 自動重算：頁面載入後，若已有清單資料則自動以新公式重算
 (function(){
@@ -3926,9 +3916,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 })();
 </script>
-
-
-    <script>
+<script>
     // 智能自動滾動功能 - 滾動到section標題
     document.addEventListener('DOMContentLoaded', function() {
         // 切割項目的長度輸入框 - 滾動到切割項目的標題
@@ -3966,8 +3954,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
     </script>
-    
-    <script>
+<script>
     // 只更新切割項目的單位
     function updateCuttingUnitOnly() {
         const cutUnit = document.getElementById('globalCutUnit');
@@ -4111,7 +4098,7 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log('✅ 自動滾動功能已啟動（使用 .section-header）');
 })();
 </script>
-    <script>
+<script>
     // Auto-hide results when inputs change to avoid showing stale screenshot/results
     (function(){
       function hideResults(){
@@ -4164,7 +4151,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     })();
     </script>
-      <script>
+<script>
     // Add small colored optional note to Purpose label (用途)
     (function(){
       function applyOptionalNote(){
@@ -4390,8 +4377,6 @@ document.addEventListener("DOMContentLoaded", function() {
   };
 })();
 </script>
-
-
 </html>
 <style>
 /* Fix unit label overflow near right edge and on mobile */
@@ -4402,7 +4387,6 @@ document.addEventListener("DOMContentLoaded", function() {
   .saw-thickness-input .unit-label { font-size: .9rem; }
 }
 </style>
-
 <style>
 /* v3: Keep unit label on RIGHT side within the field, no overflow */
 .saw-thickness-input { position: relative; }
@@ -4428,7 +4412,6 @@ document.addEventListener("DOMContentLoaded", function() {
   .saw-thickness-input .form-control { padding-right: 52px !important; }
 }
 </style>
-
 <script>
 // i18n fixes: update unit select option texts and help button when language changes
 (function(){
@@ -4474,7 +4457,6 @@ document.addEventListener("DOMContentLoaded", function() {
   window.addEventListener('load', runFixes);
 })();
 </script>
-
 <script>
 // v2 i18n: tables, algorithm options, load/help modals
 (function(){
@@ -4560,7 +4542,6 @@ document.addEventListener("DOMContentLoaded", function() {
   if (langSel) langSel.addEventListener('change', runAll);
 })();
 </script>
-
 <script>
 // Ensure saw thickness unit updates when unit changes or on load
 (function(){
@@ -4575,7 +4556,6 @@ document.addEventListener("DOMContentLoaded", function() {
   bind();
 })();
 </script>
-
 <script>
 // v5: Robust sync for saw thickness unit label
 (function(){
@@ -4618,12 +4598,11 @@ document.addEventListener("DOMContentLoaded", function() {
   bind();
 })();
 </script>
-
 <style>
 /* Increase vertical spacing between input blocks in Cutting Items and Materials */
 #cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.25rem; padding-bottom: 1.5rem; }
-#cutting-items-card { margin-bottom: 1.25rem !important; }
-#materials-card { margin-top: 1.25rem !important; margin-bottom: 1.25rem !important; }
+
+
 /* Add extra spacing between each input row */
 #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1rem; }
 #cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 0.75rem; }
@@ -4632,17 +4611,16 @@ document.addEventListener("DOMContentLoaded", function() {
 /* Make overall section taller on mobile */
 @media (max-width: 767.98px) {
   #cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.5rem; padding-bottom: 2rem; }
-  #cutting-items-card { margin-bottom: 2.5rem !important; }
-  #materials-card { margin-top: 2.5rem !important; margin-bottom: 2.5rem !important; }
+  
+  
   #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.25rem; }
 }
 </style>
-
 <style>
 /* v2: Increase vertical spacing further for Cutting Items and Materials sections */
 #cutting-items-card .card-body, #materials-card .card-body { padding-top: 2rem !important; padding-bottom: 2.5rem !important; }
-#cutting-items-card { margin-bottom: 3rem !important; }
-#materials-card { margin-top: 3rem !important; margin-bottom: 3rem !important; }
+
+
 /* Increase spacing between each input row */
 #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.5rem !important; }
 #cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 1.25rem !important; }
@@ -4651,12 +4629,11 @@ document.addEventListener("DOMContentLoaded", function() {
 /* Mobile: even more generous spacing */
 @media (max-width: 767.98px) {
   #cutting-items-card .card-body, #materials-card .card-body { padding-top: 2.25rem !important; padding-bottom: 3rem !important; }
-  #cutting-items-card { margin-bottom: 3.25rem !important; }
-  #materials-card { margin-top: 3.25rem !important; margin-bottom: 3.25rem !important; }
+  
+  
   #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.75rem !important; }
 }
 </style>
-
 <style>
 /* v3: Precisely adjust spacing as requested */
 /* 1) Increase gap BETWEEN the length row (horizontal) and the next quantity row */
@@ -4668,8 +4645,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 /* 2) Minimize bottom spacing of both sections (as small as possible) */
 #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
-#cutting-items-card { margin-bottom: 0 !important; }
-#materials-card { margin-bottom: 0 !important; }
+
+
 
 /* Optional: keep controls-row compact at bottom */
 #cuttingItems .controls-row { margin-bottom: 0.5rem !important; }
@@ -4683,7 +4660,6 @@ document.addEventListener("DOMContentLoaded", function() {
   #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
 }
 </style>
-
 <script>
 // 修正策略：當需要開新支時，先嘗試「最細但足夠」的在手材料；找不到才自動補料
 (function(){
