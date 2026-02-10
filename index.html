@@ -110,17 +110,17 @@
             font-weight: 700;
             font-size: 1.05em;
             text-shadow: 0 0 1px #000, 0 0 1px #000;
-            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .6), inset -2px -2px 0 rgba(0, 0, 0, .4), 0 2px 3px rgba(0, 0, 0, .4);
+            box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .25), inset -1px -1px 0 rgba(0, 0, 0, .15), 0 1px 2px rgba(0, 0, 0, .2);
             position: relative;
         }
 
         .btn:hover {
-            box-shadow: inset 2px 2px 0 rgba(255, 255, 255, .8), inset -2px -2px 0 rgba(0, 0, 0, .5), 0 3px 5px rgba(0, 0, 0, .5);
+            box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .35), inset -1px -1px 0 rgba(0, 0, 0, .2), 0 2px 3px rgba(0, 0, 0, .25);
         }
 
         .btn:active {
             transform: translateY(2px);
-            box-shadow: inset 2px 2px 0 rgba(0, 0, 0, .5), inset -2px -2px 0 rgba(255, 255, 255, .3), inset 0 0 3px rgba(0, 0, 0, .6);
+            box-shadow: inset 1px 1px 0 rgba(0, 0, 0, .2), inset -1px -1px 0 rgba(255, 255, 255, .15), inset 0 0 2px rgba(0, 0, 0, .3);
         }
 
         .fade-in {
@@ -213,8 +213,21 @@
             color: #fff;
             font-weight: 700;
             font-size: 1.3rem;
-            background: linear-gradient(45deg, #3a7bd5, #00d2ff);
-            border-left: 8px solid #004d40;
+            background: linear-gradient(45deg, #3a7bd5, #00d2ff); /* 還原原始顏色（藍色漸變檔頭） */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 檔頭左手面垂直色帶：淺綠漸變 */
+        .section-header::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: linear-gradient(180deg, #b9f6ca, #69f0ae); /* 保留左手面綠色垂直條（淺綠漸變） */
+            border-radius: 8px 0 0 8px;
         }
 
         .section-title {
@@ -617,6 +630,56 @@
             background-color: #5a6268;
         }
 
+        /* ====== TOP TOOLBAR（圓形三鍵：字大/字細/光暗） ====== */
+        .top-tools {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: -16px 0 16px 0; /* 貼近大標題下方 */
+            flex-wrap: wrap;
+        }
+        .top-tools .tool-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            line-height: 1;
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+        .top-tools .tool-btn i { margin: 0 !important; }
+        .top-tools .tool-btn .tool-text { font-size: 0.82rem; font-weight: 800; }
+
+        /* 顏色唔好咁搶眼：統一做柔和灰底 */
+        .top-tools .tool-btn.tool-btn-soft {
+            background: #e9ecef !important;
+            border: 1px solid #adb5bd !important;
+            color: #212529 !important;
+        }
+        .top-tools .tool-btn.tool-btn-soft:hover {
+            background: #dee2e6 !important;
+            border-color: #9aa3ab !important;
+        }
+
+        /* light mode（只做簡單反轉，保持你原有 card-body-light） */
+        body.light-mode {
+            background-color: #f3f5f7;
+            color: #212529;
+        }
+        body.light-mode .card {
+            background-color: #ffffff;
+            color: #212529;
+            border-color: rgba(0,0,0,0.12);
+        }
+        body.light-mode .section-header {
+            color: #fff;
+        }
+
         .modal-content {
             color: #212529;
         }
@@ -907,6 +970,14 @@ body select.unit-select option {
 <span id="titleText">鋁材切割排版</span>
 <i class="fa-solid fa-ruler-combined fa-2x ms-2 ruler-anim"></i>
 </h2>
+
+<!-- 大標題下方：三個圓形功能鍵（字大/字細/光暗） -->
+<div class="top-tools" aria-label="工具列">
+  <button class="btn tool-btn tool-btn-soft" id="fontIncBtn" type="button" title="文字放大" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="fontDecBtn" type="button" title="文字縮細" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" type="button" title="光明/黑暗" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+</div>
+
 <div class="card" id="settings-card"><div class="section-header">
 <div class="section-title">
 <i class="fa-solid fa-gear fa-lg me-2"></i>
@@ -1128,7 +1199,7 @@ body select.unit-select option {
 <div class="card-body text-center">
 
 <div class="button-group">
-<button class="btn btn-primary" id="calculateButton" onclick="calculate()">
+<button class="btn" id="calculateButton" onclick="calculate()">
 <i class="fas fa-calculator me-2"></i>計算
                     </button>
 <button class="btn btn-danger" id="resetButton" onclick="reset()">
@@ -1288,6 +1359,37 @@ body select.unit-select option {
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  (function(){
+    // ====== 圓形工具列功能 ======
+    var baseFontPx = 16;
+    try {
+      var cs = window.getComputedStyle(document.documentElement);
+      var px = parseFloat(cs.fontSize);
+      if(!isNaN(px) && px>8 && px<40) baseFontPx = px;
+    } catch(e) {}
+
+    window.adjustFontSize = function(delta){
+      baseFontPx = Math.max(12, Math.min(22, baseFontPx + delta));
+      document.documentElement.style.fontSize = baseFontPx + 'px';
+    };
+
+    window.toggleTheme = function(){
+      document.body.classList.toggle('light-mode');
+      try { localStorage.setItem('theme_light_mode', document.body.classList.contains('light-mode') ? '1' : '0'); } catch(e) {}
+    };
+
+    window.toggleInfo = function(){
+      return; // 已取消資訊按鈕
+    };
+
+    // restore theme
+    try {
+      if(localStorage.getItem('theme_light_mode') === '1') document.body.classList.add('light-mode');
+    } catch(e) {}
+  })();
+</script>
 <script>
         // 常數定義
         let INCH_TO_MM = 25.4;
@@ -4659,6 +4761,17 @@ document.addEventListener("DOMContentLoaded", function() {
   #materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
   #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
 }
+
+        /* Customized Calculate Button Color (Dormitory Style) */
+        #calculateButton {
+            background-color: #198754; /* Green - similar to standard calculate buttons */
+            border-color: #198754;
+            color: #fff;
+        }
+        #calculateButton:hover {
+            background-color: #157347;
+            border-color: #146c43;
+        }
 </style>
 <script>
 // 修正策略：當需要開新支時，先嘗試「最細但足夠」的在手材料；找不到才自動補料
@@ -4755,5 +4868,398 @@ document.addEventListener("DOMContentLoaded", function() {
   window.optimizeCutsFFD = createOptimizerFixed('FFD');
   window.optimizeCutsBFD = createOptimizerFixed('BFD');
   window.optimizeCutsSizeGrouping = createOptimizerFixed('SizeGrouping');
+})();
+</script>
+
+
+<!-- FINAL FIX: 參考舊檔案 011 -->
+<style>
+button, .btn {
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+}
+
+#fontIncBtn, #fontDecBtn,
+button[onclick*="toggleTheme"],
+button[onclick*="showHelp"] {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* 參考舊檔案 011 嘅設定 */
+/* .card 預設深灰色背景 */
+body:not(.sepia-mode) .card {
+    background-color: #454d55 !important;
+    border: 1px solid #6c757d !important;
+    color: #fff !important;
+}
+
+/* .card-body-light 淺灰色背景（輸入區域用） */
+body:not(.sepia-mode) .card-body-light {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+}
+
+/* .card-body 冇 -light 嘅，保持透明繼承 .card 深色背景（結果區域用） */
+body:not(.sepia-mode) .card-body {
+    /* 唔設背景色，繼承 .card */
+}
+
+/* REDUCE 3D EFFECT */
+.btn-3d,
+#globalCutUnit,
+#globalMaterialUnit {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.btn-3d:hover,
+#globalCutUnit:hover,
+#globalMaterialUnit:hover {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-3d:active,
+#globalCutUnit:active,
+#globalMaterialUnit:active {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(0px) !important;
+}
+
+/* Color legend 顏色圖例文字 */
+/* 淺色背景用深色字 */
+body:not(.sepia-mode) .card-body-light #colorLegend,
+body:not(.sepia-mode) .card-body-light .color-legend {
+    color: #212529 !important;
+}
+
+/* 深色背景用白色字 */
+body:not(.sepia-mode) .card-body:not(.card-body-light) #colorLegend,
+body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
+    color: #ffffff !important;
+}
+
+#calculateButton {
+    background: linear-gradient(135deg, #00ff48 0%, #006400 100%) !important;
+    border: none !important;
+    color: white !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 -1px 0 rgba(255,255,255,0.5) inset,
+        0 1px 0 rgba(0,0,0,0.3) inset,
+        -1px 0 0 rgba(255,255,255,0.3) inset,
+        1px 0 0 rgba(0,0,0,0.2) inset,
+        0 4px 15px rgba(0,0,0,0.4) !important;
+}
+
+#calculateButton:hover {
+    box-shadow: 
+        0 -2px 0 rgba(255,255,255,0.6) inset,
+        0 2px 0 rgba(0,0,0,0.3) inset,
+        -2px 0 0 rgba(255,255,255,0.4) inset,
+        2px 0 0 rgba(0,0,0,0.2) inset,
+        0 6px 20px rgba(0,0,0,0.5) !important;
+    transform: translateY(-1px);
+}
+
+#calculateButton:active {
+    box-shadow: 
+        0 1px 0 rgba(0,0,0,0.4) inset,
+        0 -1px 0 rgba(255,255,255,0.2) inset,
+        0 2px 8px rgba(0,0,0,0.3) !important;
+    transform: translateY(1px);
+}
+
+#calculateButton::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 50%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.5), rgba(255,255,255,0.1));
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 2;
+}
+
+#calculateButton::after {
+    content: '';
+    position: absolute;
+    top: -50%; left: -100%;
+    width: 30%; height: 200%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.9), transparent);
+    transform: rotate(25deg);
+    animation: shine 8s infinite ease-in-out;
+    pointer-events: none;
+    z-index: 3;
+}
+
+@keyframes shine {
+    0% { left: -100%; opacity: 0; }
+    10% { opacity: 1; }
+    40% { left: 200%; opacity: 0; }
+    100% { left: 200%; }
+}
+
+#helpButton, #printButton { display: none !important; }
+
+#resetButton,
+body:not(.sepia-mode) #resetButton,
+body:not(.sepia-mode) .btn-danger {
+    background: linear-gradient(135deg, #ffc9d0 0%, #ffb3be 100%) !important;
+    border: 2px solid #ff8fa3 !important;
+    color: #c0315c !important;
+    box-shadow: 0 2px 5px rgba(255, 143, 163, 0.3) !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    font-weight: 600 !important;
+}
+
+body:not(.sepia-mode) #resetButton:hover,
+body:not(.sepia-mode) .btn-danger:hover {
+    background: linear-gradient(135deg, #ffd9e0 0%, #ffc9d0 100%) !important;
+    transform: translateY(-1px);
+}
+
+body.sepia-mode * {
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+}
+
+body.sepia-mode {
+    background: #f4ecd8 !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode .card {
+    background: #faf6ed !important;
+    border: 2px solid #c9a876 !important;
+    box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2) !important;
+}
+
+body.sepia-mode .card-header,
+body.sepia-mode .section-header {
+    background: linear-gradient(135deg, #6a5040 0%, #8a6a50 100%) !important;
+    border-bottom: 2px solid #8b6f47 !important;
+}
+
+body.sepia-mode .card-body,
+body.sepia-mode .card-body-light {
+    background: #f5ead5 !important;
+}
+
+body.sepia-mode h1,
+body.sepia-mode #titleText,
+body.sepia-mode .section-title,
+body.sepia-mode .card-header *,
+body.sepia-mode .section-header * {
+    color: #ffffff !important;
+}
+
+body.sepia-mode h2, body.sepia-mode h3,
+body.sepia-mode h4, body.sepia-mode h5, body.sepia-mode h6 {
+    color: #5a4030 !important;
+}
+
+body.sepia-mode .form-control,
+body.sepia-mode .form-select {
+    background: #fffbf5 !important;
+    border: 1px solid #c9a876 !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode .table {
+    color: #4a3a2a !important;
+    border-color: #c9a876 !important;
+    background: #faf6ed !important;
+}
+
+body.sepia-mode .table thead,
+body.sepia-mode .table-active {
+    background: #e8dcc4 !important;
+}
+
+body.sepia-mode [class*="bg-light"],
+body.sepia-mode .bg-secondary {
+    background: #f0e6d2 !important;
+}
+
+body.sepia-mode .btn-primary,
+body.sepia-mode .btn-success {
+    background: 
+        repeating-linear-gradient(
+            45deg,
+            #8b6f47,
+            #8b6f47 10px,
+            #7a5f37 10px,
+            #7a5f37 20px
+        ) !important;
+    border: 2px solid #6b5533 !important;
+    color: #fff !important;
+    box-shadow: 0 3px 8px rgba(107, 85, 51, 0.3) !important;
+}
+
+body.sepia-mode .btn-secondary,
+body.sepia-mode .btn-outline-secondary {
+    background: linear-gradient(135deg, #c9a876 0%, #a88a5e 100%) !important;
+    border: 2px solid #8b7355 !important;
+    color: #3a2a1a !important;
+    box-shadow: 0 2px 6px rgba(139, 115, 85, 0.2) !important;
+}
+
+body.sepia-mode .btn-warning {
+    background: linear-gradient(135deg, #d4a574 0%, #b88a54 100%) !important;
+    border: 2px solid #9d7545 !important;
+    color: #3a2a1a !important;
+}
+
+body.sepia-mode #resetButton,
+body.sepia-mode .btn-danger {
+    background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%) !important;
+    border: 2px solid #6b3410 !important;
+    color: #fff !important;
+    box-shadow: 0 3px 8px rgba(139, 69, 19, 0.3) !important;
+}
+
+body.sepia-mode .btn-info {
+    background: 
+        radial-gradient(circle at 5px 5px, #b8956a 1px, transparent 1px),
+        #e8dcc4 !important;
+    background-size: 10px 10px !important;
+    border: 2px solid #a0826d !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode .btn {
+    background: 
+        linear-gradient(45deg, #f0e6d2 25%, transparent 25%),
+        linear-gradient(-45deg, #f0e6d2 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f0e6d2 75%),
+        linear-gradient(-45deg, transparent 75%, #f0e6d2 75%),
+        #ead9bf !important;
+    background-size: 20px 20px !important;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+    border: 1px solid #b8956a !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode .btn:hover {
+    background: 
+        linear-gradient(45deg, #e8dcc4 25%, transparent 25%),
+        linear-gradient(-45deg, #e8dcc4 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e8dcc4 75%),
+        linear-gradient(-45deg, transparent 75%, #e8dcc4 75%),
+        #dcc9a5 !important;
+    background-size: 20px 20px !important;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+}
+
+body.sepia-mode .btn-outline-warning {
+    background: linear-gradient(to bottom, #d4a574, #c9956a) !important;
+    border: 2px solid #a0826d !important;
+    color: #3a2a1a !important;
+}
+
+body.sepia-mode .btn-outline-danger {
+    background: linear-gradient(to bottom, #b8714a, #a0522d) !important;
+    border: 2px solid #8b4513 !important;
+    color: #fff !important;
+}
+
+body.sepia-mode .modal-content {
+    background: #faf6ed !important;
+    border: 2px solid #c9a876 !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode label {
+    color: #5a4030 !important;
+}
+
+body.sepia-mode .text-muted,
+body.sepia-mode .small-hint {
+    color: #8b7355 !important;
+}
+
+body.sepia-mode #colorLegend,
+body.sepia-mode .color-legend,
+body.sepia-mode [id*="colorLegend"] {
+    color: #3a2a1a !important;
+}
+
+body.sepia-mode .btn-3d,
+body.sepia-mode #globalCutUnit,
+body.sepia-mode #globalMaterialUnit {
+    box-shadow: 0 2px 4px rgba(107, 85, 51, 0.2) !important;
+}
+</style>
+
+<script>
+(function() {
+    document.body.classList.remove('sepia-mode', 'light-mode', 'dark-mode', 'dark-beauty-mode');
+
+    try {
+        localStorage.removeItem('theme');
+        localStorage.removeItem('my_custom_theme');
+        localStorage.removeItem('themelightmode');
+    } catch(e) {}
+
+    setTimeout(function() {
+        var themeBtn = document.querySelector('button[onclick*="toggleTheme"]');
+        if (themeBtn && !document.getElementById('newHelpBtn')) {
+            var helpBtn = document.createElement('button');
+            helpBtn.id = 'newHelpBtn';
+            helpBtn.className = themeBtn.className;
+            helpBtn.onclick = function() { if(window.showHelp) showHelp(); };
+            helpBtn.title = '幫助';
+            helpBtn.innerHTML = '<i class="fas fa-question"></i>';
+            themeBtn.parentNode.insertBefore(helpBtn, themeBtn.nextSibling);
+        }
+    }, 100);
+
+    window.toggleTheme = function() {
+        document.body.classList.toggle('sepia-mode');
+    };
+
+    setTimeout(function() {
+        var schemeList = document.getElementById('savedSchemesList');
+        if (schemeList) {
+            schemeList.addEventListener('click', function(e) {
+                var target = e.target;
+
+                while (target && target !== schemeList) {
+                    if (target.tagName === 'BUTTON' && 
+                        (target.onclick || target.getAttribute('onclick'))) {
+
+                        setTimeout(function() {
+                            var modals = document.querySelectorAll('.modal.show');
+                            modals.forEach(function(modal) {
+                                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                    var bsModal = bootstrap.Modal.getInstance(modal);
+                                    if (bsModal) {
+                                        bsModal.hide();
+                                    } else {
+                                        var newModal = new bootstrap.Modal(modal);
+                                        newModal.hide();
+                                    }
+                                }
+                            });
+                        }, 400);
+                        break;
+                    }
+                    target = target.parentElement;
+                }
+            });
+        }
+    }, 1000);
 })();
 </script>
