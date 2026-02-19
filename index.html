@@ -30,15 +30,167 @@
 <style>
         /* ... 保持原有的CSS樣式不變 ... */
         body {
+            /* Base color (深灰藍底，保持原本風格) */
             background-color: #2c3e50;
+            /* Subtle pattern overlay (diagonal grid) */
+            background-image:
+              linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
+              linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px);
+            background-size: 24px 24px;
+            background-attachment: fixed;
+
             color: #fff;
-            padding: 15px;
+            padding: 8px; /* reduce side whitespace */
         }
 
         .container-fluid {
             max-width: 1600px;
             margin: auto;
+            padding-left: 6px !important;  /* reduce Bootstrap container padding */
+            padding-right: 6px !important; /* reduce Bootstrap container padding */
         }
+
+        
+
+        /* ====== 彈窗開啟：背景模糊化 ====== */
+        .container-fluid {
+            transition: filter .18s ease, transform .18s ease;
+        }
+
+        /* Bootstrap modal open will add .modal-open to <body> */
+        body.modal-open .container-fluid {
+            filter: blur(6px) saturate(.95);
+            transform: scale(0.995);
+        }
+
+        /* Blur the backdrop itself (supported in modern Chrome) */
+        .modal-backdrop.show {
+            background-color: rgba(0,0,0,0.35);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            opacity: 1;
+        }
+
+        /* ====== 使用說明：視覺美化 ====== */
+        #helpModal .modal-content {
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 18px 40px rgba(0,0,0,.35);
+        }
+
+        #helpModal .modal-header {
+            background: linear-gradient(135deg, #1f3b73, #3b82f6);
+            color: #fff;
+            border-bottom: none;
+        }
+
+        #helpModal .modal-title {
+            font-weight: 900;
+            letter-spacing: .5px;
+        }
+
+        #helpModal .modal-body {
+            background: linear-gradient(180deg, #ffffff 0%, #f6f7fb 100%);
+            color: #111;
+        }
+
+        .help-guide {
+            --hg-accent: #2563eb;
+        }
+
+        .help-guide .hg-lead {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            margin-bottom: 14px;
+        }
+
+        .help-guide .hg-lead i {
+            color: var(--hg-accent);
+            margin-top: 2px;
+        }
+
+        .help-guide .hg-section-title {
+            font-weight: 900;
+            font-size: 1.05rem;
+            margin: 16px 0 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-guide .hg-steps {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 767.98px) {
+            .help-guide .hg-steps {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .help-guide .hg-step {
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 12px;
+            padding: 12px 12px;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.06);
+        }
+
+        .help-guide .hg-step .hg-step-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .help-guide .hg-badge {
+            font-weight: 900;
+            font-size: .82rem;
+            padding: 4px 9px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+        }
+
+        .help-guide .hg-step h6 {
+            margin: 0;
+            font-weight: 900;
+        }
+
+        .help-guide .hg-step p {
+            margin: 0;
+            color: #374151;
+            line-height: 1.55;
+        }
+
+        .help-guide .hg-tips {
+            background: #111827;
+            color: #fff;
+            border-radius: 12px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .help-guide .hg-tips ul {
+            margin: 8px 0 0;
+            padding-left: 18px;
+        }
+
+        .help-guide .hg-tips li {
+            margin: 6px 0;
+            color: rgba(255,255,255,0.92);
+        }
+/* Reduce grid gutters slightly to gain space */
+        .row { --bs-gutter-x: .75rem; }
 
         .card {
             background-color: #454d55;
@@ -51,10 +203,29 @@
         .card-body-light {
             background-color: #e9ecef;
             color: #212529;
+
+            /* 不鏽鋼拉絲（垂直）質感：細直紋＋輕微高光 */
+            background-image:
+              repeating-linear-gradient(
+                90deg,
+                rgba(255,255,255,0.50) 0px,
+                rgba(255,255,255,0.50) 1px,
+                rgba(0,0,0,0.05) 2px,
+                rgba(255,255,255,0.18) 4px,
+                rgba(0,0,0,0.03) 6px
+              ),
+              linear-gradient(
+                180deg,
+                rgba(255,255,255,0.55) 0%,
+                rgba(255,255,255,0.00) 22%,
+                rgba(0,0,0,0.04) 55%,
+                rgba(255,255,255,0.20) 100%
+              );
+            background-size: auto, 100% 100%;
         }
 
         .card-body {
-            padding: 1.25rem;
+            padding: 0.9rem;
         }
 
         .form-control {
@@ -188,6 +359,7 @@
         #pageTitle {
             background: linear-gradient(45deg, #4b6cb7, #182848);
             padding: 20px;
+            color: #fff;
             border-radius: 10px;
             margin-bottom: 30px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, .3);
@@ -561,18 +733,33 @@
             }
         }
 
-        .saw-thickness-input {
-            display: flex;
-            align-items: center;
+        /* Saw thickness: put unit INSIDE input field to avoid overflow */
+        .saw-thickness-input{ position: relative; display: block; width: 100%; }
+        .saw-thickness-input .form-control{
+            width: 100% !important;
+            max-width: none !important;
+            height: 40px !important;
+            padding-right: 56px !important; /* reserve room for unit */
+            margin-right: 0 !important;
+            box-sizing: border-box;
         }
-
-        .saw-thickness-input .form-control {
-            max-width: 120px;
-            margin-right: 10px;
-        }
-
-        .saw-thickness-input .unit-label {
+        .saw-thickness-input .unit-label{
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 40px;
+            line-height: 40px;
+            white-space: nowrap;
             font-size: .95em;
+            background: transparent;
+            margin: 0 !important;
+            padding: 0 2px;
+            pointer-events: none;
+        }
+        @media (max-width: 767.98px){
+            .saw-thickness-input .form-control{ width: 100% !important; max-width: none !important; padding-right: 56px !important; }
+            .saw-thickness-input .unit-label{ right: 8px; font-size: .9em; }
         }
 
         .btn {
@@ -929,14 +1116,38 @@ body select.unit-select option {
       }
     </style>
 <style>
-      /* Align saw-thickness unit text without boxed chip (mobile + desktop) */
-      .saw-thickness-input { display:flex; align-items:center; gap:6px; }
-.saw-thickness-input .form-control { flex: 1 1 auto; }
-.saw-thickness-input .unit-label { flex: 0 0 auto; white-space: nowrap; font-size: .95rem; margin-left: 0; line-height: 40px; height: 40px; }
-/* 避免單位換行壓住提示文字 */
-#sawThicknessLabel + .saw-thickness-input + #sawThicknessHint { margin-top: 6px; }
-      .saw-thickness-input .form-control { height:40px !important; }
-      .saw-thickness-input .unit-label { height:40px; line-height:40px; padding:0 4px; border:0; background:transparent; color:#212529; }
+      /* Align saw-thickness unit INSIDE the input (mobile + desktop) */
+      .saw-thickness-input{ position: relative; display: block; width: 100%; }
+      .saw-thickness-input .form-control{
+        width: 100% !important;
+        max-width: none !important;
+        height: 40px !important;
+        padding-left: 12px !important;
+        padding-right: 56px !important; /* room for unit */
+        box-sizing: border-box;
+      }
+
+      /* Right unit inside input */
+      .saw-thickness-input .unit-label{
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        margin: 0 !important;
+        padding: 0 2px;
+        height: 40px;
+        line-height: 40px;
+        background: transparent;
+        white-space: nowrap;
+        pointer-events: none;
+        color:#212529;
+      }
+      /* 避免單位換行壓住提示文字 */
+      #sawThicknessLabel + .saw-thickness-input + #sawThicknessHint { margin-top: 6px; }
+      @media (max-width: 767.98px){
+        .saw-thickness-input .form-control{ width: 100% !important; max-width: none !important; padding-left: 12px !important; padding-right: 56px !important; }
+        .saw-thickness-input .unit-label{ right: 8px; font-size: .9rem; }
+      }
       #algorithmSelector.equal-height { height:40px !important; padding-top:.25rem !important; padding-bottom:.25rem !important; font-size:1rem !important; }
     </style>
 <style>
@@ -988,7 +1199,7 @@ body select.unit-select option {
 <div class="card-body card-body-light">
 
 <div class="row g-3">
-<div class="col-md-3">
+<div class="col-6 col-md-3">
 <label class="form-label" id="languageLabel">語言:</label>
 <select class="form-select form-select-sm" id="language" onchange="updateLanguage()">
 <option value="zh">中文</option>
@@ -1017,10 +1228,11 @@ body select.unit-select option {
 <div class="col-6 col-md-3">
 <label class="form-label" id="sawThicknessLabel">鋸片厚度:</label>
 <div class="saw-thickness-input equalize">
-<input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;"/>
-<span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
+  <input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;"/>
+  <span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
 </div>
 <div class="small-hint" id="sawThicknessHint">例如: 3.2 (毫米) 或 1 (分)</div>
+
 <div class="error-message" id="sawThicknessError"></div>
 </div>
 </div>
@@ -1238,7 +1450,7 @@ body select.unit-select option {
 </div>
 <!-- 列印選項模態框 -->
 <div aria-hidden="true" aria-labelledby="printOptionsModalLabel" class="modal fade" id="printOptionsModal" tabindex="-1">
-<div class="modal-dialog">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
 <div class="modal-header">
 <h5 class="modal-title" id="printOptionsModalLabel">列印選項</h5>
@@ -1298,7 +1510,7 @@ body select.unit-select option {
 </div>
 <!-- 儲存方案模態框 -->
 <div aria-hidden="true" aria-labelledby="saveSchemeModalLabel" class="modal fade" id="saveSchemeModal" tabindex="-1">
-<div class="modal-dialog">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
 <div class="modal-header">
 <h5 class="modal-title" id="saveSchemeModalLabel">儲存方案</h5>
@@ -1319,7 +1531,7 @@ body select.unit-select option {
 </div>
 <!-- 載入方案模態框 -->
 <div aria-hidden="true" aria-labelledby="loadSchemeModalLabel" class="modal fade" id="loadSchemeModal" tabindex="-1">
-<div class="modal-dialog">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
 <div class="modal-header">
 <h5 class="modal-title" id="loadSchemeModalLabel">載入方案</h5>
@@ -1345,7 +1557,7 @@ body select.unit-select option {
 </div>
 <!-- 使用說明模態框 -->
 <div aria-hidden="true" aria-labelledby="helpModalLabel" class="modal fade" id="helpModal" tabindex="-1">
-<div class="modal-dialog">
+<div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
 <div class="modal-header">
 <h5 class="modal-title" id="helpModalLabel">使用說明</h5>
@@ -1440,6 +1652,7 @@ body select.unit-select option {
                 zh: "鋸片厚度:",
                 en: "Saw Thickness:"
             },
+
             schemeManagementLabel: {
                 zh: "方案管理:",
                 en: "Scheme Management:"
@@ -2635,15 +2848,16 @@ body select.unit-select option {
                 }
 
                 const algorithm = document.getElementById("algorithmSelector").value || "BFD";
+                const effectiveSawThickness = (Number(sawThickness.value) || 0);
                 let optimizedResult;
 
                 // ===== AutoBest: 同時計算三算法，選擇總餘料最少者 =====
                 if (algorithm === 'AutoBest') {
-                    const resFFD = optimizeCutsFFD(cuttingItems, materialItems, sawThickness.value, 'FFD');
-                    const resBFD = optimizeCutsBFD(cuttingItems, materialItems, sawThickness.value, 'BFD');
-                    const resSG  = optimizeCutsSizeGrouping(cuttingItems, materialItems, sawThickness.value, 'SizeGrouping');
+                    const resFFD = optimizeCutsFFD(cuttingItems, materialItems, effectiveSawThickness, 'FFD');
+                    const resBFD = optimizeCutsBFD(cuttingItems, materialItems, effectiveSawThickness, 'BFD');
+                    const resSG  = optimizeCutsSizeGrouping(cuttingItems, materialItems, effectiveSawThickness, 'SizeGrouping');
 
-                    const st = Number(sawThickness.value) || 0;
+                    const st = effectiveSawThickness;
                     function evaluate(bins) {
                         let totalWaste = 0;
                         let usedBars = 0;
@@ -2691,20 +2905,20 @@ body select.unit-select option {
 
                 switch (algorithm) {
                     case "FFD":
-                        optimizedResult = optimizeCutsFFD(cuttingItems, materialItems, sawThickness.value, algorithm);
+                        optimizedResult = optimizeCutsFFD(cuttingItems, materialItems, effectiveSawThickness, algorithm);
                         break;
                     case "SizeGrouping":
-                        optimizedResult = optimizeCutsSizeGrouping(cuttingItems, materialItems, sawThickness.value, algorithm);
+                        optimizedResult = optimizeCutsSizeGrouping(cuttingItems, materialItems, effectiveSawThickness, algorithm);
                         break;
                     case "BFD":
                     default:
-                        optimizedResult = optimizeCutsBFD(cuttingItems, materialItems, sawThickness.value, algorithm);
+                        optimizedResult = optimizeCutsBFD(cuttingItems, materialItems, effectiveSawThickness, algorithm);
                         break;
                 }
 
                 }
 
-                renderCuttingResults(optimizedResult, sawThickness.value);
+                renderCuttingResults(optimizedResult, effectiveSawThickness);
 
                 const resultsCard = document.getElementById("results-card");
                 if (resultsCard) {
@@ -3355,55 +3569,127 @@ body select.unit-select option {
 
             if (lang === "zh") {
                 helpContent.innerHTML = `
-                    <h5>使用說明</h5>
-                    <ol>
-                        <li><strong>設置</strong>：選擇語言和顯示單位，輸入鋸片厚度</li>
-                        <li><strong>切割項目</strong>：輸入需要切割的長度、數量和用途，點擊"新增項目"添加到列表</li>
-                        <li><strong>編輯項目</strong>：點擊表格中的"編輯"按鈕可將項目回填到輸入欄進行修改，然後點擊"更新項目"保存</li>
-                        <li><strong>材料</strong>：輸入可用材料的長度和數量，點擊"新增材料"添加到列表</li>
-                        <li><strong>編輯材料</strong>：點擊表格中的"編輯"按鈕可將材料回填到輸入欄進行修改，然後點擊"更新材料"保存</li>
-                        <li><strong>計算</strong>：點擊計算按鈕獲取最佳切割方案</li>
-                        <li><strong>結果</strong>：查看切割方案詳情和圖形化展示</li>
-                        <li>可以儲存和載入常用方案</li>
-                        <li>點擊"列印報告"可列印當前方案</li>
-                    </ol>
-                    <p>提示：</p>
-                    <ul>
-                        <li>使用公制單位時輸入米/厘米/毫米</li>
-                        <li>使用英制單位時輸入尺/寸/分</li>
-                        <li>鋸片厚度會影響材料利用率</li>
-                        <li>系統會自動計算餘料並優化方案</li>
-                        <li><strong>智能優化方案會將相同尺寸的切割件盡量排列在一起，提高開料效率</strong></li>
-                        <li><strong>點擊"清除輸入"按鈕可以快速清空輸入欄</strong></li>
-                        <li><strong>新增或更新項目後，輸入欄會自動歸零，方便輸入下一個項目</strong></li>
-                        <li><strong>編輯項目時，輸入欄的單位會跟隨該項目原本的單位（公制/英制）</strong></li>
-                    </ul>
+                    <div class="help-guide">
+                      <div class="hg-lead">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div>
+                          <div style="font-weight:900">快速上手</div>
+                          <div style="color:#334155">跟住下面 4 個步驟，由輸入到計算，再到列印／儲存方案。</div>
+                        </div>
+                      </div>
+
+                      <div class="hg-section-title"><i class="fa-solid fa-shoe-prints" style="color:#2563eb"></i>流程（4 步）</div>
+                      <div class="hg-steps">
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">1 / 設置</span><i class="fa-solid fa-gear" style="color:#1d4ed8"></i></div>
+                          <h6>語言、單位、鋸片厚度</h6>
+                          <p>先揀語言同顯示單位，再輸入鋸片厚度（會影響耗料）。</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">2 / 切割項目</span><i class="fa-solid fa-list-check" style="color:#1d4ed8"></i></div>
+                          <h6>輸入要切嘅尺寸</h6>
+                          <p>填長度、數量、用途 → 撳「新增項目」加到表格。</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">3 / 材料</span><i class="fa-solid fa-cubes" style="color:#1d4ed8"></i></div>
+                          <h6>輸入可用材料</h6>
+                          <p>填材料長度、數量 → 撳「新增材料」加到表格。</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">4 / 計算與輸出</span><i class="fa-solid fa-chart-line" style="color:#1d4ed8"></i></div>
+                          <h6>計算 → 揀方案 → 列印／儲存</h6>
+                          <p>撳「計算」睇結果；可儲存/載入常用方案；需要就列印報告。</p>
+                        </div>
+                      </div>
+
+                      <div class="hg-section-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:#2563eb"></i>常用操作</div>
+                      <div class="hg-steps">
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">編輯（項目/材料）</span><i class="fa-solid fa-pen-to-square" style="color:#1d4ed8"></i></div>
+                          <h6>表格 → 撳「編輯」</h6>
+                          <p>項目會回填到輸入框，改完再撳「更新」保存。</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">智能優化</span><i class="fa-solid fa-bolt" style="color:#1d4ed8"></i></div>
+                          <h6>同尺寸盡量排埋一齊</h6>
+                          <p>提升開料效率，適合大量重複尺寸嘅情況。</p>
+                        </div>
+                      </div>
+
+                      <div class="hg-section-title"><i class="fa-solid fa-lightbulb" style="color:#f59e0b"></i>提示</div>
+                      <div class="hg-tips">
+                        <div style="font-weight:900">輸入單位建議</div>
+                        <ul>
+                          <li>公制：米/厘米/毫米</li>
+                          <li>英制：尺/寸/分</li>
+                          <li><strong>鋸片厚度越大</strong>，理論耗料越多，結果會跟住變。</li>
+                          <li>新增／更新後輸入欄會自動歸零，方便下一筆。</li>
+                          <li>編輯時，單位會跟返該項目原本嘅單位（公制/英制）。</li>
+                        </ul>
+                      </div>
+                    </div>
                 `;
             } else {
                 helpContent.innerHTML = `
-                    <h5>User Guide</h5>
-                    <ol>
-                        <li><strong>Settings</strong>: Select language and display unit, enter saw thickness</li>
-                        <li><strong>Cutting Items</strong>: Enter required lengths, quantities and purposes, click "Add Item" to add to list</li>
-                        <li><strong>Edit Items</strong>: Click "Edit" button in table to load item back to input fields, modify and click "Update Item" to save</li>
-                        <li><strong>Materials</strong>: Enter available material lengths and quantities, click "Add Material" to add to list</li>
-                        <li><strong>Edit Materials</strong>: Click "Edit" button in table to load material back to input fields, modify and click "Update Material" to save</li>
-                        <li><strong>Calculate</strong>: Click Calculate button to get optimal cutting plan</li>
-                        <li><strong>Results</strong>: View cutting details and graphical visualization</li>
-                        <li>Save and load frequently used schemes</li>
-                        <li>Click "Print Report" to print current scheme</li>
-                    </ol>
-                    <p>Tips:</p>
-                    <ul>
-                        <li>Use meters/cm/mm for metric units</li>
-                        <li>Use feet/inches/eighths for imperial units</li>
-                        <li>Saw thickness affects material utilization</li>
-                        <li>System calculates remnants and optimizes plan</li>
-                        <li><strong>Smart optimization scheme groups same-size cuts together for better efficiency</strong></li>
-                        <li><strong>Click "Clear Input" button to quickly clear input fields</strong></li>
-                        <li><strong>After adding or updating items, input fields will automatically reset to zero for next entry</strong></li>
-                        <li><strong>When editing items, the input field units will follow the original unit (metric/imperial) of that item</strong></li>
-                    </ul>
+                    <div class="help-guide">
+                      <div class="hg-lead">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <div>
+                          <div style="font-weight:900">Quick start</div>
+                          <div style="color:#334155">Follow the 4 steps below: inputs → calculate → save/print.</div>
+                        </div>
+                      </div>
+
+                      <div class="hg-section-title"><i class="fa-solid fa-shoe-prints" style="color:#2563eb"></i>Workflow (4 steps)</div>
+                      <div class="hg-steps">
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">1 / Settings</span><i class="fa-solid fa-gear" style="color:#1d4ed8"></i></div>
+                          <h6>Language, units, saw thickness</h6>
+                          <p>Choose language and unit, then enter saw thickness (affects utilization).</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">2 / Cutting items</span><i class="fa-solid fa-list-check" style="color:#1d4ed8"></i></div>
+                          <h6>Enter required cuts</h6>
+                          <p>Length, quantity, purpose → click “Add Item”.</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">3 / Materials</span><i class="fa-solid fa-cubes" style="color:#1d4ed8"></i></div>
+                          <h6>Enter available stock</h6>
+                          <p>Material length and quantity → click “Add Material”.</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">4 / Calculate & output</span><i class="fa-solid fa-chart-line" style="color:#1d4ed8"></i></div>
+                          <h6>Calculate → review → save/print</h6>
+                          <p>Click “Calculate” to view results, then save/load schemes or print report.</p>
+                        </div>
+                      </div>
+
+                      <div class="hg-section-title"><i class="fa-solid fa-wand-magic-sparkles" style="color:#2563eb"></i>Common actions</div>
+                      <div class="hg-steps">
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">Edit (items/materials)</span><i class="fa-solid fa-pen-to-square" style="color:#1d4ed8"></i></div>
+                          <h6>Table → “Edit”</h6>
+                          <p>Loads values back into the input fields. Modify, then click “Update”.</p>
+                        </div>
+                        <div class="hg-step">
+                          <div class="hg-step-top"><span class="hg-badge">Smart optimization</span><i class="fa-solid fa-bolt" style="color:#1d4ed8"></i></div>
+                          <h6>Groups same-size cuts</h6>
+                          <p>Helps production efficiency when many repeated sizes exist.</p>
+                        </div>
+                      </div>
+
+                      <div class="hg-section-title"><i class="fa-solid fa-lightbulb" style="color:#f59e0b"></i>Tips</div>
+                      <div class="hg-tips">
+                        <div style="font-weight:900">Input units</div>
+                        <ul>
+                          <li>Metric: m / cm / mm</li>
+                          <li>Imperial: ft / in / 1/8 in</li>
+                          <li><strong>Saw thickness</strong> changes the loss between cuts.</li>
+                          <li>After add/update, inputs reset automatically for the next entry.</li>
+                          <li>When editing, input units follow the original unit of that entry.</li>
+                        </ul>
+                      </div>
+                    </div>
                 `;
             }
 
@@ -4480,40 +4766,6 @@ document.addEventListener("DOMContentLoaded", function() {
 })();
 </script>
 </html>
-<style>
-/* Fix unit label overflow near right edge and on mobile */
-.saw-thickness-input { position: relative; }
-.saw-thickness-input .unit-label { order: -1; margin-right: 6px; margin-left: 0 !important; }
-@media (max-width: 767.98px) {
-  .saw-thickness-input .form-control { max-width: 90px !important; }
-  .saw-thickness-input .unit-label { font-size: .9rem; }
-}
-</style>
-<style>
-/* v3: Keep unit label on RIGHT side within the field, no overflow */
-.saw-thickness-input { position: relative; }
-.saw-thickness-input .unit-label {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  margin: 0 !important;
-  padding: 0 4px !important;
-  height: 40px !important;
-  line-height: 40px !important;
-  background: transparent !important;
-  white-space: nowrap !important;
-}
-/* Prevent overlap: add right padding inside input to make room for the unit label */
-.saw-thickness-input .form-control {
-  padding-right: 48px !important;
-  height: 40px !important;
-}
-@media (max-width: 767.98px) {
-  .saw-thickness-input .unit-label { right: 6px; font-size: .9rem; }
-  .saw-thickness-input .form-control { padding-right: 52px !important; }
-}
-</style>
 <script>
 // i18n fixes: update unit select option texts and help button when language changes
 (function(){
@@ -5054,7 +5306,25 @@ body.sepia-mode .section-header {
 
 body.sepia-mode .card-body,
 body.sepia-mode .card-body-light {
-    background: #f5ead5 !important;
+    background-color: #f5ead5 !important;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.60) 0px,
+        rgba(255,255,255,0.60) 1px,
+        rgba(101,67,33,0.15) 2px,
+        rgba(255,255,255,0.30) 4px,
+        rgba(101,67,33,0.10) 6px
+      ),
+      linear-gradient(
+        180deg,
+        rgba(255,255,255,0.60) 0%,
+        rgba(255,255,255,0.00) 25%,
+        rgba(101,67,33,0.08) 60%,
+        rgba(255,255,255,0.30) 100%
+      ) !important;
+    background-size: auto, 100% 100% !important;
+    background-attachment: local !important; /* Ensure it scrolls with content if needed */
 }
 
 body.sepia-mode h1,
