@@ -1200,6 +1200,69 @@ body select.unit-select option {
 </style>
     <!-- Three.js：用於渲染大標題旁邊 3D 螺絲母 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+/* PATCH-2026-0221-I : 外框高度縮細 + 緊湊 + 大字體 */
+h2#pageTitle {
+  display: grid !important;
+  grid-template-columns: 112px 1fr 112px !important;
+  align-items: center !important;
+  gap: 0 12px !important;
+  /* 取消固定高度，改用 padding 壓實 */
+  height: auto !important;
+  min-height: 70px !important; 
+  padding: 6px 14px !important; /* 上下 padding 縮到 6px */
+}
+
+/* 螺帽原本係 112x112，會撐高個框，需要縮小少少先緊湊 */
+h2#pageTitle .title-nut {
+  grid-column: 1;
+  justify-self: start !important;
+  align-self: center;
+  width: 90px !important;   /* 由 112 縮細到 90 */
+  height: 90px !important; 
+}
+
+h2#pageTitle #titleText {
+  grid-column: 2;
+  text-align: center !important;
+  justify-self: center !important;
+  width: 100% !important;
+  display: block !important;
+  font-size: 2.2rem !important;  
+}
+
+h2#pageTitle .fa-ruler-combined {
+  grid-column: 3;
+  justify-self: center !important;
+  margin-left: 0 !important;
+}
+
+body.lang-zh h2#pageTitle #titleText {
+  white-space: nowrap !important;
+}
+body.lang-en h2#pageTitle #titleText {
+  white-space: normal !important;
+  max-width: 18ch;
+  line-height: 1.1;
+}
+
+@media (max-width: 767.98px) {
+  h2#pageTitle {
+    grid-template-columns: 70px 1fr 70px !important; /* 兩邊留少啲位，等中間字唔會太逼 */
+    gap: 0 8px !important;
+    min-height: 56px !important;
+    padding: 4px 10px !important;
+  }
+  h2#pageTitle .title-nut {
+    width: 70px !important;  /* 手機螺帽再縮細到 70 */
+    height: 70px !important;
+  }
+  h2#pageTitle #titleText {
+    font-size: 1.6rem !important; /* 手機字稍微微調，以防爆框 */
+  }
+}
+</style>
 </head>
 <body>
 <div class="container-fluid">
@@ -5662,13 +5725,16 @@ body.sepia-mode .btn-outline-secondary {
 body.sepia-mode .btn-warning {
     background: linear-gradient(135deg, #d4a574 0%, #b88a54 100%) !important;
     border: 2px solid #9d7545 !important;
-    color:body.sepia-mode #resetButton,
+    color: #3a2a1a !important;
+    box-shadow: 0 2px 6px rgba(157, 117, 69, 0.22) !important;
+}
+
+body.sepia-mode #resetButton,
 body.sepia-mode .btn-danger {
     background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
     border: 2px solid #ff5500 !important;
     color: #fff !important;
     box-shadow: 0 3px 8px rgba(255, 85, 0, 0.30) !important;
-}, 19, 0.3) !important;
 }
 
 body.sepia-mode .btn-info {
@@ -5741,6 +5807,62 @@ body.sepia-mode .btn-3d,
 body.sepia-mode #globalCutUnit,
 body.sepia-mode #globalMaterialUnit {
     box-shadow: 0 2px 4px rgba(107, 85, 51, 0.2) !important;
+}
+
+/* ===== PATCH-2026-0220-C: 啡色模式箭咀規則（unit-select 除外） ===== */
+body.sepia-mode select.form-select:not(.unit-select),
+body.sepia-mode select.form-select-sm:not(.unit-select) {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%235a4030' d='M4.2 6.2a1 1 0 0 1 1.4 0L8 8.6l2.4-2.4a1 1 0 1 1 1.4 1.4l-3.1 3.1a1 1 0 0 1-1.4 0L4.2 7.6a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right .55rem center !important;
+  background-size: .8rem .8rem !important;
+  padding-right: 1.9rem !important;
+}
+
+/* unit-select（公/英/顯示單位）：同灰色版一致，強制唔要箭咀 */
+body.sepia-mode select.unit-select,
+body.sepia-mode #unit,
+body.sepia-mode #globalCutUnit,
+body.sepia-mode #globalMaterialUnit {
+  background-image: none !important;
+  padding-right: 0 !important;
+}
+
+/* ===== PATCH-2026-0220-D: 陰影加深（輸入欄 + 按鈕） ===== */
+.form-control,
+.form-select,
+textarea {
+  box-shadow: 0 3px 10px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.12) !important;
+  transition: box-shadow .15s ease !important;
+}
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 .16rem rgba(0,0,0,.08), 0 6px 16px rgba(0,0,0,.22) !important;
+}
+
+/* 所有按鈕（包括頂部5個工具按鈕） */
+.btn,
+.top-tools .tool-btn {
+  box-shadow: 0 3px 10px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.14) !important;
+  transition: box-shadow .12s ease, transform .08s ease !important;
+}
+.btn:hover,
+.top-tools .tool-btn:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.16) !important;
+  transform: translateY(-1px) !important;
+}
+.btn:active,
+.top-tools .tool-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.20) !important;
+  transform: translateY(0) !important;
+}
+
+/* 保險：啡色模式重置鍵一定有陰影 */
+body.sepia-mode #resetButton {
+  box-shadow: 0 4px 12px rgba(0,0,0,.26) !important;
 }
 </style>
 
