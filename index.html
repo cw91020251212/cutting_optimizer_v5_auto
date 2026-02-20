@@ -1202,64 +1202,67 @@ body select.unit-select option {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
 <style>
-/* PATCH-2026-0221-I : 外框高度縮細 + 緊湊 + 大字體 */
-h2#pageTitle {
-  display: grid !important;
-  grid-template-columns: 112px 1fr 112px !important;
-  align-items: center !important;
-  gap: 0 12px !important;
-  /* 取消固定高度，改用 padding 壓實 */
-  height: auto !important;
-  min-height: 70px !important; 
-  padding: 6px 14px !important; /* 上下 padding 縮到 6px */
-}
-
-/* 螺帽原本係 112x112，會撐高個框，需要縮小少少先緊湊 */
-h2#pageTitle .title-nut {
-  grid-column: 1;
-  justify-self: start !important;
-  align-self: center;
-  width: 90px !important;   /* 由 112 縮細到 90 */
-  height: 90px !important; 
-}
-
-h2#pageTitle #titleText {
-  grid-column: 2;
-  text-align: center !important;
-  justify-self: center !important;
-  width: 100% !important;
-  display: block !important;
-  font-size: 2.2rem !important;  
-}
-
-h2#pageTitle .fa-ruler-combined {
-  grid-column: 3;
-  justify-self: center !important;
-  margin-left: 0 !important;
-}
-
-body.lang-zh h2#pageTitle #titleText {
-  white-space: nowrap !important;
-}
-body.lang-en h2#pageTitle #titleText {
-  white-space: normal !important;
-  max-width: 18ch;
-  line-height: 1.1;
-}
+/* PATCH-2026-0221-N : 標題 + 排版結果區塊(紅圈)輪廓與陰影 */
+h2#pageTitle { display: grid !important; grid-template-columns: 112px 1fr 112px !important; align-items: center !important; gap: 0 12px !important; height: auto !important; min-height: 70px !important; padding: 6px 14px !important; }
+h2#pageTitle .title-nut { grid-column: 1; justify-self: start !important; width: 90px !important; height: 90px !important; }
+h2#pageTitle #titleText { grid-column: 2; text-align: center !important; justify-self: center !important; width: 100% !important; display: block !important; font-size: 2.2rem !important; }
+h2#pageTitle .fa-ruler-combined { grid-column: 3; justify-self: center !important; margin-left: 0 !important; }
+body.lang-zh h2#pageTitle #titleText { white-space: nowrap !important; }
+body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width: 18ch; line-height: 1.1; }
 
 @media (max-width: 767.98px) {
-  h2#pageTitle {
-    grid-template-columns: 70px 1fr 70px !important; /* 兩邊留少啲位，等中間字唔會太逼 */
-    gap: 0 8px !important;
-    min-height: 56px !important;
-    padding: 4px 10px !important;
-  }
-  h2#pageTitle .title-nut {
-    width: 70px !important;  /* 手機螺帽再縮細到 70 */
-    height: 70px !important;
-  }
-  h2#pageTitle #titleText {
-    font-size: 1.6rem !important; /* 手機字稍微微調，以防爆框 */
+  h2#pageTitle { grid-template-columns: 70px 1fr 70px !important; gap: 0 8px !important; min-height: 56px !important; padding: 4px 10px !important; }
+  h2#pageTitle .title-nut { width: 70px !important; height: 70px !important; }
+  h2#pageTitle #titleText { font-size: 1.6rem !important; }
+}
+
+/* =========================================
+   針對「紅圈住嘅排版圖結果」加上強烈外框與陰影
+   ========================================= */
+
+/* 1. 優化摘要 (綠色底) */
+.opt-summary-box {
+  border: 2px solid #388e3c !important; /* 明顯綠色輪廓線 */
+  border-left: 6px solid #4caf50 !important; /* 左邊更粗 */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important; /* 強烈陰影 */
+  border-radius: 12px !important;
+}
+
+/* 2. 每條原料區塊 (白色/淺灰底) */
+.opt-material-box {
+  border: 2px solid #868e96 !important; /* 實色灰色輪廓線 */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important; /* 強烈立體陰影 */
+  border-radius: 10px !important;
+  margin-top: 20px !important; /* 加大距離避免陰影重疊 */
+}
+
+/* 淺色模式下稍微調柔和陰影 */
+body.light-mode .opt-summary-box,
+body.light-mode .opt-material-box {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2) !important;
+  border-color: #adb5bd !important;
+}
+body.light-mode .opt-summary-box {
+  border-color: #4caf50 !important;
+}
+
+/* 啡色模式下專用色系輪廓線及陰影 */
+body.sepia-mode .opt-summary-box {
+  border: 2px solid #8b6f47 !important;
+  border-left: 6px solid #8b6f47 !important;
+  box-shadow: 0 8px 24px rgba(101, 67, 33, 0.4) !important;
+}
+body.sepia-mode .opt-material-box {
+  border: 2px solid #8b6f47 !important;
+  box-shadow: 0 8px 24px rgba(101, 67, 33, 0.4) !important;
+}
+
+/* 列印模式下取消陰影與粗邊框 */
+@media print {
+  .opt-summary-box, .opt-material-box {
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+    border-radius: 0 !important;
   }
 }
 </style>
@@ -3148,7 +3151,7 @@ body.lang-en h2#pageTitle #titleText {
 
             // 生成HTML
             let html = `
-                <div style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                <div class="opt-summary-box" style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
                     <h4 style="margin: 0 0 10px 0; color: #1b5e20;">📊 優化摘要</h4>
                     <div style="display: flex; justify-content: space-around; font-size: 14px;">
                         <div>
@@ -3175,7 +3178,7 @@ body.lang-en h2#pageTitle #titleText {
                 const wastePercentage = ((waste / bin.length) * 100).toFixed(1);
 
                 html += `
-                    <div style="margin-bottom: 15px; border: 1px solid #ccc; padding: 12px; border-radius: 6px; background: #f9f9f9;">
+                    <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9;">
                         <div style="font-weight: bold; margin-bottom: 8px; color: #333;">
                             原料 #${binIndex + 1} - ${formatLengthForDisplay(bin.length, unit)}
                             ${bin.autoAdded ? ' <span style="color: #f57c00; font-size: 0.9em;">[自動添加]</span>' : ''}
