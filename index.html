@@ -2427,7 +2427,7 @@ body select.unit-select option {
                 <td>${escapeHTML(purpose || "-")}</td>
                 <td class="text-center">
                     <div class="action-buttons">
-                        <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(${rowIndex})" title="編輯">
+                        <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="編輯">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); exitCuttingEditMode();" title="刪除">
@@ -2505,7 +2505,7 @@ body select.unit-select option {
                     <td>${purpose || "-"}</td>
                     <td class="text-center">
                         <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(${editingCuttingIndex})" title="編輯">
+                            <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="編輯">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); exitCuttingEditMode();" title="刪除">
@@ -2577,7 +2577,7 @@ body select.unit-select option {
                 <td>${quantity}</td>
                 <td class="text-center">
                     <div class="action-buttons">
-                        <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(${rowIndex})" title="編輯">
+                        <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="編輯">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); exitMaterialEditMode();" title="刪除">
@@ -2652,7 +2652,7 @@ body select.unit-select option {
                     <td>${quantity}</td>
                     <td class="text-center">
                         <div class="action-buttons">
-                            <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(${editingMaterialIndex})" title="編輯">
+                            <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="編輯">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); exitMaterialEditMode();" title="刪除">
@@ -3481,7 +3481,7 @@ body select.unit-select option {
                         <td>${purpose || "-"}</td>
                         <td class="text-center">
                             <div class="action-buttons">
-                                <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(${rowIndex})" title="編輯">
+                                <button class="btn btn-sm btn-outline-warning" onclick="enterCuttingEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="編輯">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); exitCuttingEditMode();" title="刪除">
@@ -3528,7 +3528,7 @@ body select.unit-select option {
                         <td>${quantity}</td>
                         <td class="text-center">
                             <div class="action-buttons">
-                                <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(${rowIndex})" title="編輯">
+                                <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="編輯">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <button class="btn btn-sm btn-outline-danger" onclick="this.closest('tr').remove(); exitMaterialEditMode();" title="刪除">
@@ -3980,82 +3980,151 @@ window.convertInputValues = function(group, targetUnit) {
 };
 
 window.parseLength = function(lengthInputGroup) {
-    const unitSelect = lengthInputGroup.querySelector(".unit-select");
-    const unit = unitSelect ? unitSelect.value : "metric";
-    const inputs = lengthInputGroup.querySelectorAll(".form-control");
-
-    const lang = document.getElementById("language").value;
-    let totalMM = 0;
-    let formatHint = "standard";
-
-    if (unit === "imperial") {
+    let unitSelect = lengthInputGroup.querySelector('.unit-select');
+    if (!unitSelect) {
+        if (lengthInputGroup.closest('#cuttingItems'))  unitSelect = document.getElementById('globalCutUnit');
+        else if (lengthInputGroup.closest('#materialItems')) unitSelect = document.getElementById('globalMaterialUnit');
+    }
+    const unit = unitSelect ? unitSelect.value : 'metric';
+    const inputs = lengthInputGroup.querySelectorAll('.form-control');
+    const lang = document.getElementById('language')?.value || 'zh';
+    let totalMM = 0, formatHint = 'standard';
+    if (unit === 'imperial') {
         const ft = parseFloat(inputs[0].value) || 0;
         const inch = parseFloat(inputs[1].value) || 0;
         const eighth = parseFloat(inputs[2].value) || 0;
-
-        if (ft === 0 && inch >= 12) formatHint = "inches_only";
-
-        if (isNaN(ft) && isNaN(inch) && isNaN(eighth)) {
-            return { value: 0, error: lang === "zh" ? "長度無效" : "Invalid length" };
-        }
-        totalMM = (ft * 12 + inch + eighth/8) * 25.4;
+        if (ft === 0 && inch > 0 && inch < 12) formatHint = 'inchesonly';
+        totalMM = (ft * 304.8) + (inch * 25.4) + (eighth * 25.4 / 8);
     } else {
-        const m = parseFloat(inputs[0].value) || 0;
-        const cm = parseFloat(inputs[1].value) || 0;
-        const mm = parseFloat(inputs[2].value) || 0;
-        totalMM = m * 1000 + cm * 10 + mm;
+        totalMM = (parseFloat(inputs[0].value) || 0) * 1000
+                + (parseFloat(inputs[1].value) || 0) * 10
+                + (parseFloat(inputs[2].value) || 0);
     }
-    return { value: totalMM, formatHint: formatHint };
+    if (totalMM < 0) return { value: 0, error: lang === 'zh' ? '長度不能為負數' : 'Length cannot be negative' };
+    return { value: totalMM, formatHint };
 };
 
 window.enterCuttingEditMode = function(index) {
-    const row = document.querySelectorAll("#cuttingItemsTable tbody tr")[index];
-    if (!row) return;
-
-    document.getElementById("editingCuttingIndex").value = index;
-    const template = document.querySelector("#cuttingItems .cutting-item");
-
-    // 這裡我們信任 dataset 中的 inputUnit
-    // 如果它出錯 (像截圖那樣)，我們在下面填充數值時會強制修正它
-    const unit = row.dataset.inputUnit || "metric";
-    const lengthMM = parseFloat(row.dataset.length);
-    const formatHint = row.dataset.formatHint || "standard";
-
-    const unitSelect = template.querySelector(".unit-select");
-    if(unitSelect) {
-        unitSelect.value = unit;
-        const group = unitSelect.closest(".length-input-group");
-        if(group) group.dataset.currentUnit = unit; // 正確初始化
-        window.forceUpdateUI(unitSelect);
+    // 1. 清除上一次可能殘留嘅 edit-mode 狀態
+    const prevTemplate = document.querySelector('#cuttingItems .cutting-item');
+    if (prevTemplate) {
+        prevTemplate.classList.remove('edit-mode');
+        document.querySelectorAll('#cuttingItemsTable tbody tr').forEach(r => r.classList.remove('table-row-edit'));
     }
 
-    // 填充數值 (絕對真理來源：lengthMM)
-    if (unit === "imperial") {
+    const row = document.querySelectorAll('#cuttingItemsTable tbody tr')[index];
+    if (!row) return;
+
+    const template = document.querySelector('#cuttingItems .cutting-item');
+
+    // 2. 讀取儲存喺行資料入面嘅單位
+    const unit = row.dataset.inputUnit || 'metric';
+    const lengthMM = parseFloat(row.dataset.length) || 0;
+    const formatHint = row.dataset.formatHint || 'standard';
+
+    // 3. 更新 unit-select 同 UI 標籤
+    const unitSelect = template.querySelector('.unit-select');
+    if (unitSelect) {
+        unitSelect.value = unit;
+        const group = unitSelect.closest('.length-input-group');
+        if (group) group.dataset.currentUnit = unit;
+        if (typeof window.forceUpdateUI === 'function') window.forceUpdateUI(unitSelect);
+    }
+
+    // 4. 填入尺寸數值
+    if (unit === 'imperial') {
         const totalInches = lengthMM / 25.4;
-        const eighths = Math.round((totalInches % 1) * 8);
-        if (formatHint === "inches_only") {
-            template.querySelector('[data-part="ft"]').value = 0;
-            template.querySelector('[data-part="in"]').value = Math.floor(totalInches);
+        const wholeFt    = Math.floor(totalInches / 12);
+        const wholeIn    = Math.floor(totalInches % 12);
+        const eighths    = Math.round((totalInches % 1) * 8);
+        if (formatHint === 'inches_only' || formatHint === 'inchesonly') {
+            template.querySelector('[data-part="ft"]').value   = 0;
+            template.querySelector('[data-part="in"]').value   = Math.floor(totalInches);
+            template.querySelector('[data-part="eighth"]').value = eighths;
         } else {
-            template.querySelector('[data-part="ft"]').value = Math.floor(totalInches / 12);
-            template.querySelector('[data-part="in"]').value = Math.floor(totalInches % 12);
+            template.querySelector('[data-part="ft"]').value   = wholeFt;
+            template.querySelector('[data-part="in"]').value   = wholeIn;
+            template.querySelector('[data-part="eighth"]').value = eighths;
         }
-        template.querySelector('[data-part="eighth"]').value = eighths;
     } else {
         const meters = Math.floor(lengthMM / 1000);
-        const cm = Math.floor((lengthMM % 1000) / 10);
-        const mm = Math.round(lengthMM % 10);
-        template.querySelector('[data-part="ft"]').value = meters;
-        template.querySelector('[data-part="in"]').value = cm;
+        const cm     = Math.floor((lengthMM % 1000) / 10);
+        const mm     = Math.round(lengthMM % 10);
+        template.querySelector('[data-part="ft"]').value   = meters;
+        template.querySelector('[data-part="in"]').value   = cm;
         template.querySelector('[data-part="eighth"]').value = mm;
     }
 
-    template.querySelector(".cutQty").value = row.dataset.quantity;
-    template.querySelector(".cutPurpose").value = row.dataset.purpose || "";
+    template.querySelector('.cutQty').value       = row.dataset.quantity || 0;
+    template.querySelector('.cutPurpose').value   = row.dataset.purpose  || '';
 
-    document.getElementById("addCuttingButton").style.display = "none";
-    document.getElementById("updateCuttingButton").style.display = "inline-block";
-    /* cancelCuttingEditBtn removed: use clearCuttingButton if needed */
+    // 5. ★ 關鍵：同步全局變量，否則 updateCuttingItem 永遠報錯 ★
+    editingCuttingIndex = index;
+    document.getElementById('editingCuttingIndex').value = index;
+
+    // 6. Edit-mode 視覺效果
+    template.classList.add('edit-mode');
+    row.classList.add('table-row-edit');
+
+    document.getElementById('addCuttingButton').style.display    = 'none';
+    document.getElementById('updateCuttingButton').style.display = 'inline-block';
+
+    // 7. 滾動到輸入區
+    try {
+        template.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch(e) {}
+}
+window.enterMaterialEditMode = function(index) {
+    const prevTemplate = document.querySelector('#materialItems .material-item');
+    if (prevTemplate) {
+        prevTemplate.classList.remove('edit-mode');
+        document.querySelectorAll('#materialItemsTable tbody tr').forEach(r => r.classList.remove('table-row-edit'));
+    }
+
+    const row = document.querySelectorAll('#materialItemsTable tbody tr')[index];
+    if (!row) return;
+
+    const template = document.querySelector('#materialItems .material-item');
+
+    const unit     = row.dataset.inputUnit || 'metric';
+    const lengthMM = parseFloat(row.dataset.length) || 0;
+
+    const unitSelect = template.querySelector('.unit-select');
+    if (unitSelect) {
+        unitSelect.value = unit;
+        const group = unitSelect.closest('.length-input-group');
+        if (group) group.dataset.currentUnit = unit;
+        if (typeof window.forceUpdateUI === 'function') window.forceUpdateUI(unitSelect);
+    }
+
+    if (unit === 'imperial') {
+        const totalInches = lengthMM / 25.4;
+        template.querySelector('[data-part="ft"]').value    = Math.floor(totalInches / 12);
+        template.querySelector('[data-part="in"]').value    = Math.floor(totalInches % 12);
+        template.querySelector('[data-part="eighth"]').value = Math.round((totalInches % 1) * 8);
+    } else {
+        const meters = Math.floor(lengthMM / 1000);
+        const cm     = Math.floor((lengthMM % 1000) / 10);
+        const mm     = Math.round(lengthMM % 10);
+        template.querySelector('[data-part="ft"]').value    = meters;
+        template.querySelector('[data-part="in"]').value    = cm;
+        template.querySelector('[data-part="eighth"]').value = mm;
+    }
+
+    template.querySelector('.materialQty').value = row.dataset.quantity || 1;
+
+    editingMaterialIndex = index;
+    document.getElementById('editingMaterialIndex').value = index;
+
+    template.classList.add('edit-mode');
+    row.classList.add('table-row-edit');
+
+    document.getElementById('addMaterialButton').style.display    = 'none';
+    document.getElementById('updateMaterialButton').style.display = 'inline-block';
+
+    try {
+        template.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch(e) {}
 };
 
 document.addEventListener("DOMContentLoaded", function() {
@@ -5473,19 +5542,17 @@ body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
 #resetButton,
 body:not(.sepia-mode) #resetButton,
 body:not(.sepia-mode) .btn-danger {
-    background: linear-gradient(135deg, #ffc9d0 0%, #ffb3be 100%) !important;
-    border: 2px solid #ff8fa3 !important;
-    color: #c0315c !important;
-    box-shadow: 0 2px 5px rgba(255, 143, 163, 0.3) !important;
+    background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
+    border: 2px solid #ff5500 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(255, 85, 0, 0.30) !important;
     text-shadow: none !important;
     -webkit-text-stroke: 0 !important;
-    font-weight: 600 !important;
-}
-
-body:not(.sepia-mode) #resetButton:hover,
+    font-weight: 600 !impbody:not(.sepia-mode) #resetButton:hover,
 body:not(.sepia-mode) .btn-danger:hover {
-    background: linear-gradient(135deg, #ffd9e0 0%, #ffc9d0 100%) !important;
+    background: linear-gradient(135deg, #ffc78f 0%, #ff7733 50%, #ffa8a8 100%) !important;
     transform: translateY(-1px);
+}eY(-1px);
 }
 
 body.sepia-mode * {
@@ -5595,15 +5662,13 @@ body.sepia-mode .btn-outline-secondary {
 body.sepia-mode .btn-warning {
     background: linear-gradient(135deg, #d4a574 0%, #b88a54 100%) !important;
     border: 2px solid #9d7545 !important;
-    color: #3a2a1a !important;
-}
-
-body.sepia-mode #resetButton,
+    color:body.sepia-mode #resetButton,
 body.sepia-mode .btn-danger {
-    background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%) !important;
-    border: 2px solid #6b3410 !important;
+    background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
+    border: 2px solid #ff5500 !important;
     color: #fff !important;
-    box-shadow: 0 3px 8px rgba(139, 69, 19, 0.3) !important;
+    box-shadow: 0 3px 8px rgba(255, 85, 0, 0.30) !important;
+}, 19, 0.3) !important;
 }
 
 body.sepia-mode .btn-info {
