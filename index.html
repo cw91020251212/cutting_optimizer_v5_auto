@@ -38,7 +38,7 @@
     </style>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>鋁材切割排版 (間距修正完成)</title>
+<title>鋁材切割排版 (橫向優化版)</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
@@ -54,7 +54,7 @@
         }
 
         .container-fluid {
-            max-width: 1600px;
+            max-width: 1800px;  /* 增加最大寬度，更好利用大螢幕 */
             margin: auto;
             padding-left: 6px !important;
             padding-right: 6px !important;
@@ -1287,153 +1287,167 @@ html.no-transitions, html.no-transitions * {
 </div>
 </div>
 </div>
-<div class="card" id="cutting-items-card"><div class="section-header">
-<div class="section-title">
-<i class="fa-solid fa-list-check fa-lg me-2"></i>
-<span id="cuttingItemsTitle">切割項目</span>
-</div>
-<span class="step-indicator">2/4</span>
-</div>
-<div class="card-body card-body-light">
 
-<div id="cuttingItems">
-<div class="cutting-item">
-<div class="row g-3 align-items-center">
-<div class="col-md-12">
-<label class="form-label cutLengthLabel">長度:</label>
-<div class="row g-2 length-input-group d-flex align-items-end">
-<div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-<label class="small-hint cutLengthHint">米</label>
-<div class="error-message cutLengthError"></div>
+<!-- 將切割項目與材料卡片放在同一行，各佔一半寬度，以充分利用橫向空間 -->
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card" id="cutting-items-card"><div class="section-header">
+    <div class="section-title">
+    <i class="fa-solid fa-list-check fa-lg me-2"></i>
+    <span id="cuttingItemsTitle">切割項目</span>
+    </div>
+    <span class="step-indicator">2/4</span>
+    </div>
+    <div class="card-body card-body-light">
+    
+    <div id="cuttingItems">
+    <div class="cutting-item">
+    <div class="row g-3 align-items-center">
+    <div class="col-md-12">
+    <label class="form-label cutLengthLabel">長度:</label>
+    <div class="row g-2 length-input-group d-flex align-items-end">
+    <div class="col">
+    <input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+    <label class="small-hint cutLengthHint">米</label>
+    <div class="error-message cutLengthError"></div>
+    </div>
+    <div class="col">
+    <input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+    <label class="small-hint cutLengthHint">厘米</label>
+    </div>
+    <div class="col">
+    <input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+    <label class="small-hint cutLengthHint">毫米</label>
+    </div>
+    </div>
+    </div>
+    <div class="row g-2 mt-2">
+    <div class="col-6">
+    <label class="form-label cutQtyLabel">數量:</label>
+    <input class="cutQty form-control form-control-sm" min="0" placeholder="0" type="number"/>
+    <div class="small-hint cutQtyHint">例如：5</div>
+    </div>
+    <div class="col-6">
+    <label class="form-label cutPurposeLabel">用途:</label>
+    <input class="cutPurpose form-control form-control-sm" placeholder=""/>
+    <div class="small-hint cutPurposeHint">例如：邊框</div>
+    </div>
+    </div>
+    <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+    <button class="btn btn-success btn-sm flex-fill" id="addCuttingButton" onclick="addCuttingItem()">
+    <i class="fas fa-plus me-1"></i>新增項目
+                                    </button>
+    <button class="btn btn-secondary btn-sm flex-fill" id="clearCuttingButton" onclick="clearCuttingInputs()">
+    <i class="fas fa-times me-1"></i>清除輸入
+                                    </button>
+    <select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="min-width:110px; max-width:160px; white-space:nowrap">
+    <option selected="selected" value="metric">公</option>
+    <option value="imperial">英</option>
+    </select>
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- 加入 table-responsive 以適應小螢幕 -->
+    <div class="table-responsive">
+    <table class="table table-sm table-hover mt-3" id="cuttingItemsTable">
+    <thead>
+    <tr class="table-active">
+    <th>長度</th>
+    <th>數量</th>
+    <th>用途</th>
+    <th class="text-center" style="width:100px">操作</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+    </table>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+    <button class="btn btn-warning btn-sm update-btn" id="updateCuttingButton" onclick="updateCuttingItem()" style="display:none">
+    <i class="fas fa-edit me-1"></i>更新項目
+                        </button>
+    </div>
+    <input id="editingCuttingIndex" type="hidden" value="-1"/>
+    </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card" id="materials-card"><div class="section-header">
+    <div class="section-title">
+    <i class="fa-solid fa-ruler-combined fa-lg me-2"></i>
+    <span id="materialTitle">材料</span>
+    </div>
+    <span class="step-indicator">3/4</span>
+    </div>
+    <div class="card-body card-body-light">
+    
+    <div id="materialItems">
+    <div class="material-item">
+    <div class="row g-3 align-items-center">
+    <div class="col-md-12">
+    <label class="form-label materialLengthLabel">材料長度:</label>
+    <div class="row g-2 length-input-group d-flex align-items-end">
+    <div class="col">
+    <input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+    <label class="small-hint materialLengthHint">米</label>
+    <div class="error-message materialLengthError"></div>
+    </div>
+    <div class="col">
+    <input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+    <label class="small-hint materialLengthHint">厘米</label>
+    </div>
+    <div class="col">
+    <input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+    <label class="small-hint materialLengthHint">毫米</label>
+    </div>
+    </div>
+    </div>
+    <div class="row g-2 mt-2">
+    <div class="col-6">
+    <label class="form-label materialQtyLabel">數量:</label>
+    <input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
+    <div class="small-hint materialQtyHint">10</div>
+    </div>
+    </div>
+    <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+    <button class="btn btn-success btn-sm flex-fill" id="addMaterialButton" onclick="addMaterialItem()">
+    <i class="fas fa-plus me-1"></i>
+    </button>
+    <button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
+    <i class="fas fa-times me-1"></i>
+    </button>
+    <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0 btn-3d" id="globalMaterialUnit">
+    <option selected="selected" value="metric">公</option>
+    <option value="imperial">英</option>
+    </select>
+    </div>
+    </div>
+    </div>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-sm table-hover mt-3" id="materialItemsTable">
+    <thead>
+    <tr class="table-active">
+    <th>材料長度</th>
+    <th>數量</th>
+    <th class="text-center" style="width:100px">操作</th>
+    <th class="text-center" style="width:120px">使用狀態</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+    </table>
+    </div>
+    <div class="d-flex gap-2 mt-2">
+    <button class="btn btn-warning btn-sm update-btn" id="updateMaterialButton" onclick="updateMaterialItem()" style="display:none">
+    <i class="fas fa-edit me-1"></i>更新材料
+                        </button>
+    </div>
+    <input id="editingMaterialIndex" type="hidden" value="-1"/>
+    </div>
+    </div>
+  </div>
 </div>
-<div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-<label class="small-hint cutLengthHint">厘米</label>
-</div>
-<div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-<label class="small-hint cutLengthHint">毫米</label>
-</div>
-</div>
-</div>
-<div class="row g-2 mt-2">
-<div class="col-6">
-<label class="form-label cutQtyLabel">數量:</label>
-<input class="cutQty form-control form-control-sm" min="0" placeholder="0" type="number"/>
-<div class="small-hint cutQtyHint">例如：5</div>
-</div>
-<div class="col-6">
-<label class="form-label cutPurposeLabel">用途:</label>
-<input class="cutPurpose form-control form-control-sm" placeholder=""/>
-<div class="small-hint cutPurposeHint">例如：邊框</div>
-</div>
-</div>
-<div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-<button class="btn btn-success btn-sm flex-fill" id="addCuttingButton" onclick="addCuttingItem()">
-<i class="fas fa-plus me-1"></i>新增項目
-                                </button>
-<button class="btn btn-secondary btn-sm flex-fill" id="clearCuttingButton" onclick="clearCuttingInputs()">
-<i class="fas fa-times me-1"></i>清除輸入
-                                </button>
-<select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="min-width:110px; max-width:160px; white-space:nowrap">
-<option selected="selected" value="metric">公</option>
-<option value="imperial">英</option>
-</select>
-</div>
-</div>
-</div>
-</div>
-<table class="table table-sm table-hover mt-3" id="cuttingItemsTable">
-<thead>
-<tr class="table-active">
-<th>長度</th>
-<th>數量</th>
-<th>用途</th>
-<th class="text-center" style="width:100px">操作</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-<div class="d-flex gap-2 mt-2">
-<button class="btn btn-warning btn-sm update-btn" id="updateCuttingButton" onclick="updateCuttingItem()" style="display:none">
-<i class="fas fa-edit me-1"></i>更新項目
-                    </button>
-</div>
-<input id="editingCuttingIndex" type="hidden" value="-1"/>
-</div>
-</div>
-<div class="card mt-3" id="materials-card"><div class="section-header">
-<div class="section-title">
-<i class="fa-solid fa-ruler-combined fa-lg me-2"></i>
-<span id="materialTitle">材料</span>
-</div>
-<span class="step-indicator">3/4</span>
-</div>
-<div class="card-body card-body-light">
 
-<div id="materialItems">
-<div class="material-item">
-<div class="row g-3 align-items-center">
-<div class="col-md-12">
-<label class="form-label materialLengthLabel">材料長度:</label>
-<div class="row g-2 length-input-group d-flex align-items-end">
-<div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-<label class="small-hint materialLengthHint">米</label>
-<div class="error-message materialLengthError"></div>
-</div>
-<div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-<label class="small-hint materialLengthHint">厘米</label>
-</div>
-<div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-<label class="small-hint materialLengthHint">毫米</label>
-</div>
-</div>
-</div>
-<div class="row g-2 mt-2">
-<div class="col-6">
-<label class="form-label materialQtyLabel">數量:</label>
-<input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
-<div class="small-hint materialQtyHint">10</div>
-</div>
-</div>
-<div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-<button class="btn btn-success btn-sm flex-fill" id="addMaterialButton" onclick="addMaterialItem()">
-<i class="fas fa-plus me-1"></i>
-</button>
-<button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
-<i class="fas fa-times me-1"></i>
-</button>
-<select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0 btn-3d" id="globalMaterialUnit">
-<option selected="selected" value="metric">公</option>
-<option value="imperial">英</option>
-</select>
-</div>
-</div>
-</div>
-</div>
-<table class="table table-sm table-hover mt-3" id="materialItemsTable">
-<thead>
-<tr class="table-active">
-<th>材料長度</th>
-<th>數量</th>
-<th class="text-center" style="width:100px">操作</th>
-<th class="text-center" style="width:120px">使用狀態</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-<div class="d-flex gap-2 mt-2">
-<button class="btn btn-warning btn-sm update-btn" id="updateMaterialButton" onclick="updateMaterialItem()" style="display:none">
-<i class="fas fa-edit me-1"></i>更新材料
-                    </button>
-</div>
-<input id="editingMaterialIndex" type="hidden" value="-1"/>
-</div>
-</div>
 <div class="card" id="results-card"><div class="section-header">
 <div class="section-title">
 <i class="fa-solid fa-chart-bar fa-lg me-2"></i>
@@ -1627,6 +1641,7 @@ html.no-transitions, html.no-transitions * {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
+<!-- 以下保留所有原始 JavaScript 函數，完全不動 -->
 <script>
   (function(){
     var baseFontPx = 16;
