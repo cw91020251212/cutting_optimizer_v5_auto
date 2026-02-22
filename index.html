@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
+<!-- build: 2026-02-22T18:50+08:00 v2 -->
+
 <script>
 /* Anti-flash：在畫面渲染前，先套用主題/字體（避免先閃灰色畫面） */
 (function(){
@@ -21,6 +23,100 @@
 </script>
 <style>
       /* Equalize height and look for algorithm select and saw thickness input */
+
+      /* Auto-Replenish：更細、更清晰 (開/閂 一眼見) */
+      /* 方案管理嗰行：預留上方空間，方便成組向上移都唔會裁字 */
+      .scheme-actions-row{
+        padding-top: 14px;
+        overflow: visible !important;
+      }
+
+      .auto-replenish-control{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        justify-content:flex-start;
+        gap:3px;
+        height: 90px; /* 固定高度 */
+        padding-top: 6px; /* 留返頂位，避免升高後裁切中文字 */
+        padding-left: 10px;
+        margin-left: 4px;
+        border-left: 1px solid rgba(0,0,0,0.12);
+        opacity: .92;
+        white-space: nowrap;
+        align-self: center; /* 跟隔籬按鈕同一中線 */
+        transform: translateY(-26px); /* 全組再升高（配合上方預留空間） */
+        overflow: visible;
+        cursor: pointer; /* 整個區都可點 */
+      }
+      .auto-replenish-control *{ cursor: pointer; }
+      .auto-replenish-control .ar-title-row{
+        display:flex;
+        flex-direction: column; /* 狀態放第二行 */
+        align-items:center;
+        justify-content:center;
+        gap:2px;
+        line-height:1.2;
+        padding-top: 2px;
+      }
+      .auto-replenish-control .ar-title{
+        display:block;
+        font-size: .9rem;
+        color:#444;
+        font-weight: 700;
+        line-height: 1.2;
+      }
+      .auto-replenish-control .ar-state{
+        font-size: .72rem;
+        padding: 2px 6px;
+        border-radius: 999px;
+        border: 1px solid rgba(0,0,0,.15);
+        background: rgba(108,117,125,.08);
+        color:#555;
+        letter-spacing: .02em;
+      }
+      .auto-replenish-control .ar-state.on{
+        background: rgba(25,135,84,.12);
+        border-color: rgba(25,135,84,.35);
+        color: #146c43;
+      }
+      .auto-replenish-control .ar-state.off{
+        background: rgba(220,53,69,.10);
+        border-color: rgba(220,53,69,.35);
+        color: #b02a37;
+      }
+      .auto-replenish-control .ar-desc{
+        font-size: .72rem;
+        color: rgba(33,37,41,.65);
+        line-height:1.05;
+        text-align:center;
+        display:none; /* 版面要求：掣升高，描述唔佔位 */
+      }
+
+      /* 只顯示掣，不再把文字擺右手邊（避免偏埋一邊） */
+      .auto-replenish-switch.form-switch{ padding-left: 0 !important; margin:0 !important; }
+      .auto-replenish-switch.form-switch .form-check-input{ margin-left: 0 !important; margin-top: 0 !important; }
+      .auto-replenish-switch.form-switch .form-check-input{
+        width: 20px !important;
+        height: 40px !important;
+        cursor: pointer;
+      }
+      .auto-replenish-switch.form-switch .form-check-input:checked{
+        background-color: #198754 !important; /* 綠色=開 */
+        border-color: #198754 !important;
+      }
+      .auto-replenish-switch.form-switch .form-check-input:not(:checked){
+        background-color: #adb5bd !important; /* 灰色=閂 */
+        border-color: #adb5bd !important;
+      }
+      .auto-replenish-switch.form-switch .form-check-input:focus{
+        box-shadow: 0 0 0 .12rem rgba(25,135,84,.22) !important;
+      }
+
+      @media (max-width: 420px) {
+        #autoReplenishDesc { display: none !important; }
+      }
+
       #algorithmSelector.equal-height,
       #sawThickness.equal-height { height: 40px !important; }
       .equalize .form-control,
@@ -1122,17 +1218,54 @@ body select.unit-select option {
 </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
-h2#pageTitle { display: grid !important; grid-template-columns: 112px 1fr 112px !important; align-items: center !important; gap: 0 12px !important; height: auto !important; min-height: 70px !important; padding: 6px 14px !important; }
-h2#pageTitle .title-nut { grid-column: 1; justify-self: start !important; width: 90px !important; height: 90px !important; }
-h2#pageTitle #titleText { grid-column: 2; text-align: center !important; justify-self: center !important; width: 100% !important; display: block !important; font-size: 2.2rem !important; }
-h2#pageTitle .fa-ruler-combined { grid-column: 3; justify-self: center !important; margin-left: 0 !important; }
+/* 大標題：跟返舊版做法（Nut 左、標題中、曲尺右；build 置於標題下方） */
+h2#pageTitle{
+  display: grid !important;
+  grid-template-columns: 112px 1fr 112px !important;
+  grid-template-rows: auto auto !important;
+  align-items: center !important;
+  gap: 0 12px !important;
+  height: auto !important;
+  min-height: 70px !important;
+  padding: 6px 14px !important;
+}
+h2#pageTitle .title-nut{
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  justify-self: start !important;
+  width: 90px !important;
+  height: 90px !important;
+}
+h2#pageTitle #titleText{
+  grid-column: 2;
+  grid-row: 1;
+  text-align: center !important;
+  justify-self: center !important;
+  width: 100% !important;
+  display: block !important;
+  font-size: 2.2rem !important;
+}
+h2#pageTitle #buildStamp{
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: center !important;
+  margin-left: 0 !important;
+  margin-top: 2px;
+}
+h2#pageTitle .fa-ruler-combined{
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  justify-self: center !important;
+  margin-left: 0 !important;
+}
 body.lang-zh h2#pageTitle #titleText { white-space: nowrap !important; }
 body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width: 18ch; line-height: 1.1; }
 
 @media (max-width: 767.98px) {
-  h2#pageTitle { grid-template-columns: 70px 1fr 70px !important; gap: 0 8px !important; min-height: 56px !important; padding: 4px 10px !important; }
+  h2#pageTitle { grid-template-columns: 70px 1fr 70px !important; min-height: 56px !important; padding: 4px 10px !important; }
   h2#pageTitle .title-nut { width: 70px !important; height: 70px !important; }
   h2#pageTitle #titleText { font-size: 1.6rem !important; }
+  h2#pageTitle #buildStamp { font-size: .70rem !important; }
 }
 
 .opt-summary-box {
@@ -1217,6 +1350,7 @@ html.no-transitions, html.no-transitions * {
 <h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
 <span id="titleNut" class="title-nut" aria-hidden="true"></span>
 <span id="titleText">鋁材切割排版</span>
+<small id="buildStamp" style="opacity:.55; font-size:.75rem; margin-left:8px;">build: 2026-02-22r4</small>
 <i class="fa-solid fa-ruler-combined fa-2x ms-2 ruler-anim"></i>
 </h2>
 
@@ -1275,13 +1409,26 @@ html.no-transitions, html.no-transitions * {
 <div class="row g-3 mt-2">
 <div class="col-md-12">
 <label class="form-label" id="schemeManagementLabel">方案管理:</label>
-<div class="d-flex gap-2">
-<button class="btn btn-sm save-scheme-btn" id="saveSchemeButton" onclick="saveScheme()">
+<div class="d-flex align-items-center gap-2 scheme-actions-row" style="flex-wrap: nowrap; overflow-x: auto;">
+  <button class="btn btn-sm save-scheme-btn" id="saveSchemeButton" onclick="saveScheme()">
 <i class="fas fa-save me-1"></i>儲存方案
                             </button>
-<button class="btn btn-sm load-scheme-btn" id="loadSchemeButton" onclick="loadScheme()">
+  <button class="btn btn-sm load-scheme-btn" id="loadSchemeButton" onclick="loadScheme()">
 <i class="fas fa-folder-open me-1"></i>載入方案
                             </button>
+
+  <!-- 自動補料開關（更細；狀態「開/閂」一眼見；描述放上方） -->
+  <div class="auto-replenish-control" id="autoReplenishControl" aria-label="Auto-Replenish control">
+    <div class="ar-title-row">
+      <span class="ar-title" id="autoReplenishLabel"></span>
+      <span class="ar-state on" id="autoReplenishState">開</span>
+    </div>
+    <div class="ar-desc" id="autoReplenishDesc">材料不足時自動補入預設長度</div>
+    <div class="form-check form-switch auto-replenish-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="autoReplenishToggle" checked>
+      <label class="visually-hidden" for="autoReplenishToggle" id="autoReplenishA11yLabel">Auto-Replenish</label>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -1928,6 +2075,13 @@ html.no-transitions, html.no-transitions * {
             var b5=document.getElementById('qrBtn'); if(b5) b5.title=t.qr;
             var qrUrlLabel=document.getElementById('qrUrlLabel'); if(qrUrlLabel) qrUrlLabel.textContent=t.qrUrl;
             var qrCloseBtn=document.getElementById('qrCloseBtn'); if(qrCloseBtn) qrCloseBtn.textContent=t.close;
+
+            // Auto-Replenish toggle (label + description + state)
+            var arLbl=document.getElementById('autoReplenishLabel'); if(arLbl) arLbl.textContent = (lang==='zh') ? '自動補料' : 'Auto-Replenish';
+            var arDesc=document.getElementById('autoReplenishDesc'); if(arDesc) arDesc.textContent = (lang==='zh') ? '材料不足時自動補入預設長度' : 'Auto-add default length when material is insufficient';
+            // 保持原有(英文)開關文字描述：唔跟語言變成中文
+            var arA11y=document.getElementById('autoReplenishA11yLabel'); if(arA11y) arA11y.textContent = 'Auto-Replenish';
+            if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
 
             updateInputLabels();
             // --- Extra modal & static UI translations ---
@@ -3912,6 +4066,11 @@ document.addEventListener("DOMContentLoaded", function() {
             if(availableMaterials.length > 0) {
               binLength = (availableMaterials.shift().length || 0);
             } else {
+              if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
+                throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
+                  ? '材料不足：已關閉自動補料，請先加入足夠材料。'
+                  : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+              }
               binLength = defaultLength;
               autoAdded = true;
             }
@@ -3957,6 +4116,11 @@ document.addEventListener("DOMContentLoaded", function() {
               if(availableMaterials.length > 0) {
                 binLength = (availableMaterials.shift().length || 0);
               } else {
+                if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
+                  throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
+                    ? '材料不足：已關閉自動補料，請先加入足夠材料。'
+                    : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                }
                 binLength = defaultLength;
                 autoAdded = true;
               }
@@ -3999,6 +4163,11 @@ document.addEventListener("DOMContentLoaded", function() {
             if(availableMaterials.length > 0) {
               binLength = (availableMaterials.shift().length || 0);
             } else {
+              if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
+                throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
+                  ? '材料不足：已關閉自動補料，請先加入足夠材料。'
+                  : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+              }
               binLength = defaultLength;
               autoAdded = true;
             }
@@ -4013,6 +4182,20 @@ document.addEventListener("DOMContentLoaded", function() {
   window.optimizeCutsBFD = createOptimizer('BFD');
   window.optimizeCutsFFD = createOptimizer('FFD');
   window.optimizeCutsSizeGrouping = createOptimizer('SizeGrouping');
+
+  // 供其他地方讀取自動補料設定
+  window.isAutoReplenishEnabled = function(){
+    const el = document.getElementById('autoReplenishToggle');
+    if (el) return !!el.checked;
+    try {
+      const saved = localStorage.getItem('aluminum_cut_user_prefs_v1');
+      if (saved) {
+        const s = JSON.parse(saved);
+        return !(s && s.autoReplenish === false);
+      }
+    } catch(e) {}
+    return true;
+  };
 
   const originalRender = window.renderCuttingResults;
   window.renderCuttingResults = function(bins, sawThickness) {
@@ -4510,6 +4693,19 @@ document.addEventListener("DOMContentLoaded", function() {
   const STORAGE_KEY = 'aluminum_cut_user_prefs_v1';
   let isRestoring = false;
 
+  // Auto-Replenish UI：同步顯示「開/閂」
+  window.updateAutoReplenishUI = function(){
+    const el = document.getElementById('autoReplenishToggle');
+    const state = document.getElementById('autoReplenishState');
+    if (!el || !state) return;
+    const langEl = document.getElementById('language');
+    const lang = langEl ? langEl.value : 'zh';
+    const on = !!el.checked;
+    state.textContent = (lang === 'zh') ? (on ? '開' : '閂') : (on ? 'ON' : 'OFF');
+    state.classList.toggle('on', on);
+    state.classList.toggle('off', !on);
+  };
+
   function saveSettings(){
     if (isRestoring) return;
     try {
@@ -4521,7 +4717,8 @@ document.addEventListener("DOMContentLoaded", function() {
         algorithm: document.getElementById('algorithmSelector') ? document.getElementById('algorithmSelector').value : 'BFD',
         sawThickness: document.getElementById('sawThickness') ? document.getElementById('sawThickness').value : '',
         theme: document.body.classList.contains('sepia-mode') ? 'sepia' : 'normal',
-        fontSize: document.documentElement.style.fontSize || ''
+        fontSize: document.documentElement.style.fontSize || '',
+        autoReplenish: document.getElementById('autoReplenishToggle') ? !!document.getElementById('autoReplenishToggle').checked : true
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch(e) {}
@@ -4573,6 +4770,13 @@ document.addEventListener("DOMContentLoaded", function() {
       const sawEl = document.getElementById('sawThickness');
       if (sawEl && s && s.sawThickness !== undefined) sawEl.value = s.sawThickness;
 
+      const autoRepEl = document.getElementById('autoReplenishToggle');
+      if (autoRepEl) {
+        // 預設開啟；只有明確儲存為 false 才關閉
+        autoRepEl.checked = !(s && s.autoReplenish === false);
+      }
+      if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
+
     } catch(e) {
       console.warn('Settings load failed:', e);
     } finally {
@@ -4585,12 +4789,34 @@ document.addEventListener("DOMContentLoaded", function() {
   function init(){
     loadSettings();
 
-    ['language','unit','globalCutUnit','globalMaterialUnit','algorithmSelector','sawThickness'].forEach(id => {
+    ['language','unit','globalCutUnit','globalMaterialUnit','algorithmSelector','sawThickness','autoReplenishToggle'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('change', saveSettings);
       el.addEventListener('input', saveSettings);
     });
+
+    // Auto-Replenish：即時更新「開/閂」標籤
+    const _ar = document.getElementById('autoReplenishToggle');
+    const _arWrap = document.getElementById('autoReplenishControl');
+    if (_ar) {
+      _ar.addEventListener('change', () => {
+        if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
+      });
+
+      // 令「整個控制區」都可以點擊切換（避免以為已關但其實冇切到）
+      if (_arWrap) {
+        _arWrap.addEventListener('click', (ev) => {
+          // 如果直接點到 input，本身已會 toggle，避免 double toggle
+          if (ev.target === _ar) return;
+          _ar.checked = !_ar.checked;
+          _ar.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
+
+      // 首次渲染
+      if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
+    }
 
     if (typeof window.toggleTheme === 'function') {
       const originalToggle = window.toggleTheme;
@@ -4851,7 +5077,14 @@ document.addEventListener("DOMContentLoaded", function() {
           if(placeIntoExisting(cut)) return;
           var reqLen = cut.length;
           var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
-          if(takeLen===null){ takeLen = defaultLen; bins.push({length: takeLen, cuts:[cut], autoAdded:true}); }
+          if(takeLen===null){
+            if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
+              throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
+                ? '材料不足：已關閉自動補料，請先加入足夠材料。'
+                : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+            }
+            takeLen = defaultLen; bins.push({length: takeLen, cuts:[cut], autoAdded:true});
+          }
           else { bins.push({length: takeLen, cuts:[cut], autoAdded:false}); }
         });
       } else if(algo==='SizeGrouping'){
@@ -4875,6 +5108,13 @@ document.addEventListener("DOMContentLoaded", function() {
             else {
               var reqLen = len;
               var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
+              if(takeLen===null){
+                if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
+                  throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
+                    ? '材料不足：已關閉自動補料，請先加入足夠材料。'
+                    : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                }
+              }
               var newBin = { length: (takeLen===null? defaultLen: takeLen), cuts: [], autoAdded: (takeLen===null) };
               var remaining = newBin.length;
               while(group.length){ var cut=group[0]; var req=cut.length+(newBin.cuts.length>0? sawThickness:0); if(req<=remaining){ newBin.cuts.push(group.shift()); remaining-=req; } else break; }
@@ -4887,7 +5127,14 @@ document.addEventListener("DOMContentLoaded", function() {
           if(placeIntoExisting(cut)) return;
           var reqLen = cut.length;
           var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
-          if(takeLen===null){ bins.push({length: defaultLen, cuts:[cut], autoAdded:true}); }
+          if(takeLen===null){
+            if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
+              throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
+                ? '材料不足：已關閉自動補料，請先加入足夠材料。'
+                : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+            }
+            bins.push({length: defaultLen, cuts:[cut], autoAdded:true});
+          }
           else { bins.push({length: takeLen, cuts:[cut], autoAdded:false}); }
         });
       }
