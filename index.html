@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- build: 2026-02-22T18:50+08:00 v2 -->
+
 
 <script>
 /* Anti-flash：在畫面渲染前，先套用主題/字體（避免先閃灰色畫面） */
@@ -27,7 +27,7 @@
       /* Auto-Replenish：更細、更清晰 (開/閂 一眼見) */
       /* 方案管理嗰行：預留上方空間，方便成組向上移都唔會裁字 */
       .scheme-actions-row{
-        padding-top: 14px;
+        padding-top: 3px;
         overflow: visible !important;
       }
 
@@ -131,6 +131,40 @@
           max-width: 50% !important;
         }
       }
+
+      /* 材料區按鈕：同切割項目一致（由 controls-row 統一控制高度/寬度） */
+      /* （保留空位：避免舊CSS令材料掣變正方形而同上邊唔一致） */
+
+      /* 切割表 / 材料表：統一排版（材料只係多咗幾欄字） */
+      #cuttingItemsTable th, #cuttingItemsTable td,
+      #materialItemsTable th, #materialItemsTable td { vertical-align: middle; padding: .25rem .4rem; }
+      #cuttingItemsTable th, #materialItemsTable th { white-space: nowrap; }
+      #cuttingItemsTable td, #materialItemsTable td { white-space: nowrap; }
+
+      /* 固定欄位闊度：類別/狀態合理；操作固定 100px */
+      #materialItemsTable th:nth-child(3), #materialItemsTable td:nth-child(3){ width: 90px;  text-align:center; }
+      #materialItemsTable th:nth-child(4), #materialItemsTable td:nth-child(4){ width: 80px;  text-align:center; }
+      #materialItemsTable th:nth-child(5), #materialItemsTable td:nth-child(5){ width: 100px; text-align:center; }
+
+      /* 狀態欄：更細字、唔好換行 */
+      #materialItemsTable td.usage-status { white-space: nowrap; font-size: .82rem; padding-left: .25rem; padding-right: .25rem; }
+
+      /* 核心：令「操作」預設喺右邊畫面外
+         做法：材料表最少闊度 = 100% + (操作欄闊度)
+         於是畫面內會見到：長度/數量/類別/狀態；需要先橫向滑到最右先見到操作 */
+      #materialItemsTable { min-width: calc(100% + 100px); }
+
+      /* 由於材料表刻意要橫向滑到最右先見到「操作」，手機會出現一條深色橫向 scrollbar（好似背景有窿）。
+         下面隱藏 scrollbar 但保留可滑動。 */
+      #materials-card .table-responsive { scrollbar-width: none; }
+      #materials-card .table-responsive::-webkit-scrollbar { height: 0; }
+      #materials-card .table-responsive::-webkit-scrollbar-thumb { background: transparent; }
+
+      /* 手機：保持單行同可滑動，但唔加得太誇張 */
+      @media (max-width: 576px) {
+        #materialItemsTable td { white-space: nowrap; }
+      }
+
     </style>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
@@ -145,7 +179,7 @@
               linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px);
             background-size: 24px 24px;
             background-attachment: fixed;
-            color: #fff;
+            color: #1f2d2a;
             padding: 8px;
         }
 
@@ -506,6 +540,23 @@
             .title-nut{ width: 84px; height: 84px; }
         }
 
+        /* Title header: true center using CSS Grid (stable on mobile/zoom) */
+        #pageTitle{
+            display: grid;
+            grid-template-columns: 120px 1fr 120px;
+            align-items: center;
+            justify-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #pageTitle .title-nut{ justify-self: start; }
+        #pageTitle #titleText{ justify-self: center; text-align: center; line-height: 1.1; }
+        #pageTitle .ruler-anim{ justify-self: end; margin-right: 6px; }
+
+        @media (max-width: 767.98px){
+            #pageTitle{ grid-template-columns: 90px 1fr 90px; }
+        }
+
         .section-header {
             padding: 12px 20px;
             border-radius: 8px;
@@ -724,9 +775,10 @@
         }
 
         .unit-select.imperial-active {
-            background-color: #17a2b8;
+            /* 英制：紅色，清晰同公制做對比 */
+            background-color: #dc3545;
             color: #fff;
-            border-color: #17a2b8;
+            border-color: #dc3545;
         }
 
         .waste-label {
@@ -1036,6 +1088,15 @@
             gap: 5px;
             justify-content: center;
         }
+        /* 表格內編輯/刪除掣：正方形 */
+        .action-buttons .btn{
+            width: 34px;
+            height: 34px;
+            padding: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         .update-btn {
             background-color: #ffc107;
@@ -1074,6 +1135,70 @@
             -webkit-appearance: none;
             appearance: none;
         }
+
+        /* 材料類別（下拉）：碎料=橙紅、原裝=綠色；兩者都有漸變 + 立體 */
+        select.materialClass {
+          font-weight: 700;
+          height: 31px !important;
+          min-height: 31px !important;
+          line-height: 31px !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          box-sizing: border-box !important;
+          border: 1px solid rgba(0,0,0,.18) !important;
+          color: #1f2d2a !important;
+          text-shadow: 0 1px 0 rgba(255,255,255,.55);
+          box-shadow:
+            0 2px 0 rgba(0,0,0,.22),
+            0 6px 14px rgba(0,0,0,.18),
+            inset 0 1px 0 rgba(255,255,255,.45);
+          -webkit-appearance: none;
+          appearance: none;
+          background-size: 100% 100% !important;
+        }
+        select.materialClass.mclass-scrap{
+          background: linear-gradient(180deg, #ffd3c1 0%, #ffb79f 55%, #ff9f7f 100%) !important;
+        }
+        select.materialClass.mclass-original{
+          background: linear-gradient(180deg, #d6f2e2 0%, #b8e6cc 55%, #9adab6 100%) !important;
+        }
+        /* 盡量令 option 文字唔會因為白字睇唔到（部分手機唔支援） */
+        select.materialClass option{ color:#000; }
+
+/* 材料類別標籤：漸變 + 立體 */
+.mclass-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width: 64px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: .5px;
+  color: #111 !important; /* 類別字：黑色 */
+  border: 1px solid rgba(0,0,0,.18);
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.22),
+    0 6px 14px rgba(0,0,0,.18),
+    inset 0 1px 0 rgba(255,255,255,.45);
+  text-shadow: 0 1px 0 rgba(255,255,255,.35) !important; /* 少少提亮邊緣 */
+}
+.mclass-scrap{
+  background: linear-gradient(180deg, #ffd3c1 0%, #ffb79f 55%, #ff9f7f 100%);
+}
+.mclass-original{
+  background: linear-gradient(180deg, #d6f2e2 0%, #b8e6cc 55%, #9adab6 100%);
+}
+
+/* 方案管理：縮短標題與按鈕之間距（更強硬 override） */
+#schemeManagementLabel{
+  display:block !important;
+  margin: 2px 0 3px 0 !important; /* 向下少少，唔好「升高」 */
+  padding: 0 !important;
+  line-height: normal !important;
+}
+.scheme-actions-row{ margin-top: 0 !important; }
         @media (max-width: 767.98px) {
             .controls-row { gap: 6px; }
             .controls-row .btn { font-size: .95rem; padding: .40rem .60rem; white-space: nowrap; flex: 1 1 0; min-width: 90px; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; }
@@ -1222,16 +1347,17 @@ body select.unit-select option {
 h2#pageTitle{
   display: grid !important;
   grid-template-columns: 112px 1fr 112px !important;
-  grid-template-rows: auto auto !important;
+  /* 單行 Grid：確保標題文字在整個標題區塊內上下置中 */
+  grid-template-rows: 1fr !important;
   align-items: center !important;
   gap: 0 12px !important;
-  height: auto !important;
-  min-height: 70px !important;
-  padding: 6px 14px !important;
+  height: 100px !important;
+  min-height: 100px !important;
+  padding: 10px 14px !important;
 }
 h2#pageTitle .title-nut{
   grid-column: 1;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   justify-self: start !important;
   width: 90px !important;
   height: 90px !important;
@@ -1242,8 +1368,13 @@ h2#pageTitle #titleText{
   text-align: center !important;
   justify-self: center !important;
   width: 100% !important;
-  display: block !important;
+  /* 令中英(含換行)都可在 100px 高度內上下置中 */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
   font-size: 2.2rem !important;
+  line-height: 1.15 !important;
 }
 h2#pageTitle #buildStamp{
   grid-column: 2;
@@ -1254,7 +1385,7 @@ h2#pageTitle #buildStamp{
 }
 h2#pageTitle .fa-ruler-combined{
   grid-column: 3;
-  grid-row: 1 / span 2;
+  grid-row: 1;
   justify-self: center !important;
   margin-left: 0 !important;
 }
@@ -1318,7 +1449,7 @@ html.preload-normal body {
     linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
   background-size: 24px 24px !important;
   background-attachment: fixed !important;
-  color: #fff !important;
+  color: #1f2d2a !important;
 }
 html.preload-sepia,
 html.preload-sepia body {
@@ -1337,7 +1468,7 @@ body:not(.sepia-mode) {
     linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
   background-size: 24px 24px !important;
   background-attachment: fixed !important;
-  color: #fff !important;
+  color: #1f2d2a !important;
 }
 html.no-transitions, html.no-transitions * {
   transition: none !important;
@@ -1350,7 +1481,7 @@ html.no-transitions, html.no-transitions * {
 <h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
 <span id="titleNut" class="title-nut" aria-hidden="true"></span>
 <span id="titleText">鋁材切割排版</span>
-<small id="buildStamp" style="opacity:.55; font-size:.75rem; margin-left:8px;">build: 2026-02-22r4</small>
+
 <i class="fa-solid fa-ruler-combined fa-2x ms-2 ruler-anim"></i>
 </h2>
 
@@ -1374,7 +1505,7 @@ html.no-transitions, html.no-transitions * {
 <label class="form-label" id="languageLabel">語言:</label>
 <select class="form-select form-select-sm" id="language" onchange="updateLanguage()">
 <option value="zh">中文</option>
-<option value="en">English</option>
+<option value="en" selected>English</option>
 </select>
 </div>
 <div class="col-md-3">
@@ -1391,6 +1522,7 @@ html.no-transitions, html.no-transitions * {
 <label class="form-label" id="algorithmLabel">算法:</label>
 <select class="form-select equal-height" id="algorithmSelector">
 <option value="AutoBest">自動最慳料</option>
+<option value="CostFirst">碎料優先</option>
 <option value="BFD">BFD</option>
 <option value="FFD">FFD</option>
 <option value="SizeGrouping">智能優化</option>
@@ -1406,7 +1538,7 @@ html.no-transitions, html.no-transitions * {
 <div class="error-message" id="sawThicknessError"></div>
 </div>
 </div>
-<div class="row g-3 mt-2">
+<div class="row g-3 mt-0" style="margin-top:3px;">
 <div class="col-md-12">
 <label class="form-label" id="schemeManagementLabel">方案管理:</label>
 <div class="d-flex align-items-center gap-2 scheme-actions-row" style="flex-wrap: nowrap; overflow-x: auto;">
@@ -1529,56 +1661,67 @@ html.no-transitions, html.no-transitions * {
     <div class="card-body card-body-light">
     
     <div id="materialItems">
-    <div class="material-item">
-    <div class="row g-3 align-items-center">
-    <div class="col-md-12">
-    <label class="form-label materialLengthLabel">材料長度:</label>
-    <div class="row g-2 length-input-group d-flex align-items-end">
-    <div class="col">
-    <input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-    <label class="small-hint materialLengthHint">米</label>
-    <div class="error-message materialLengthError"></div>
-    </div>
-    <div class="col">
-    <input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-    <label class="small-hint materialLengthHint">厘米</label>
-    </div>
-    <div class="col">
-    <input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-    <label class="small-hint materialLengthHint">毫米</label>
-    </div>
-    </div>
-    </div>
-    <div class="row g-2 mt-2">
-    <div class="col-6">
-    <label class="form-label materialQtyLabel">數量:</label>
-    <input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
-    <div class="small-hint materialQtyHint">10</div>
-    </div>
-    </div>
-    <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-    <button class="btn btn-success btn-sm flex-fill" id="addMaterialButton" onclick="addMaterialItem()">
-    <i class="fas fa-plus me-1"></i>
-    </button>
-    <button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
-    <i class="fas fa-times me-1"></i>
-    </button>
-    <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0 btn-3d" id="globalMaterialUnit">
-    <option selected="selected" value="metric">公</option>
-    <option value="imperial">英</option>
-    </select>
-    </div>
-    </div>
-    </div>
+      <div class="material-item">
+        <div class="row g-3 align-items-center">
+          <div class="col-md-12">
+            <label class="form-label materialLengthLabel">材料長度:</label>
+            <div class="row g-2 length-input-group d-flex align-items-end">
+              <div class="col">
+                <input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+                <label class="small-hint materialLengthHint">米</label>
+                <div class="error-message materialLengthError"></div>
+              </div>
+              <div class="col">
+                <input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+                <label class="small-hint materialLengthHint">厘米</label>
+              </div>
+              <div class="col">
+                <input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+                <label class="small-hint materialLengthHint">毫米</label>
+              </div>
+            </div>
+
+            <div class="row g-2 mt-2">
+              <div class="col-6">
+                <label class="form-label materialQtyLabel">數量:</label>
+                <input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
+                <div class="small-hint materialQtyHint">10</div>
+              </div>
+
+              <div class="col-6">
+                <label class="form-label materialClassLabel">材料類別:</label>
+                <select class="form-select form-select-sm materialClass" style="height:31px;">
+                  <option value="scrap" selected>碎料</option>
+                  <option value="original">原裝</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+              <button class="btn btn-success btn-sm flex-fill" id="addMaterialButton" onclick="addMaterialItem()">
+                <i class="fas fa-plus me-1"></i>新增材料
+              </button>
+              <button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
+                <i class="fas fa-times me-1"></i>清除輸入
+              </button>
+              <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0" id="globalMaterialUnit" style="min-width:110px; max-width:160px; white-space:nowrap">
+                <option selected="selected" value="metric">公</option>
+                <option value="imperial">英</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="table-responsive">
     <table class="table table-sm table-hover mt-3" id="materialItemsTable">
     <thead>
     <tr class="table-active">
-    <th>材料長度</th>
+    <th>長度</th>
     <th>數量</th>
+    <th class="text-center" style="width:110px">類別</th>
+    <th class="text-center" style="width:80px">使用狀態</th>
     <th class="text-center" style="width:100px">操作</th>
-    <th class="text-center" style="width:120px">使用狀態</th>
     </tr>
     </thead>
     <tbody></tbody>
@@ -1945,6 +2088,10 @@ html.no-transitions, html.no-transitions * {
                 zh: "數量:",
                 en: "Quantity:"
             },
+            materialClassLabel: {
+                zh: "材料類別:",
+                en: "Material Type:"
+            },
             addMaterialButton: {
                 zh: '<i class="fas fa-plus me-1"></i>新增材料',
                 en: '<i class="fas fa-plus me-1"></i>Add Material'
@@ -2013,6 +2160,8 @@ html.no-transitions, html.no-transitions * {
 
         function updateLanguage() {
             let lang = document.getElementById("language").value;
+            // Update browser tab title
+            document.title = (lang === 'zh') ? '鋁材切割排版' : 'Aluminum Cutting Optimization';
             document.body.classList.toggle("lang-en", lang === "en");
             document.body.classList.toggle("lang-zh", lang === "zh");
 
@@ -2032,6 +2181,67 @@ html.no-transitions, html.no-transitions * {
             document.querySelectorAll(".cutPurposeLabel").forEach(e => e.textContent = elements.cutPurposeLabel[lang]);
             document.querySelectorAll(".materialLengthLabel").forEach(e => e.textContent = elements.materialLengthLabel[lang]);
             document.querySelectorAll(".materialQtyLabel").forEach(e => e.textContent = elements.materialQtyLabel[lang]);
+            document.querySelectorAll(".materialClassLabel").forEach(e => e.textContent = elements.materialClassLabel[lang]);
+
+            // Material class select options
+            document.querySelectorAll('select.materialClass').forEach(sel => {
+              const optScrap = sel.querySelector('option[value="scrap"]');
+              const optOrig  = sel.querySelector('option[value="original"]');
+              if (optScrap) optScrap.textContent = (lang === 'zh') ? '碎料' : 'Scrap';
+              if (optOrig)  optOrig.textContent  = (lang === 'zh') ? '原裝' : 'Original';
+            });
+
+            // Algorithm selector options
+            (function(){
+              const sel = document.getElementById('algorithmSelector');
+              if (!sel) return;
+              const map = {
+                AutoBest:      { zh: '自動最慳料', en: 'Auto best (min waste)' },
+                CostFirst:     { zh: '碎料優先',   en: 'Offcut-first' },
+                SizeGrouping:  { zh: '智能優化',   en: 'Smart optimization' }
+              };
+              Array.from(sel.options || []).forEach(opt => {
+                const m = map[opt.value];
+                if (m && m[lang]) opt.textContent = m[lang];
+              });
+            })();
+
+            // Table headers (Cutting)
+            (function(){
+              const th = document.querySelectorAll('#cuttingItemsTable thead th');
+              if (!th || th.length < 4) return;
+              if (lang === 'zh') {
+                th[0].textContent = '長度';
+                th[1].textContent = '數量';
+                th[2].textContent = '用途';
+                th[3].textContent = '操作';
+              } else {
+                th[0].textContent = 'Length';
+                th[1].textContent = 'Qty';
+                th[2].textContent = 'Purpose';
+                th[3].textContent = 'Actions';
+              }
+            })();
+
+            // Table headers (Materials)
+            (function(){
+              const th = document.querySelectorAll('#materialItemsTable thead th');
+              if (!th || th.length < 4) return;
+              if (lang === 'zh') {
+                th[0].textContent = '長度';
+                th[1].textContent = '數量';
+                th[2].textContent = '類別';
+                if (th[3]) th[3].textContent = '使用狀態';
+                if (th[4]) th[4].textContent = '操作';
+              } else {
+                th[0].textContent = 'Length';
+                th[1].textContent = 'Qty';
+                th[2].textContent = 'Type';
+                if (th[3]) th[3].textContent = 'Usage';
+                if (th[4]) th[4].textContent = 'Actions';
+              }
+            })();
+
             document.querySelectorAll("#addCuttingButton").forEach(e => e.innerHTML = elements.addCuttingButton[lang]);
             document.querySelectorAll("#updateCuttingButton").forEach(e => e.innerHTML = elements.updateCuttingButton[lang]);
             document.querySelectorAll("#clearCuttingButton").forEach(e => e.innerHTML = elements.clearCuttingButton[lang]);
@@ -2393,6 +2603,7 @@ html.no-transitions, html.no-transitions * {
             }
 
             template.querySelector('.cutQty').value       = row.dataset.quantity || 0;
+            // row.dataset.mclass is for MATERIAL rows, not cutting rows
             template.querySelector('.cutPurpose').value   = row.dataset.purpose  || '';
 
             editingCuttingIndex = index;
@@ -2693,12 +2904,16 @@ html.no-transitions, html.no-transitions * {
             row.dataset.quantity = quantity;
             row.dataset.display = display;
             row.dataset.inputUnit = unit;
+            const mclass = (template.querySelector('.materialClass') && template.querySelector('.materialClass').value) ? template.querySelector('.materialClass').value : 'scrap';
+            row.dataset.mclass = mclass;
 
             const rowIndex = tbody.children.length;
             
             row.innerHTML = `
                 <td>${display}</td>
                 <td>${quantity}</td>
+                <td class="text-center"><span class="mclass-badge ${mclass==='original' ? 'mclass-original' : 'mclass-scrap'}">${(mclass==='original') ? ((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'原裝':'Original') : ((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'碎料':'Scrap')}</span></td>
+                <td class="usage-status text-center">-</td>
                 <td class="text-center">
                     <div class="action-buttons">
                         <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="${(document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'編輯':'Edit'}">
@@ -2709,7 +2924,6 @@ html.no-transitions, html.no-transitions * {
                         </button>
                     </div>
                 </td>
-                <td class="usage-status text-center">-</td>
             `;
 
             tbody.appendChild(row);
@@ -2771,10 +2985,14 @@ html.no-transitions, html.no-transitions * {
                 row.dataset.quantity = quantity;
                 row.dataset.display = display;
                 row.dataset.inputUnit = unit;
+                const mclass = (template.querySelector('.materialClass') && template.querySelector('.materialClass').value) ? template.querySelector('.materialClass').value : (row.dataset.mclass || 'scrap');
+                row.dataset.mclass = mclass;
 
                 row.innerHTML = `
                     <td>${display}</td>
                     <td>${quantity}</td>
+                    <td class="text-center"><span class="mclass-badge ${mclass==='original' ? 'mclass-original' : 'mclass-scrap'}">${(mclass==='original') ? ((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'原裝':'Original') : ((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'碎料':'Scrap')}</span></td>
+                    <td class="usage-status text-center">-</td>
                     <td class="text-center">
                         <div class="action-buttons">
                             <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="${(document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'編輯':'Edit'}">
@@ -2785,7 +3003,6 @@ html.no-transitions, html.no-transitions * {
                             </button>
                         </div>
                     </td>
-                    <td class="usage-status text-center">-</td>
                 `;
             }
 
@@ -2823,7 +3040,8 @@ html.no-transitions, html.no-transitions * {
                     items.push({
                         length: length,
                         quantity: quantity,
-                        display: display
+                        display: display,
+                        mclass: row.dataset.mclass || "scrap"
                     });
                 }
             });
@@ -2841,6 +3059,48 @@ html.no-transitions, html.no-transitions * {
                         if (i === j) continue;
                         let targetBin = bins[j];
                         let sourceBin = bins[i];
+                        let usedLength = targetBin.cuts.reduce((s, c) => s + c.length, 0);
+                        let kerfLength = targetBin.cuts.length > 0 ? (targetBin.cuts.length - 1) * sawThickness : 0;
+                        let required = sourceBin.cuts.reduce((s, c) => s + c.length, 0);
+                        let totalCuts = targetBin.cuts.length + sourceBin.cuts.length;
+                        let totalKerf = (totalCuts - 1) * sawThickness;
+                        if (usedLength + required + totalKerf <= targetBin.length) {
+                            targetBin.cuts = targetBin.cuts.concat(sourceBin.cuts);
+                            bins.splice(i, 1);
+                            changed = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return bins;
+        }
+
+        // ----- 後處理合併（保留碎料使用）-----
+        // 用於「碎料優先（強制）」：避免將『碎料』嗰支 bin 合併入『原裝/auto』，
+        // 否則會出現：你揀碎料優先，但結果顯示碎料「未用」。
+        function optimizeBinsKeepScrap(bins, sawThickness) {
+            function clsOf(bin) {
+                const cls = (bin && (bin.mclass || (bin.autoAdded ? 'auto' : 'scrap'))) || 'scrap';
+                return cls;
+            }
+            function isScrap(cls) { return cls === 'scrap'; }
+
+            let changed = true;
+            while (changed) {
+                changed = false;
+                for (let i = bins.length - 1; i >= 0; i--) {
+                    if (bins.length <= 1) break;
+                    for (let j = 0; j < bins.length; j++) {
+                        if (i === j) continue;
+                        let targetBin = bins[j];
+                        let sourceBin = bins[i];
+
+                        const srcCls = clsOf(sourceBin);
+                        const tgtCls = clsOf(targetBin);
+                        // 核心規則：碎料 bin 唔可以被合併入非碎料 bin
+                        if (isScrap(srcCls) && !isScrap(tgtCls)) continue;
+
                         let usedLength = targetBin.cuts.reduce((s, c) => s + c.length, 0);
                         let kerfLength = targetBin.cuts.length > 0 ? (targetBin.cuts.length - 1) * sawThickness : 0;
                         let required = sourceBin.cuts.reduce((s, c) => s + c.length, 0);
@@ -2876,7 +3136,7 @@ html.no-transitions, html.no-transitions * {
                     mats.forEach(function(m) {
                         var q = Number(m.quantity || 0);
                         for (var i = 0; i < q; i++) {
-                            arr.push({ length: Number(m.length) || 0, display: m.display || '' });
+                            arr.push({ length: Number(m.length) || 0, display: m.display || '', mclass: m.mclass || 'scrap' });
                         }
                     });
                     return arr;
@@ -2886,7 +3146,7 @@ html.no-transitions, html.no-transitions * {
                         var m = availableMaterials[i];
                         if ((m.length || 0) >= requiredLen) {
                             availableMaterials.splice(i, 1);
-                            return m.length || 0;
+                            return m;
                         }
                     }
                     return null;
@@ -2895,7 +3155,7 @@ html.no-transitions, html.no-transitions * {
                 var allCuts = expandCuts(cuts);
                 if (algo !== 'SizeGrouping') allCuts.sort(function(a, b) { return b.length - a.length; });
                 var availableMaterials = expandMaterials(materials).sort(function(a, b) { return a.length - b.length; });
-                var defaultLen = materials && materials.length ? Math.max.apply(null, materials.map(function(m) { return m.length || 0; })) : 6000;
+                var defaultLen = (materials && materials.length) ? Math.max.apply(null, materials.map(function(m) { return Number(m.length)||0; })) : 6000;
                 var bins = [];
 
                 function placeIntoExisting(cut) {
@@ -2922,11 +3182,11 @@ html.no-transitions, html.no-transitions * {
                     allCuts.forEach(function(cut) {
                         if (placeIntoExisting(cut)) return;
                         var reqLen = cut.length;
-                        var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
-                        if (takeLen === null) {
-                            bins.push({ length: defaultLen, cuts: [cut], autoAdded: true });
+                        var takeMat = selectSmallestAdequate(availableMaterials, reqLen);
+                        if (takeMat === null) {
+                            bins.push({ length: defaultLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
                         } else {
-                            bins.push({ length: takeLen, cuts: [cut], autoAdded: false });
+                            bins.push({ length: takeMat.length, cuts: [cut], autoAdded: false, mclass: takeMat.mclass || 'scrap' });
                         }
                     });
                 } else if (algo === 'SizeGrouping') {
@@ -2959,8 +3219,8 @@ html.no-transitions, html.no-transitions * {
                                 for (var k = 0; k < bestCount; k++) bestBin.cuts.push(group.shift());
                             } else {
                                 var reqLen = len;
-                                var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
-                                var newBin = { length: (takeLen === null ? defaultLen : takeLen), cuts: [], autoAdded: (takeLen === null) };
+                                var takeMat = selectSmallestAdequate(availableMaterials, reqLen);
+                                var newBin = { length: (takeMat === null ? defaultLen : takeMat.length), cuts: [], autoAdded: (takeMat === null), mclass: (takeMat === null ? 'auto' : (takeMat.mclass || 'scrap')) };
                                 var remaining = newBin.length;
                                 while (group.length) {
                                     var cut = group[0];
@@ -2978,11 +3238,11 @@ html.no-transitions, html.no-transitions * {
                     allCuts.forEach(function(cut) {
                         if (placeIntoExisting(cut)) return;
                         var reqLen = cut.length;
-                        var takeLen = selectSmallestAdequate(availableMaterials, reqLen);
-                        if (takeLen === null) {
-                            bins.push({ length: defaultLen, cuts: [cut], autoAdded: true });
+                        var takeMat = selectSmallestAdequate(availableMaterials, reqLen);
+                        if (takeMat === null) {
+                            bins.push({ length: defaultLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
                         } else {
-                            bins.push({ length: takeLen, cuts: [cut], autoAdded: false });
+                            bins.push({ length: takeMat.length, cuts: [cut], autoAdded: false, mclass: takeMat.mclass || 'scrap' });
                         }
                     });
                 }
@@ -2993,6 +3253,127 @@ html.no-transitions, html.no-transitions * {
         window.optimizeCutsFFD = createOptimizerFixed('FFD');
         window.optimizeCutsBFD = createOptimizerFixed('BFD');
         window.optimizeCutsSizeGrouping = createOptimizerFixed('SizeGrouping');
+
+        // 強制碎料優先：先盡量用晒所有「碎料」材料，最後先開「原裝」/自動補料
+        window.optimizeCutsScrapFirst = function(cuts, materials, sawThickness) {
+            function expandCuts(cuts) {
+                var arr = [];
+                (cuts || []).forEach(function(it) {
+                    var q = Number(it.quantity || 0);
+                    for (var i = 0; i < q; i++) {
+                        arr.push({ length: Number(it.length)||0, display: it.display || '', purpose: it.purpose || '' });
+                    }
+                });
+                return arr;
+            }
+            function expandMaterials(mats) {
+                var arr = [];
+                (mats || []).forEach(function(m) {
+                    var q = Number(m.quantity || 0);
+                    for (var i = 0; i < q; i++) {
+                        arr.push({ length: Number(m.length)||0, display: m.display || '', mclass: (m.mclass || 'scrap') });
+                    }
+                });
+                return arr;
+            }
+
+            var allCuts = expandCuts(cuts).filter(function(c){return c.length>0;});
+            // 大件先放，令碎料盡量被塞滿
+            allCuts.sort(function(a,b){return b.length-a.length;});
+
+            var mats = expandMaterials(materials).filter(function(m){return m.length>0;});
+            var scrapMats = mats.filter(function(m){ return (m.mclass||'scrap') === 'scrap'; }).sort(function(a,b){return a.length-b.length;});
+            var origMats  = mats.filter(function(m){ return (m.mclass||'scrap') !== 'scrap'; }).sort(function(a,b){return a.length-b.length;});
+
+            var defaultLen = (materials && materials.length) ? Math.max.apply(null, materials.map(function(m) { return Number(m.length)||0; })) : 6000;
+
+            function packOneBar(barLen, availableCuts) {
+                // 用 BFD 思路：每次揀「放完之後剩餘最少」嗰件
+                var cutsInBar = [];
+                var remaining = barLen;
+                while (availableCuts.length) {
+                    var bestIdx = -1;
+                    var bestRem = Infinity;
+                    for (var i=0;i<availableCuts.length;i++) {
+                        var c = availableCuts[i];
+                        var req = c.length + (cutsInBar.length>0 ? sawThickness : 0);
+                        var rem = remaining - req;
+                        if (rem >= 0 && rem < bestRem) {
+                            bestRem = rem;
+                            bestIdx = i;
+                        }
+                    }
+                    if (bestIdx === -1) break;
+                    var chosen = availableCuts.splice(bestIdx,1)[0];
+                    var req2 = chosen.length + (cutsInBar.length>0 ? sawThickness : 0);
+                    cutsInBar.push(chosen);
+                    remaining -= req2;
+                }
+                return cutsInBar;
+            }
+
+            var bins = [];
+
+            // 1) 先逐支碎料去塞（即使會令總餘料唔係最靚，都優先用碎料）
+            for (var s=0; s<scrapMats.length; s++) {
+                if (!allCuts.length) break;
+                var mat = scrapMats[s];
+                var cutsPacked = packOneBar(mat.length, allCuts);
+                if (cutsPacked.length) {
+                    bins.push({ length: mat.length, cuts: cutsPacked, autoAdded: false, mclass: 'scrap', display: mat.display||'' });
+                }
+                // 如果呢支碎料完全塞唔到任何件，就視為未用，唔會硬開（避免產生空bin）
+            }
+
+            // 2) 仲有剩餘切件：最後先用原裝，再唔夠先自動補料
+            //    直接用現有 BFD（小嘅原裝先拎）
+            function selectSmallestAdequate(availableMaterials, requiredLen) {
+                for (var i = 0; i < availableMaterials.length; i++) {
+                    var m = availableMaterials[i];
+                    if ((m.length || 0) >= requiredLen) {
+                        availableMaterials.splice(i, 1);
+                        return m;
+                    }
+                }
+                return null;
+            }
+
+            // 復用 createOptimizerFixed('BFD') 入面嘅 placeIntoExisting
+            function placeIntoExisting(cut) {
+                var best = null, bestRem = Infinity;
+                for (var i = 0; i < bins.length; i++) {
+                    var bin = bins[i];
+                    var used = (bin.cuts||[]).reduce(function(s, c) { return s + c.length; }, 0);
+                    var kerf = (bin.cuts && bin.cuts.length > 0) ? (bin.cuts.length - 1) * sawThickness : 0;
+                    var req = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
+                    var rem = bin.length - (used + kerf + req);
+                    if (rem >= 0 && rem < bestRem) {
+                        bestRem = rem;
+                        best = bin;
+                    }
+                }
+                if (best) {
+                    best.cuts.push(cut);
+                    return true;
+                }
+                return false;
+            }
+
+            var availableOrig = origMats.slice();
+            while (allCuts.length) {
+                var cut = allCuts.shift();
+                if (placeIntoExisting(cut)) continue;
+                var takeMat = selectSmallestAdequate(availableOrig, cut.length);
+                if (takeMat === null) {
+                    bins.push({ length: defaultLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
+                } else {
+                    bins.push({ length: takeMat.length, cuts: [cut], autoAdded: false, mclass: (takeMat.mclass || 'original') });
+                }
+            }
+
+            return bins;
+        };
+
 
         function updateMaterialUsageStatus(bins) {
             // 統計每種長度實際使用嘅數量（只計非自動補料）
@@ -3014,14 +3395,16 @@ html.no-transitions, html.no-transitions * {
                 if (!statusCell) {
                     statusCell = document.createElement("td");
                     statusCell.className = "usage-status text-center";
-                    row.appendChild(statusCell);
+                    // 保持「操作」喺最右：狀態插入到最後一格之前
+                    if (row.lastElementChild) row.insertBefore(statusCell, row.lastElementChild);
+                    else row.appendChild(statusCell);
                 }
                 if (used >= qty) {
-                    { var _sl=document.getElementById('language')?document.getElementById('language').value:'zh'; statusCell.innerHTML = '<span style="color:green;">'+(_sl==='zh'?'✓ 全部使用':'✓ Fully Used')+'</span>'; }
+                    { var _sl=document.getElementById('language')?document.getElementById('language').value:'zh'; statusCell.innerHTML = '<span style="color:green;">'+(_sl==='zh'?'✓全用':'✓ Used')+'</span>'; }
                 } else if (used > 0) {
-                    { var _sl2=document.getElementById('language')?document.getElementById('language').value:'zh'; statusCell.innerHTML = `<span style="color:#f39c12;">${_sl2==='zh'?'⚠️ 部分使用':'⚠️ Partial Use'} (${used}/${qty})</span>`; }
+                    { var _sl2=document.getElementById('language')?document.getElementById('language').value:'zh'; statusCell.innerHTML = `<span style="color:#f39c12;">${_sl2==='zh'?'⚠部分':'⚠ Partial'} (${used}/${qty})</span>`; }
                 } else {
-                    { var _sl3=document.getElementById('language')?document.getElementById('language').value:'zh'; statusCell.innerHTML = '<span style="color:red;">'+(_sl3==='zh'?'✗ 未使用':'✗ Unused')+'</span>'; }
+                    { var _sl3=document.getElementById('language')?document.getElementById('language').value:'zh'; statusCell.innerHTML = '<span style="color:red;">'+(_sl3==='zh'?'✗未用':'✗ Unused')+'</span>'; }
                 }
                 // 扣除已用數量，避免重複計數（相同長度嘅下一行會少咗）
                 usageCount[len] = Math.max(0, usageCount[len] - used);
@@ -3053,7 +3436,30 @@ html.no-transitions, html.no-transitions * {
                 const effectiveSawThickness = (Number(sawThickness.value) || 0);
                 let optimizedResult;
 
-                if (algorithm === 'AutoBest') {
+                if (algorithm === 'CostFirst') {
+                    // 強制碎料優先（A 模式）：先盡量用碎料，最後先開原裝
+                    optimizedResult = optimizeCutsScrapFirst(cuttingItems, materialItems, effectiveSawThickness);
+
+                    const resultDetails = document.getElementById('resultDetails');
+                    if (resultDetails) {
+                        const banner = document.createElement('div');
+                        banner.style.margin = '12px 0';
+                        banner.style.padding = '10px';
+                        banner.style.backgroundColor = '#fff3e0';
+                        banner.style.border = '1px solid #ffe0b2';
+                        banner.style.borderRadius = '6px';
+                        banner.style.color = '#e65100';
+                        const _bLang = document.getElementById('language')?document.getElementById('language').value:'zh';
+                        if (_bLang === 'zh') {
+                            banner.innerHTML = `<strong>碎料優先（強制）</strong>：先盡量塞滿碎料，最後先開原裝`;
+                        } else {
+                            banner.innerHTML = `<strong>Scrap-First (Force)</strong>: Fill scraps first, open originals last.`;
+                        }
+                        resultDetails.prepend(banner);
+                    }
+
+                } else if (algorithm === 'AutoBest') {
+
                     const resFFD = optimizeCutsFFD(cuttingItems, materialItems, effectiveSawThickness);
                     const resBFD = optimizeCutsBFD(cuttingItems, materialItems, effectiveSawThickness);
                     const resSG  = optimizeCutsSizeGrouping(cuttingItems, materialItems, effectiveSawThickness);
@@ -3125,7 +3531,12 @@ html.no-transitions, html.no-transitions * {
                 }
 
                 // 後處理合併
-                optimizedResult = optimizeBins(optimizedResult, effectiveSawThickness);
+                // 注意：碎料優先（強制）要保留碎料使用，唔好將碎料 bin 合併走
+                if (algorithm === 'CostFirst') {
+                    optimizedResult = optimizeBinsKeepScrap(optimizedResult, effectiveSawThickness);
+                } else {
+                    optimizedResult = optimizeBins(optimizedResult, effectiveSawThickness);
+                }
 
                 renderCuttingResults(optimizedResult, effectiveSawThickness);
                 updateMaterialUsageStatus(optimizedResult);
@@ -3346,7 +3757,8 @@ html.no-transitions, html.no-transitions * {
                     length: row.dataset.length || "0",
                     quantity: row.dataset.quantity || "1",
                     display: row.dataset.display || "",
-                    inputUnit: row.dataset.inputUnit || "metric"
+                    inputUnit: row.dataset.inputUnit || "metric",
+                    mclass: row.dataset.mclass || "scrap"
                 });
             });
 
@@ -3582,6 +3994,8 @@ html.no-transitions, html.no-transitions * {
                     row.dataset.quantity = quantity;
                     row.dataset.display = display;
                     row.dataset.inputUnit = inputUnit;
+                    const mclass = (item.mclass || 'scrap');
+                    row.dataset.mclass = mclass;
 
                     const tbody = document.querySelector("#materialItemsTable tbody");
                     const rowIndex = tbody.children.length;
@@ -3589,6 +4003,8 @@ html.no-transitions, html.no-transitions * {
                     row.innerHTML = `
                         <td>${display}</td>
                         <td>${quantity}</td>
+                        <td class="text-center"><span class="mclass-badge ${mclass==='original' ? 'mclass-original' : 'mclass-scrap'}">${(mclass==='original') ? ((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'原裝':'Original') : ((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'碎料':'Scrap')}</span></td>
+                        <td class="usage-status text-center">-</td>
                         <td class="text-center">
                             <div class="action-buttons">
                                 <button class="btn btn-sm btn-outline-warning" onclick="enterMaterialEditMode(Array.from(this.closest('tbody').children).indexOf(this.closest('tr')))" title="${(document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'編輯':'Edit'}">
@@ -3599,7 +4015,6 @@ html.no-transitions, html.no-transitions * {
                                 </button>
                             </div>
                         </td>
-                        <td class="usage-status text-center">-</td>
                     `;
 
                     tbody.appendChild(row);
@@ -4045,7 +4460,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
 
       let bins = [];
-      let availableMaterials = materials.flatMap(item => Array(item.quantity).fill(item)).sort((a, b) => a.length - b.length);
+      let availableMaterials = materials.flatMap(item => Array.from({length: item.quantity}, () => ({...item}))).sort((a, b) => a.length - b.length);
       const defaultLength = materials.length > 0 ? materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
 
       if(algoType === 'FFD') {
@@ -4064,7 +4479,9 @@ document.addEventListener("DOMContentLoaded", function() {
           if(!placed) {
             let binLength, autoAdded = false;
             if(availableMaterials.length > 0) {
-              binLength = (availableMaterials.shift().length || 0);
+              const mat = availableMaterials.shift();
+                binLength = (mat.length || 0);
+                var mclass = (mat.mclass || 'scrap');
             } else {
               if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                 throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
@@ -4074,7 +4491,7 @@ document.addEventListener("DOMContentLoaded", function() {
               binLength = defaultLength;
               autoAdded = true;
             }
-            bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded});
+            bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)});
           }
         });
       } else if(algoType === 'SizeGrouping') {
@@ -4114,7 +4531,9 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
               let binLength, autoAdded = false;
               if(availableMaterials.length > 0) {
-                binLength = (availableMaterials.shift().length || 0);
+                const mat = availableMaterials.shift();
+                binLength = (mat.length || 0);
+                var mclass = (mat.mclass || 'scrap');
               } else {
                 if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                   throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
@@ -4124,7 +4543,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 binLength = defaultLength;
                 autoAdded = true;
               }
-              const newBin = {length: binLength, cuts: [], autoAdded: autoAdded};
+              const newBin = {length: binLength, cuts: [], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)};
               let remainingLength = binLength;
               while(groupCuts.length > 0) {
                 const cut = groupCuts[0];
@@ -4161,7 +4580,9 @@ document.addEventListener("DOMContentLoaded", function() {
           } else {
             let binLength, autoAdded = false;
             if(availableMaterials.length > 0) {
-              binLength = (availableMaterials.shift().length || 0);
+              const mat = availableMaterials.shift();
+                binLength = (mat.length || 0);
+                var mclass = (mat.mclass || 'scrap');
             } else {
               if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                 throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
@@ -4171,7 +4592,7 @@ document.addEventListener("DOMContentLoaded", function() {
               binLength = defaultLength;
               autoAdded = true;
             }
-            bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded});
+            bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)});
           }
         });
       }
@@ -4348,37 +4769,41 @@ document.addEventListener("DOMContentLoaded", function() {
 })();
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const cuttingScrollInputs = 
-                        }
-                    }
-                }, 300);
-            });
-        });
-
-        const materialScrollInputs = document.querySelectorAll('.auto-scroll-material');
-
-        materialScrollInputs.forEach(function(input) {
-            input.addEventListener('focus', function() {
-                setTimeout(function() {
-                    const materialCard = document.getElementById('materials-card');
-                    if (materialCard) {
-                        const sectionHeader = materialCard.querySelector('.section-header');
-                        if (sectionHeader) {
-                            const rect = sectionHeader.getBoundingClientRect();
-                            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                            const targetY = rect.top + scrollTop - 20;
-                            window.scrollTo({
-                                top: targetY,
-                                behavior: 'smooth'
-                            });
-                        }
-                    }
-                }, 300);
-            });
-        });
+// 自動捲動到輸入卡片（避免手機鍵盤遮住輸入框）
+document.addEventListener('DOMContentLoaded', function() {
+  const cuttingScrollInputs = document.querySelectorAll('.auto-scroll-cutting');
+  cuttingScrollInputs.forEach(function(input) {
+    input.addEventListener('focus', function() {
+      setTimeout(function() {
+        const cuttingCard = document.getElementById('cutting-items-card');
+        if (!cuttingCard) return;
+        const sectionHeader = cuttingCard.querySelector('.section-header');
+        if (!sectionHeader) return;
+        const rect = sectionHeader.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = rect.top + scrollTop - 20;
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }, 300);
     });
-    </script>
+  });
+
+  const materialScrollInputs = document.querySelectorAll('.auto-scroll-material');
+  materialScrollInputs.forEach(function(input) {
+    input.addEventListener('focus', function() {
+      setTimeout(function() {
+        const materialCard = document.getElementById('materials-card');
+        if (!materialCard) return;
+        const sectionHeader = materialCard.querySelector('.section-header');
+        if (!sectionHeader) return;
+        const rect = sectionHeader.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const targetY = rect.top + scrollTop - 20;
+        window.scrollTo({ top: targetY, behavior: 'smooth' });
+      }, 300);
+    });
+  });
+});
+</script>
 <script>
     function updateCuttingUnitOnly() {
         const cutUnit = document.getElementById('globalCutUnit');
@@ -4876,17 +5301,20 @@ document.addEventListener("DOMContentLoaded", function() {
     var matHead = document.querySelector('#materialItemsTable thead');
     if (matHead) {
       var ths2 = matHead.querySelectorAll('th');
-      if (ths2.length >= 4) { // 注意材料表現在有4欄
+      // 材料表已加了「類別」欄：共5欄
+      if (ths2.length >= 5) {
         if (lang === 'zh') {
-          ths2[0].textContent = '材料長度';
+          ths2[0].textContent = '長度';
           ths2[1].textContent = '數量';
-          ths2[2].textContent = '操作';
+          ths2[2].textContent = '類別';
           ths2[3].textContent = '使用狀態';
+          ths2[4].textContent = '操作';
         } else {
-          ths2[0].textContent = 'Material Length';
+          ths2[0].textContent = 'Length';
           ths2[1].textContent = 'Quantity';
-          ths2[2].textContent = 'Action';
-          ths2[3].textContent = 'Usage Status';
+          ths2[2].textContent = 'Type';
+          ths2[3].textContent = 'Usage';
+          ths2[4].textContent = 'Action';
         }
       }
     }
@@ -5170,7 +5598,7 @@ button[onclick*="showHelp"],
 body:not(.sepia-mode) .card {
     background-color: #454d55 !important;
     border: 1px solid #6c757d !important;
-    color: #fff !important;
+    color: #1f2d2a !important;
 }
 
 body:not(.sepia-mode) .card-body-light {
@@ -5383,7 +5811,7 @@ body.sepia-mode .btn-success {
             #7a5f37 20px
         ) !important;
     border: 2px solid #6b5533 !important;
-    color: #fff !important;
+    color: #1f2d2a !important;
     box-shadow: 0 3px 8px rgba(107, 85, 51, 0.3) !important;
 }
 
@@ -5406,7 +5834,7 @@ body.sepia-mode #resetButton,
 body.sepia-mode .btn-danger {
     background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
     border: 2px solid #ff5500 !important;
-    color: #fff !important;
+    color: #1f2d2a !important;
     box-shadow: 0 3px 8px rgba(255, 85, 0, 0.30) !important;
 }
 
@@ -5452,7 +5880,7 @@ body.sepia-mode .btn-outline-warning {
 body.sepia-mode .btn-outline-danger {
     background: linear-gradient(to bottom, #b8714a, #a0522d) !important;
     border: 2px solid #8b4513 !important;
-    color: #fff !important;
+    color: #1f2d2a !important;
 }
 
 body.sepia-mode .modal-content {
@@ -5609,6 +6037,26 @@ body.sepia-mode #resetButton {
             });
         }
     }, 1000);
+})();
+</script>
+
+<script>
+// 材料類別下拉：依選擇自動套用顏色（碎料=橙紅，原裝=綠色）
+(function(){
+  function apply(el){
+    if(!el) return;
+    el.classList.remove('mclass-scrap','mclass-original');
+    var v = el.value || 'scrap';
+    el.classList.add(v==='original' ? 'mclass-original' : 'mclass-scrap');
+  }
+  function bind(){
+    document.querySelectorAll('select.materialClass').forEach(function(sel){
+      apply(sel);
+      sel.addEventListener('change', function(){ apply(sel); });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
 })();
 </script>
 </html>
