@@ -3797,6 +3797,16 @@ html.no-transitions, html.no-transitions * {
         }
 
         // ----- 後處理合併函數 -----
+        // 浮點數容錯：避免因小數誤差導致「明明有位都唔放」
+        // 例：長度/鋸路厚度含小數時，0.0000001 的誤差會令 rem 變成 -1e-12。
+        const __EPS_BASE = 1e-6;
+        function __epsFor(len){
+            const L = Math.max(0, Number(len) || 0);
+            return Math.max(1e-9, __EPS_BASE * (L > 0 ? L : 1));
+        }
+        function __leq(a,b,eps){ return Number(a) <= Number(b) + (eps||0); }
+        function __geq(a,b,eps){ return Number(a) + (eps||0) >= Number(b); }
+
         function optimizeBins(bins, sawThickness) {
             let changed = true;
             while (changed) {
@@ -3812,7 +3822,8 @@ html.no-transitions, html.no-transitions * {
                         let required = sourceBin.cuts.reduce((s, c) => s + c.length, 0);
                         let totalCuts = targetBin.cuts.length + sourceBin.cuts.length;
                         let totalKerf = (totalCuts - 1) * sawThickness;
-                        if (usedLength + required + totalKerf <= targetBin.length) {
+                        const eps = __epsFor(targetBin.length);
+                        if (__leq(usedLength + required + totalKerf, targetBin.length, eps)) {
                             targetBin.cuts = targetBin.cuts.concat(sourceBin.cuts);
                             bins.splice(i, 1);
                             changed = true;
@@ -3854,7 +3865,8 @@ html.no-transitions, html.no-transitions * {
                         let required = sourceBin.cuts.reduce((s, c) => s + c.length, 0);
                         let totalCuts = targetBin.cuts.length + sourceBin.cuts.length;
                         let totalKerf = (totalCuts - 1) * sawThickness;
-                        if (usedLength + required + totalKerf <= targetBin.length) {
+                        const eps = __epsFor(targetBin.length);
+                        if (__leq(usedLength + required + totalKerf, targetBin.length, eps)) {
                             targetBin.cuts = targetBin.cuts.concat(sourceBin.cuts);
                             bins.splice(i, 1);
                             changed = true;
@@ -3862,6 +3874,212 @@ html.no-transitions, html.no-transitions * {
                         }
                     }
                 }
+            }
+            return bins;
+        }
+
+        // ----- 再平衡（逐件搬移，盡量減少開新料/空位浪費）-----
+        // 目的：修正「明明其他材料仲有位，但系統又開多一支」
+        // 做法：由後面嗰啲 bin 開始，逐件 cut 嘗試搬入其他 bin（Best-Fit），
+        //       如果搬得晒就刪走嗰支 bin。
+        // keepScrap=true 時：唔會將碎料 bin 搬空（亦唔會將碎料 cut 搬去非碎料 bin）。
+        function rebalanceBins(bins, sawThickness, keepScrap){
+            function clsOf(bin) {
+                return (bin && (bin.mclass || (bin.autoAdded ? 'auto' : 'scrap'))) || 'scrap';
+            }
+            function isScrap(cls){ return cls === 'scrap'; }
+            function usedLen(bin){
+                return (bin.cuts||[]).reduce(function(s,c){ return s + (Number(c.length)||0); }, 0);
+            }
+            function kerfLen(bin){
+                var n = (bin.cuts||[]).length;
+                return n>0 ? (n-1) * sawThickness : 0;
+            }
+            function remaining(bin){
+                return (Number(bin.length)||0) - (usedLen(bin) + kerfLen(bin));
+            }
+            function canPlace(bin, cut){
+                var n = (bin.cuts||[]).length;
+                var req = (Number(cut.length)||0) + (n>0 ? sawThickness : 0);
+                const eps = __epsFor(bin.length);
+                return __geq(remaining(bin), req, eps);
+            }
+            function placeBestFit(cut, sourceIdx){
+                var bestIdx = -1;
+                var bestRem = Infinity;
+                for (var i=0;i<bins.length;i++){
+                    if (i===sourceIdx) continue;
+                    // 只向前搬（避免來回搬導致無限循環）
+                    if (i > sourceIdx) continue;
+                    var bin = bins[i];
+                    if (!bin) continue;
+                    // keepScrap: 禁止將碎料 bin 搬空去非碎料 bin
+                    if (keepScrap){
+                        var srcCls = clsOf(bins[sourceIdx]);
+                        var tgtCls = clsOf(bin);
+                        if (isScrap(srcCls) && !isScrap(tgtCls)) continue;
+                    }
+                    if (!canPlace(bin, cut)) continue;
+                    // 計算放入後剩餘（越細越好）
+                    var n = (bin.cuts||[]).length;
+                    var req = (Number(cut.length)||0) + (n>0 ? sawThickness : 0);
+                    var remAfter = remaining(bin) - req;
+                    if (remAfter < bestRem){
+                        bestRem = remAfter;
+                        bestIdx = i;
+                    }
+                }
+                if (bestIdx >= 0){
+                    bins[bestIdx].cuts.push(cut);
+                    return true;
+                }
+                return false;
+            }
+
+            var changed = true;
+            while (changed){
+                changed = false;
+                // 由尾到頭，盡量搬走後面啲 bin
+                for (var s=bins.length-1; s>=0; s--){
+                    if (bins.length<=1) break;
+                    var src = bins[s];
+                    if (!src || !(src.cuts||[]).length) continue;
+
+                    // keepScrap：唔搬空碎料 bin（即係：如果搬得晒就會空，就唔做「最後一件」搬走）
+                    var srcIsScrap = isScrap(clsOf(src));
+
+                    // 大件先試，成功率高啲
+                    var cutsSorted = src.cuts.slice().sort(function(a,b){ return (Number(b.length)||0) - (Number(a.length)||0); });
+                    for (var k=0; k<cutsSorted.length; k++){
+                        var cut = cutsSorted[k];
+                        // 如果 keepScrap 同埋呢個 src 係碎料，而家只剩 1 件，唔搬走最後一件
+                        if (keepScrap && srcIsScrap && src.cuts.length<=1) break;
+
+                        if (placeBestFit(cut, s)){
+                            // 從 src 刪走同一件（用 reference 比較）
+                            var idx = src.cuts.indexOf(cut);
+                            if (idx>=0) src.cuts.splice(idx,1);
+                            changed = true;
+                        }
+                    }
+
+                    // 如果 src 搬到空（非 keepScrap 或者非碎料），刪走支 bin
+                    if ((src.cuts||[]).length===0){
+                        if (!(keepScrap && srcIsScrap)){
+                            bins.splice(s,1);
+                            changed = true;
+                        }
+                    }
+                }
+            }
+            return bins;
+        }
+
+        // ----- 局部搜尋改良（允許交換/前後搬移，逼近舊版『唔浪費』效果）-----
+        // 只接受「支數減少」或「總餘料減少」嘅改動，避免來回震盪。
+        function improveBinsLocalSearch(bins, sawThickness, keepScrap){
+            function clsOf(bin){ return (bin && (bin.mclass || (bin.autoAdded ? 'auto' : 'scrap'))) || 'scrap'; }
+            function isScrap(cls){ return cls === 'scrap'; }
+            function usedLen(bin){ return (bin.cuts||[]).reduce(function(s,c){ return s + (Number(c.length)||0); },0); }
+            function kerfLen(bin){ var n=(bin.cuts||[]).length; return n>0 ? (n-1)*sawThickness : 0; }
+            function waste(bin){ return (Number(bin.length)||0) - (usedLen(bin)+kerfLen(bin)); }
+            function score(bins){
+                var bars = 0; var tw = 0;
+                for (var i=0;i<bins.length;i++){
+                    var b=bins[i]; if(!b) continue;
+                    if ((b.cuts||[]).length===0) continue;
+                    bars++;
+                    tw += Math.max(0, waste(b));
+                }
+                return {bars: bars, waste: tw};
+            }
+            function better(a,b){ return (a.bars < b.bars) || (a.bars===b.bars && a.waste + 1e-9 < b.waste); }
+            function canPlace(bin, cut){
+                var n=(bin.cuts||[]).length;
+                var req=(Number(cut.length)||0) + (n>0 ? sawThickness : 0);
+                const eps=__epsFor(bin.length);
+                return __geq((Number(bin.length)||0) - (usedLen(bin)+kerfLen(bin)), req, eps);
+            }
+
+            // 先做一次簡單塞前（通常已經夠），再用局部搜尋微調
+            var base = score(bins);
+            var maxIter = 800; // 控制時間
+            for (var it=0; it<maxIter; it++){
+                var improved=false;
+                var bestMove=null;
+                var bestScore=base;
+
+                for (var s=0; s<bins.length; s++){
+                    var src=bins[s];
+                    if(!src || !(src.cuts||[]).length) continue;
+                    var srcIsScrap = isScrap(clsOf(src));
+
+                    for (var ci=0; ci<src.cuts.length; ci++){
+                        var cut = src.cuts[ci];
+
+                        // keepScrap：唔搬走碎料最後一件
+                        if (keepScrap && srcIsScrap && src.cuts.length<=1) continue;
+
+                        for (var t=0; t<bins.length; t++){
+                            if (t===s) continue;
+                            var tgt=bins[t];
+                            if(!tgt) continue;
+
+                            if (keepScrap){
+                                var tgtIsScrap = isScrap(clsOf(tgt));
+                                if (srcIsScrap && !tgtIsScrap) continue; // 碎料切件唔去非碎料
+                            }
+
+                            if (!canPlace(tgt, cut)) continue;
+
+                            // 試做 move
+                            tgt.cuts.push(cut);
+                            src.cuts.splice(ci,1);
+                            // 如果搬到空：非 keepScrap 或非碎料才可刪
+                            var removed=false;
+                            if (src.cuts.length===0 && !(keepScrap && srcIsScrap)){
+                                bins.splice(s,1);
+                                removed=true;
+                            }
+
+                            var sc = score(bins);
+
+                            // 還原
+                            if (removed){
+                                bins.splice(s,0,src);
+                            }
+                            src.cuts.splice(ci,0,cut);
+                            tgt.cuts.pop();
+
+                            if (better(sc, bestScore)){
+                                bestScore=sc;
+                                bestMove={s:s, ci:ci, t:t};
+                            }
+                        }
+                    }
+                }
+
+                if (bestMove){
+                    // 套用最佳 move
+                    var src2=bins[bestMove.s];
+                    if(!src2 || !(src2.cuts||[]).length) { base = score(bins); continue; }
+                    var cut2=src2.cuts[bestMove.ci];
+                    // 因為 bins 可能改變過 index，重新找可行目標
+                    var tgt2=bins[bestMove.t];
+                    if (!tgt2 || !canPlace(tgt2, cut2)) { base = score(bins); continue; }
+
+                    tgt2.cuts.push(cut2);
+                    src2.cuts.splice(bestMove.ci,1);
+                    var src2IsScrap = isScrap(clsOf(src2));
+                    if (src2.cuts.length===0 && !(keepScrap && src2IsScrap)){
+                        bins.splice(bestMove.s,1);
+                    }
+
+                    base = score(bins);
+                    improved=true;
+                }
+
+                if (!improved) break;
             }
             return bins;
         }
@@ -3915,7 +4133,8 @@ html.no-transitions, html.no-transitions * {
                         var kerf = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
                         var req = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
                         var rem = bin.length - (used + kerf + req);
-                        if (rem >= 0 && rem < bestRem) {
+                        const eps = __epsFor(bin.length);
+                        if (rem >= -eps && rem < bestRem) {
                             bestRem = rem;
                             best = bin;
                         }
@@ -3954,7 +4173,8 @@ html.no-transitions, html.no-transitions * {
                                 var count = 0, curr = used + kerf;
                                 for (var j = 0; j < group.length; j++) {
                                     var req = len + (bin.cuts.length + count > 0 ? sawThickness : 0);
-                                    if (curr + req <= bin.length) {
+                                    const eps = __epsFor(bin.length);
+                                    if (curr + req <= bin.length + eps) {
                                         count++;
                                         curr += req;
                                     } else break;
@@ -3974,7 +4194,8 @@ html.no-transitions, html.no-transitions * {
                                 while (group.length) {
                                     var cut = group[0];
                                     var req = cut.length + (newBin.cuts.length > 0 ? sawThickness : 0);
-                                    if (req <= remaining) {
+                                    const eps = __epsFor(newBin.length);
+                                    if (req <= remaining + eps) {
                                         newBin.cuts.push(group.shift());
                                         remaining -= req;
                                     } else break;
@@ -4048,7 +4269,8 @@ html.no-transitions, html.no-transitions * {
                         var c = availableCuts[i];
                         var req = c.length + (cutsInBar.length>0 ? sawThickness : 0);
                         var rem = remaining - req;
-                        if (rem >= 0 && rem < bestRem) {
+                        const eps = __epsFor(barLen);
+                        if (rem >= -eps && rem < bestRem) {
                             bestRem = rem;
                             bestIdx = i;
                         }
@@ -4097,7 +4319,8 @@ html.no-transitions, html.no-transitions * {
                     var kerf = (bin.cuts && bin.cuts.length > 0) ? (bin.cuts.length - 1) * sawThickness : 0;
                     var req = cut.length + (bin.cuts.length > 0 ? sawThickness : 0);
                     var rem = bin.length - (used + kerf + req);
-                    if (rem >= 0 && rem < bestRem) {
+                    const eps = __epsFor(bin.length);
+                    if (rem >= -eps && rem < bestRem) {
                         bestRem = rem;
                         best = bin;
                     }
@@ -4305,6 +4528,11 @@ function calculate() {
                 } else {
                     optimizedResult = optimizeBins(optimizedResult, effectiveSawThickness);
                 }
+
+                // 再平衡：逐件搬移，盡量塞滿已有材料，減少「明明有位但唔放」
+                optimizedResult = rebalanceBins(optimizedResult, effectiveSawThickness, algorithm === 'CostFirst');
+                // 進一步局部搜尋：允許交換/前後搬移，改善『有位都唔放』
+                optimizedResult = improveBinsLocalSearch(optimizedResult, effectiveSawThickness, algorithm === 'CostFirst');
 
                 renderCuttingResults(optimizedResult, effectiveSawThickness);
                 updateMaterialUsageStatus(optimizedResult);
