@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="zh">
 <head>
 
@@ -29,35 +28,191 @@
       .scheme-actions-row{
         padding-top: 3px;
         overflow: visible !important;
+        width: 100%;
+        justify-content: space-between;
+        align-items: center; /* 令同一行啲掣垂直對齊 */
+        flex-wrap: nowrap;
       }
+      .scheme-actions-row .scheme-left{
+        display:flex;
+        gap: 8px;
+        flex: 0 0 auto;
+        align-items:center;
+        flex-wrap: nowrap;
+      }
+      .scheme-actions-row .scheme-right{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-end;
+        gap:2px;
+        flex: 0 0 auto;
+        position: relative; /* 俾標籤用 absolute 定位 */
+      }
+
+      /* 重要：『自動補料』標籤唔再佔高度，避免推低右邊個掣 */
+      .scheme-actions-row .scheme-right .auto-replenish-title{
+        position: absolute;
+        right: 0;
+        bottom: calc(100% + 6px); /* 標籤上面，距離掣 6px（再高少少） */
+        top: auto;
+        width: 120px;          /* 同桌面 autoReplenish 按鈕闊度一致 */
+        text-align: center;    /* 跟『方案管理』同一理念：清晰、穩定 */
+        margin: 0;
+        pointer-events: none;
+
+        /* 跟 .form-label（方案管理）睇齊：字級/粗幼/行高 */
+        color: inherit;
+        text-shadow: none;
+        font-size: 1.05em;
+        font-weight: 500;
+        line-height: normal;
+        opacity: 1;
+        white-space: nowrap;
+      }
+      /* 方案管理三粒掣：同一高度（桌面/平板） */
+      .scheme-actions-row .scheme-left .btn,
+      #autoReplenishPickerBtn{
+        /* 允許字體放大後自動換行並增高 */
+        min-height:40px;
+        height:auto;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        flex-wrap:wrap;
+        white-space:normal;
+        text-align:center;
+        line-height:1.15;
+        padding-top:.35rem;
+        padding-bottom:.35rem;
+      }
+
+      /* 自動補料按鈕：桌面闊，字大少少（3D 沿用 .btn 全局） */
+      #autoReplenishPickerBtn{
+        width:120px;
+        font-size:1.05rem;
+        font-weight:900;
+        padding: .35rem 10px;
+        white-space: normal;
+        word-break: break-word;
+      }
+
+      /* 手機窄屏：參考「切割項目」controls-row 做法：兩粒方案掣平排 + 右側細粒自動補料掣（唔做全寬大掣） */
+      @media (max-width: 576px){
+        .scheme-actions-row{
+          display:flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: nowrap;
+          gap: 8px;
+        }
+        .scheme-actions-row .scheme-left{
+          flex: 1 1 auto;
+          min-width: 0;
+          flex-wrap: nowrap;
+        }
+        /* 令兩粒方案掣可以縮細，避免推到出界 */
+        .scheme-actions-row .scheme-left .btn{
+          flex: 1 1 0;
+          min-width: 0;
+          padding: .35rem .55rem;
+          font-size: .95rem;
+          min-height: 38px;
+          height: auto !important;
+          white-space: normal;
+          line-height: 1.15;
+        }
+        .scheme-actions-row .scheme-left .btn i{ margin-right: .35rem !important; }
+
+        .scheme-actions-row .scheme-right{
+          flex: 0 0 auto;
+          width: 72px; /* 比切割項目45px闊少少，但仍然係細掣 */
+          align-items: flex-end;
+        }
+        .scheme-actions-row .auto-replenish-title{
+          font-size: .72rem;
+          white-space: nowrap;
+        }
+
+        /* 手機：標籤闊度跟按鈕，唔好出界（同桌面一樣用 bottom 定位） */
+        .scheme-actions-row .scheme-right .auto-replenish-title{
+          width: 72px;
+          bottom: calc(100% + 6px);
+          top: auto;
+          font-size: 1.05em;
+          font-weight: 500;
+          line-height: normal;
+          color: inherit;
+        }
+        #autoReplenishPickerBtn{
+          width: 72px;
+          min-height: 38px;
+          height: auto !important;
+          padding: .35rem .25rem;
+          font-size: 1rem;
+          font-weight: 900;
+          white-space: normal;
+          line-height: 1.1;
+        }
+      }
+
+      /* 所有方案管理區域按鈕：允許自動換行 */
+      .scheme-actions-row button{ white-space: normal; }
+
+      /* 自動補料（新制）— 跟其他按鈕同樣 3D（沿用全局 .btn），呢度只做排版 */
+      .auto-replenish-wrap{
+        display:flex;
+        flex-direction:column;
+        align-items:flex-end;
+        justify-content:flex-start;
+        gap:2px;
+        margin-left:auto;
+        padding-right:2px;
+      }
+      .auto-replenish-title{
+        font-size: 0.78rem;
+        font-weight: 800;
+        letter-spacing: .02em;
+        opacity: .92;
+        line-height: 1;
+        color: rgba(255,255,255,.92);
+        text-shadow: 0 1px 2px rgba(0,0,0,.35);
+      }
+      body.light-mode .auto-replenish-title{ color: rgba(0,0,0,.75); text-shadow:none; }
+      body.sepia-mode .auto-replenish-title{ color: rgba(62,42,16,.85); text-shadow:none; }
 
       .auto-replenish-control{
         display:flex;
         flex-direction:column;
-        align-items:center;
+        align-items:flex-start;
         justify-content:flex-start;
-        gap:3px;
-        height: 90px; /* 固定高度 */
-        padding-top: 6px; /* 留返頂位，避免升高後裁切中文字 */
-        padding-left: 10px;
-        margin-left: 4px;
+        gap:2px;
+        height: auto;
+        padding: 0 0 0 8px;
+        margin-left: 6px;
         border-left: 1px solid rgba(0,0,0,0.12);
-        opacity: .92;
+        opacity: .95;
         white-space: nowrap;
-        align-self: center; /* 跟隔籬按鈕同一中線 */
-        transform: translateY(-26px); /* 全組再升高（配合上方預留空間） */
+        align-self: center;
         overflow: visible;
-        cursor: pointer; /* 整個區都可點 */
+        cursor: pointer;
       }
       .auto-replenish-control *{ cursor: pointer; }
       .auto-replenish-control .ar-title-row{
         display:flex;
-        flex-direction: column; /* 狀態放第二行 */
+        flex-direction: row;
         align-items:center;
-        justify-content:center;
-        gap:2px;
+        justify-content:flex-start;
+        gap:6px;
         line-height:1.2;
-        padding-top: 2px;
+        padding-top: 0;
+      }
+      .auto-replenish-control .ar-caret{
+        width: 0; height: 0;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid rgba(0,0,0,0.35);
+        margin-left: 2px;
       }
       .auto-replenish-control .ar-title{
         display:block;
@@ -165,7 +320,137 @@
         #materialItemsTable td { white-space: nowrap; }
       }
 
-    </style>
+    
+/* === AnyGen patch: button 3D + modal blur (v2) === */
+
+/* Button 3D style — follow #calculateButton look (highlight + inset depth), not heavy drop-shadows */
+.btn:not(.btn-close):not(.tool-btn),
+button.btn:not(.btn-close):not(.tool-btn){
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: transform .08s ease-out, filter .12s ease-out;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.25) inset,
+    0 -2px 0 rgba(0,0,0,0.18) inset,
+    0 6px 14px rgba(0,0,0,0.18);
+}
+
+.btn:not(.btn-close):not(.tool-btn)::before{
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 52%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.42), rgba(255,255,255,0.08));
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* subtle "shine" sweep */
+@keyframes agShine {
+  0%, 70% { transform: translateX(-160%) rotate(25deg); opacity: 0; }
+  78% { opacity: .55; }
+  90% { transform: translateX(220%) rotate(25deg); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.btn:not(.btn-close):not(.tool-btn)::after{
+  content: '';
+  position: absolute;
+  top: -60%; left: -120%;
+  width: 34%; height: 240%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.85), transparent);
+  transform: translateX(-160%) rotate(25deg);
+  animation: agShine 8s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.btn:hover:not(.btn-close):not(.tool-btn){
+  filter: brightness(1.03) saturate(1.02);
+  transform: translateY(-1px);
+}
+
+.btn:active:not(.btn-close):not(.tool-btn),
+.btn.active:not(.btn-close):not(.tool-btn){
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.35) inset,
+    0 -1px 0 rgba(255,255,255,0.16) inset,
+    0 2px 8px rgba(0,0,0,0.26);
+  transform: translateY(1px);
+}
+
+/* Keep existing #calculateButton special effects */
+#calculateButton::before, #calculateButton::after { animation: shine 8s infinite ease-in-out; }
+
+/* Modal open → blur everything behind */
+body.modal-open .container-fluid,
+body.ag-modal-blur .container-fluid{
+  filter: blur(14px) saturate(.92) contrast(.98);
+  transform: scale(0.99);
+}
+
+.modal-backdrop.show{
+  background-color: rgba(0,0,0,0.18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.modal-content{
+  box-shadow: 0 20px 70px rgba(0,0,0,.35);
+}
+
+
+/* === AnyGen patch: compact header + tool buttons spacing (2026-02-24) === */
+
+/* Make the big title banner shorter but keep visual balance */
+#pageTitle{
+  height: 74px !important;
+  min-height: 74px !important;
+  padding: 6px 12px !important;
+  margin-bottom: 12px !important;
+  font-size: 1.65rem !important;
+}
+#pageTitle .fa-ruler-combined{ font-size: 1.25em !important; }
+.title-nut{ width: 86px !important; height: 86px !important; }
+
+/* IMPORTANT: never use negative margin here (it causes the 5 round buttons to stick to the banner) */
+.top-tools{
+  margin: 8px 0 14px 0 !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* 5 round function keys: keep them same size */
+.tool-btn{
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  border-radius: 999px !important;
+  flex: 0 0 auto !important;
+  line-height: 1 !important;
+}
+.tool-text{ font-size: 0.76rem !important; font-weight: 800 !important; }
+#themeToggleBtn i{ font-size: 0.95rem !important; }
+
+/* 「使用說明 / 幫助」按鈕：之前視覺上比左右兩個細，單獨放大一點 */
+#newHelpBtn{ width: 34px !important; height: 34px !important; }
+#newHelpBtn i{ font-size: 1.05rem !important; line-height: 1 !important; }
+
+#qrBtn span{ font-size: 0.72rem !important; font-weight: 800 !important; line-height: 1 !important; }
+
+@media (max-width: 480px){
+  #pageTitle{ height: 64px !important; min-height: 64px !important; font-size: 1.4rem !important; margin-bottom: 10px !important; }
+  .title-nut{ width: 72px !important; height: 72px !important; }
+  .top-tools{ margin: 6px 0 12px 0 !important; gap: 6px !important; }
+  .tool-btn{ width: 28px !important; height: 28px !important; }
+  /* 手機上同樣放大少少「使用說明」 */
+  #newHelpBtn{ width: 32px !important; height: 32px !important; }
+  .tool-text{ font-size: 0.72rem !important; }
+}
+
+</style>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>鋁材切割排版 (橫向優化版)</title>
@@ -1111,7 +1396,7 @@
         }
 
 #cuttingItems .controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
-#cuttingItems .controls-row .btn { flex: 1 1 0; white-space: nowrap; padding: .5rem .75rem; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+#cuttingItems .controls-row .btn { flex: 1 1 0; white-space: normal !important; padding: .40rem .75rem; min-height: 38px; height: auto !important; display: flex !important; flex-wrap: wrap; align-items: center !important; justify-content: center !important; line-height: 1.15; text-align:center; }
 #cuttingItems .controls-row .unit-select { max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; font-size: 1rem !important; text-align: center !important; padding: 0.2rem 0.1rem !important; box-sizing: border-box !important; }
 @media (max-width: 390px) {
   #cuttingItems .controls-row { gap: 6px; }
@@ -1126,7 +1411,19 @@
         }
         .controls-row .btn {
             flex: 1 1 0;
-            min-width: 86px; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; }
+            min-width: 86px;
+            min-height: 38px;
+            height: auto !important;
+            display: flex !important;
+            flex-wrap: wrap;
+            align-items: center !important;
+            justify-content: center !important;
+            box-sizing: border-box !important;
+            border-width: 1px !important;
+            white-space: normal !important;
+            line-height: 1.15;
+            text-align: center;
+          }
         .controls-row .unit-select {
             flex: 0 0 auto;
             min-width: 45px !important;
@@ -1201,7 +1498,7 @@
 .scheme-actions-row{ margin-top: 0 !important; }
         @media (max-width: 767.98px) {
             .controls-row { gap: 6px; }
-            .controls-row .btn { font-size: .95rem; padding: .40rem .60rem; white-space: nowrap; flex: 1 1 0; min-width: 90px; height: 38px !important; display: flex !important; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; }
+            .controls-row .btn { font-size: .95rem; padding: .35rem .60rem; white-space: normal !important; flex: 1 1 0; min-width: 90px; min-height: 38px; height: auto !important; display: flex !important; flex-wrap: wrap; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; line-height: 1.15; text-align:center; }
             .controls-row .unit-select { width: auto !important; flex: 0 0 clamp(72px, 18vw, 96px); max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; box-sizing: border-box !important; white-space: nowrap; font-size: 1rem; text-align: center; padding: 0 !important; line-height: 38px !important; -webkit-appearance: none; appearance: none; display: inline-flex; align-items: center; justify-content: center; }
         }
 </style>
@@ -1475,6 +1772,165 @@ html.no-transitions, html.no-transitions * {
   animation: none !important;
 }
 </style>
+
+
+<!-- AnyGen: 案例彈窗樣式（香港用語） -->
+<style id="ag-case-help-style">
+  /* === AnyGen: Use-cases modal (beautified) === */
+  :root{
+    --ag-case-bg: #ffffff;
+    --ag-case-text: #0f172a;
+    --ag-case-muted: rgba(15,23,42,.72);
+    --ag-case-border: rgba(15,23,42,.10);
+    --ag-case-shadow: 0 22px 70px rgba(0,0,0,.42);
+    --ag-case-accent: #2563eb;
+    --ag-case-accent-2: #10b981;
+  }
+
+  /* keep the round tool button consistent */
+  #ag-case-help-btn{display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;white-space:nowrap}
+
+  /* overlay */
+  #ag-case-help-overlay{position:fixed;inset:0;z-index:10000;display:none}
+  #ag-case-help-overlay[data-open="true"]{display:block}
+  #ag-case-help-backdrop{position:absolute;inset:0;background:rgba(2,6,23,.58)}
+
+  /* modal container */
+  #ag-case-help-modal{
+    position:relative;
+    max-width: 980px;
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 24px);
+    margin: 12px auto;
+    background: var(--ag-case-bg);
+    color: var(--ag-case-text);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: var(--ag-case-shadow);
+    border: 1px solid var(--ag-case-border);
+  }
+
+  /* header */
+  #ag-case-help-header{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(16,185,129,.08));
+    border-bottom: 1px solid var(--ag-case-border);
+  }
+  #ag-case-help-title{font-size:16px;font-weight:900;letter-spacing:.2px}
+  #ag-case-help-close{
+    border: 1px solid rgba(15,23,42,.14);
+    background: rgba(255,255,255,.9);
+    border-radius: 12px;
+    padding: 8px 10px;
+    cursor: pointer;
+    text-decoration:none;
+    color: var(--ag-case-text);
+    font-weight: 700;
+  }
+  #ag-case-help-close:hover{background:rgba(255,255,255,1)}
+
+  /* tabs */
+  #ag-case-help-tabs{
+    display:flex;
+    gap:8px;
+    padding: 10px 12px;
+    border-bottom:1px solid var(--ag-case-border);
+    background: rgba(15,23,42,.03);
+    flex-wrap: wrap;
+  }
+  .ag-case-tab{
+    border:1px solid rgba(15,23,42,.14);
+    background:#fff;
+    border-radius:999px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor:pointer;
+    font-weight: 800;
+  }
+  .ag-case-tab[aria-selected="true"]{
+    background: linear-gradient(135deg, #111827, #0b1220);
+    color:#fff;
+    border-color:#111827;
+  }
+
+  /* body */
+  #ag-case-help-body{padding:16px;overflow:auto;max-height:calc(100dvh - 24px - 56px - 52px)}
+
+  /* panels */
+  .ag-case-panel{display:none}
+  .ag-case-panel[data-active="true"]{display:block}
+
+  .ag-case-h{
+    font-size: 20px;
+    font-weight: 950;
+    margin: 0 0 10px;
+    line-height: 1.18;
+  }
+  .ag-case-sub{
+    color: var(--ag-case-muted);
+    margin: 0 0 14px;
+    line-height: 1.65;
+    background: rgba(37,99,235,.06);
+    border: 1px solid rgba(37,99,235,.14);
+    border-radius: 14px;
+    padding: 10px 12px;
+  }
+
+  /* steps as “cards” */
+  .ag-case-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+  .ag-case-steps li{
+    margin:0;
+    padding: 12px 12px 12px 44px;
+    border-radius: 14px;
+    border: 1px solid var(--ag-case-border);
+    background: rgba(255,255,255,.9);
+    position: relative;
+    line-height: 1.65;
+  }
+  .ag-case-steps li::before{
+    content: attr(data-step);
+    position:absolute;
+    left: 12px;
+    top: 12px;
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 12px;
+    font-weight: 950;
+    color: #fff;
+    background: linear-gradient(135deg, var(--ag-case-accent), #1d4ed8);
+    box-shadow: 0 6px 14px rgba(37,99,235,.25);
+  }
+
+  .ag-case-tip{
+    margin-top: 12px;
+    padding: 12px 12px;
+    border-radius: 14px;
+    background: rgba(16,185,129,.08);
+    border: 1px solid rgba(16,185,129,.22);
+  }
+  .ag-case-tip b{font-weight: 950}
+
+  /* mobile */
+  @media (max-width: 480px){
+    #ag-case-help-modal{width: calc(100% - 14px); margin: 7px auto; border-radius: 16px;}
+    #ag-case-help-body{padding: 12px;}
+    .ag-case-h{font-size: 18px;}
+    .ag-case-steps li{padding-left: 42px;}
+  }
+
+  /* sepia-mode compatibility: keep readable */
+  body.sepia-mode #ag-case-help-modal{background:#fffdf8;border-color: rgba(107,85,51,.25)}
+  body.sepia-mode #ag-case-help-header{background: linear-gradient(135deg, rgba(139,111,71,.16), rgba(16,185,129,.08));}
+  body.sepia-mode .ag-case-sub{background: rgba(139,111,71,.06); border-color: rgba(139,111,71,.18);}
+  body.sepia-mode .ag-case-tab[aria-selected="true"]{background: linear-gradient(135deg, #6a5040, #4f3a2e); border-color:#4f3a2e;}
+  body.sepia-mode .ag-case-steps li{background: rgba(255,253,248,.92);}
+</style>
+
 </head>
 <body>
 <div class="container-fluid">
@@ -1489,7 +1945,295 @@ html.no-transitions, html.no-transitions * {
   <button class="btn tool-btn tool-btn-soft" id="fontIncBtn" type="button" title="文字放大" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
   <button class="btn tool-btn tool-btn-soft" id="fontDecBtn" type="button" title="文字縮細" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
   <button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" type="button" title="光明/黑暗" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+  <!-- 案例（固定放喺頂部工具列：唔靠 JS 插入） -->
+  <button class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" type="button" title="案例" aria-label="案例" aria-haspopup="dialog" aria-controls="ag-case-help-overlay" onclick="showCaseHelp()"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
 </div>
+
+<!-- AnyGen: 案例彈窗（兩個案例） -->
+<div id="ag-case-help-overlay" role="dialog" aria-modal="true" aria-label="使用案例">
+  <a id="ag-case-help-backdrop" href="#" aria-label="關閉案例彈窗"></a>
+  <div id="ag-case-help-modal">
+    <div id="ag-case-help-header">
+      <div id="ag-case-help-title">使用案例</div>
+      <a id="ag-case-help-close" href="#" role="button">關閉</a>
+    </div>
+    <div id="ag-case-help-tabs" role="tablist">
+      <button class="ag-case-tab" type="button" role="tab" aria-selected="true" data-tab="case1">案例一：未知庫存做預算</button>
+      <button class="ag-case-tab" type="button" role="tab" aria-selected="false" data-tab="case2">案例二：碎料優先清貨倉</button>
+    </div>
+    <div id="ag-case-help-body">
+      <section class="ag-case-panel" data-panel="case1" data-active="true">
+        <h2 class="ag-case-h">案例一：未知庫存，快速估算用料預算</h2>
+        <p class="ag-case-sub"><b>適用情況：</b>你未清楚貨倉仲有幾多現成料，只想快手估算要準備幾多新料（報價／做預算用）。</p>
+        <ol class="ag-case-steps">
+          <li><b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。</li>
+          <li><b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。</li>
+          <li><b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。</li>
+          <li><b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。</li>
+        </ol>
+        <div class="ag-case-tip"><b>小貼士：</b>最啱報價階段，用唔著翻貨倉點料，幾秒就估到材料成本。</div>
+      </section>
+
+      <section class="ag-case-panel" data-panel="case2" data-active="false">
+        <h2 class="ag-case-h">案例二：有碎料舊料，叫系統優先「清貨倉」</h2>
+        <p class="ag-case-sub"><b>適用情況：</b>貨倉有碎料想先用晒，唔夠先補新料，盡量慳成本。</p>
+        <ol class="ag-case-steps">
+          <li><b>排版設定改做「碎料優先」：</b>呢步最重要，等於直接同系統講「先用舊料」。</li>
+          <li><b>輸入部件需求：</b>喺「部件區」填尺寸 + 數量。</li>
+          <li><b>輸入現有碎料：</b>喺「材料／物料區」如實填碎料尺寸 + 數量。</li>
+          <li><b>按「計算」睇排版圖：</b>畫面會清楚展示點樣優先用碎料；唔夠嘅部分會由「自動補料」補標準新料。</li>
+        </ol>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const overlay=document.getElementById('ag-case-help-overlay');
+  const tabs=[...document.querySelectorAll('.ag-case-tab')];
+  const panels=[...document.querySelectorAll('.ag-case-panel')];
+
+  function getBtn(){
+    return document.getElementById('ag-case-help-btn');
+  }
+
+  // 初始狀態：確保彈窗唔會殘留喺背後
+  if(overlay){
+    overlay.dataset.open = 'false';
+    overlay.style.display = 'none';
+    overlay.setAttribute('aria-hidden','true');
+  }
+
+  // 事件：關閉
+  const closeBtn = document.getElementById('ag-case-help-close');
+  const backdrop = document.getElementById('ag-case-help-backdrop');
+  [closeBtn, backdrop].forEach(function(el){
+    if(!el) return;
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      close();
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && overlay && overlay.dataset.open === 'true') close();
+  });
+
+  // 俾全站語言切換用
+  window.updateCaseHelpLanguage = function(lang){
+    try{ updateCaseHelpLanguageImpl(lang); }catch(e){}
+  };
+
+  // --- open/close (真正關閉：唔靠 :target / hash) ---
+  function open(){
+    if(!overlay) return;
+    // 每次打開都回到第一個案例（同事最易跟）
+    try { setTab('case1'); } catch(e) {}
+    overlay.dataset.open='true';
+    overlay.style.display='block';
+    overlay.removeAttribute('aria-hidden');
+    // 防止背景頁面滾動
+    try{ document.body.style.overflow='hidden'; }catch(e){}
+  }
+  function close(){
+    if(!overlay) return;
+    overlay.dataset.open='false';
+    overlay.style.display='none';
+    overlay.setAttribute('aria-hidden','true');
+    try{ document.body.style.overflow=''; }catch(e){}
+    // 清走 hash，避免任何 :target/路由殘留
+    try{
+      if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    } catch(e){}
+  }
+
+  // 供工具列 onclick 使用（同其他5個鍵一致）
+  window.showCaseHelp = function(){ open(); };
+  window.hideCaseHelp = function(){ close(); };
+
+  function applyStepBadges(){
+    // 為每個步驟自動加 1/2/3/4 標籤（配合 CSS li::before）
+    panels.forEach(panel => {
+      const lis = panel.querySelectorAll('.ag-case-steps li');
+      lis.forEach((li, idx) => {
+        if (!li.getAttribute('data-step')) li.setAttribute('data-step', String(idx + 1));
+      });
+    });
+  }
+
+  function setTab(key){
+    tabs.forEach(t=>t.setAttribute('aria-selected', String(t.dataset.tab===key)));
+    panels.forEach(p=>{ p.dataset.active = String(p.dataset.panel===key); });
+    applyStepBadges();
+  }
+
+  // tabs click
+  tabs.forEach(t => {
+    t.addEventListener('click', function(){
+      setTab(this.dataset.tab);
+    });
+  });
+
+  // --- i18n：案例按鈕 + 彈窗內容 ---
+  const caseI18n = {
+    zh: {
+      btnShort: '例',
+      btnTitle: '案例',
+      modalTitle: '使用案例',
+      close: '關閉',
+      tab1: '案例一：未知庫存做預算',
+      tab2: '案例二：碎料優先清貨倉',
+      h1: '案例一：未知庫存，快速估算用料預算',
+      sub1: '<b>適用情況：</b>你未清楚貨倉仲有幾多現成料，只想快手估算要準備幾多新料（報價／做預算用）。',
+      steps1: [
+        '<b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。',
+        '<b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。',
+        '<b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。',
+        '<b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。'
+      ],
+      tip1: '<b>小貼士：</b>最啱報價階段，用唔著翻貨倉點料，幾秒就估到材料成本。',
+      h2: '案例二：有碎料舊料，叫系統優先「清貨倉」',
+      sub2: '<b>適用情況：</b>貨倉有碎料想先用晒，唔夠先補新料，盡量慳成本。',
+      steps2: [
+        '<b>排版設定改做「碎料優先」：</b>呢步最重要，等於直接同系統講「先用舊料」。',
+        '<b>輸入部件需求：</b>喺「部件區」填尺寸 + 數量。',
+        '<b>輸入現有碎料：</b>喺「材料／物料區」如實填碎料尺寸 + 數量。',
+        '<b>按「計算」睇排版圖：</b>畫面會清楚展示點樣優先用碎料；唔夠嘅部分會由「自動補料」補標準新料。'
+      ]
+    },
+    en: {
+      btnShort: 'Ex',
+      btnTitle: 'Examples',
+      modalTitle: 'Use Cases',
+      close: 'Close',
+      tab1: 'Use Case 1: Budgeting with unknown stock',
+      tab2: 'Use Case 2: Use offcuts first (clear your stock)',
+      h1: 'Use Case 1: Quick budgeting when warehouse stock is unknown',
+      sub1: '<b>When to use:</b> You don\'t know how much stock is left in the warehouse, and you just want a quick estimate of how many new bars you need (for quoting/budgeting).',
+      steps1: [
+        '<b>Set the standard stock length:</b> Choose the unit and set the default bar length for auto top-up (e.g., timber 8 ft, aluminum 3 m).',
+        '<b>Enter cutting requirements:</b> In the Cutting Items table, fill in length and quantity row by row.',
+        '<b>In Material, input only 1 standard bar:</b> Because you\'re budgeting, start with one bar. The system will use <i>Auto top-up</i> to infer how many bars are needed in total.',
+        '<b>Click Calculate and review the layout:</b> The layout shows the best cutting plan, so you can quickly see the approximate number of bars required.'
+      ],
+      tip1: '<b>Tip:</b> Great for the quotation stage—no need to count real stock. Get a fast material estimate in seconds.',
+      h2: 'Use Case 2: Prioritize offcuts to reduce cost (clear your warehouse)',
+      sub2: '<b>When to use:</b> You have offcuts/scrap in the warehouse. You want to use them first, and only top up with new standard bars when needed.',
+      steps2: [
+        '<b>Switch the algorithm to “Offcut-first”:</b> This tells the system to use existing offcuts before new material.',
+        '<b>Enter cutting requirements:</b> In the Cutting Items table, fill in length and quantity.',
+        '<b>Enter existing offcuts:</b> In Material, input the offcut lengths and quantities as they are in your warehouse.',
+        '<b>Click Calculate and review the layout:</b> The result clearly shows how offcuts are consumed first; any shortage will be covered by <i>Auto top-up</i> with standard bars.'
+      ]
+    }
+  };
+
+  function updateCaseHelpLanguageImpl(lang){
+    lang = (lang === 'en') ? 'en' : 'zh';
+    const t = caseI18n[lang];
+
+    // Button
+    const _btn = getBtn();
+    if(_btn){
+      _btn.innerHTML = '<span style="font-size:12px;font-weight:700;line-height:1;">' + t.btnShort + '</span>';
+      _btn.title = t.btnTitle;
+      _btn.setAttribute('aria-label', t.btnTitle);
+    }
+
+    // Modal header
+    const titleEl = document.getElementById('ag-case-help-title');
+    if(titleEl) titleEl.textContent = t.modalTitle;
+    const closeEl = document.getElementById('ag-case-help-close');
+    if(closeEl) closeEl.textContent = t.close;
+
+    // Tabs
+    const tab1 = document.querySelector('.ag-case-tab[data-tab="case1"]');
+    const tab2 = document.querySelector('.ag-case-tab[data-tab="case2"]');
+    if(tab1) tab1.textContent = t.tab1;
+    if(tab2) tab2.textContent = t.tab2;
+
+    // Panel 1
+    const p1 = document.querySelector('.ag-case-panel[data-panel="case1"]');
+    if(p1){
+      const h = p1.querySelector('.ag-case-h');
+      const sub = p1.querySelector('.ag-case-sub');
+      const lis = p1.querySelectorAll('.ag-case-steps li');
+      const tip = p1.querySelector('.ag-case-tip');
+      if(h) h.textContent = t.h1;
+      if(sub) sub.innerHTML = t.sub1;
+      (t.steps1 || []).forEach((txt,i)=>{ if(lis[i]) lis[i].innerHTML = txt; });
+      if(tip) tip.innerHTML = t.tip1;
+    }
+
+    // Panel 2
+    const p2 = document.querySelector('.ag-case-panel[data-panel="case2"]');
+    if(p2){
+      const h = p2.querySelector('.ag-case-h');
+      const sub = p2.querySelector('.ag-case-sub');
+      const lis = p2.querySelectorAll('.ag-case-steps li');
+      if(h) h.textContent = t.h2;
+      if(sub) sub.innerHTML = t.sub2;
+      (t.steps2 || []).forEach((txt,i)=>{ if(lis[i]) lis[i].innerHTML = txt; });
+    }
+  }
+
+  // 初次載入時，同步一次語言
+  updateCaseHelpLanguageImpl((document.getElementById('language')||{}).value || 'zh');
+
+  function attachBtnIntoToolbar(){
+    if(!btn) return false;
+    if(btn.dataset.attached==='true') return true;
+
+    // 1) 你張截圖紅圈嗰排：.top-tools（A+、A-、半月、?、QR）
+    const topTools = document.querySelector('.top-tools');
+    if(topTools){
+      const ref = document.getElementById('qrBtn')
+        || document.getElementById('newHelpBtn')
+        || document.getElementById('themeToggleBtn')
+        || topTools.querySelector('button');
+
+      if(ref){
+        btn.className = ref.className || btn.className || '';
+      }
+
+      // 圓形功能鍵：根據語言自動換字
+      updateCaseHelpLanguageImpl((document.getElementById('language')||{}).value || 'zh');
+
+      btn.style.display = 'inline-flex';
+      btn.dataset.attached='true';
+
+      // 插喺 QR 後面（如果未有 QR，就插喺 ? 後面）
+      if(ref && ref.parentNode === topTools){
+        topTools.insertBefore(btn, ref.nextSibling);
+      } else {
+        topTools.appendChild(btn);
+      }
+      return true;
+    }
+
+    // 2) 後備：方案管理嗰行（如果有需要）
+    const schemeLeft = document.querySelector('.scheme-actions-row .scheme-left');
+    if(schemeLeft){
+      const ref = schemeLeft.querySelector('button');
+      if(ref){
+        btn.className = ref.className || 'btn btn-sm';
+      }
+      btn.style.display = 'inline-flex';
+      btn.dataset.attached='true';
+      schemeLeft.appendChild(btn);
+      return true;
+    }
+
+    return false;
+  }
+
+  // 初次載入：初始化為「案例一」+ 生成步驟編號
+  try { setTab('case1'); } catch(e) {}
+
+  // v23：改用 CSS :target 開關彈窗，避免 anygen.io 預覽禁用 JS
+  //（保留腳本但唔再依賴 click 綁定 / 插入）
+})();
+</script>
 
 <div class="card" id="settings-card"><div class="section-header">
 <div class="section-title">
@@ -1511,11 +2255,12 @@ html.no-transitions, html.no-transitions * {
 <div class="col-md-3">
 <div class="d-flex flex-column align-items-start">
 <label class="form-label mb-2" id="unitLabel" style="font-size: 0.875rem;">顯示單位:</label>
-<select class="form-select unit-select" id="unit" onchange="updateInputLabels()" style="height: 40px; width: 40px; font-size: 1rem; font-weight: 500;">
+<select class="form-select unit-select" id="unit" onchange="updateInputLabels()" style="display:none">
 <option selected="selected" value="metric">公</option>
 <option value="imperial">英</option>
 <option value="imperial_decimal">英(D)</option>
 </select>
+<button class="btn btn-success" id="unitPickerBtn" type="button" data-bs-toggle="modal" data-bs-target="#unitPickerModal" style="height:40px;width:56px;font-size:1.1rem;font-weight:700;padding:0;" data-target-select="unit">公</button>
 </div>
 </div>
 <div class="col-6 col-md-3">
@@ -1541,25 +2286,25 @@ html.no-transitions, html.no-transitions * {
 <div class="row g-3 mt-0" style="margin-top:3px;">
 <div class="col-md-12">
 <label class="form-label" id="schemeManagementLabel">方案管理:</label>
-<div class="d-flex align-items-center gap-2 scheme-actions-row" style="flex-wrap: nowrap; overflow-x: auto;">
-  <button class="btn btn-sm save-scheme-btn" id="saveSchemeButton" onclick="saveScheme()">
-<i class="fas fa-save me-1"></i>儲存方案
-                            </button>
-  <button class="btn btn-sm load-scheme-btn" id="loadSchemeButton" onclick="loadScheme()">
-<i class="fas fa-folder-open me-1"></i>載入方案
-                            </button>
+<div class="d-flex align-items-center gap-2 scheme-actions-row" style="overflow: visible; width:100%;">
+  <div class="scheme-left">
+    <button class="btn btn-sm save-scheme-btn" id="saveSchemeButton" onclick="saveScheme()">
+      <i class="fas fa-save me-1"></i>儲存方案
+    </button>
+    <button class="btn btn-sm load-scheme-btn" id="loadSchemeButton" onclick="loadScheme()">
+      <i class="fas fa-folder-open me-1"></i>載入方案
+    </button>
+  </div>
 
-  <!-- 自動補料開關（更細；狀態「開/閂」一眼見；描述放上方） -->
-  <div class="auto-replenish-control" id="autoReplenishControl" aria-label="Auto-Replenish control">
-    <div class="ar-title-row">
-      <span class="ar-title" id="autoReplenishLabel"></span>
-      <span class="ar-state on" id="autoReplenishState">開</span>
-    </div>
-    <div class="ar-desc" id="autoReplenishDesc">材料不足時自動補入預設長度</div>
-    <div class="form-check form-switch auto-replenish-switch">
-      <input class="form-check-input" type="checkbox" role="switch" id="autoReplenishToggle" checked>
-      <label class="visually-hidden" for="autoReplenishToggle" id="autoReplenishA11yLabel">Auto-Replenish</label>
-    </div>
+  <!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
+  <div class="scheme-right" id="autoReplenishWrap">
+    <div class="auto-replenish-title" id="autoReplenishBtnTitle">自動補料</div>
+    <button class="btn btn-success btn-sm" id="autoReplenishPickerBtn" type="button"
+            data-bs-toggle="modal" data-bs-target="#autoReplenishModal"
+            title="自動補料" aria-label="自動補料">OFF</button>
+    <!-- 保留舊 checkbox 作相容（隱藏），供既有程式用 checked 判斷 -->
+    <input type="checkbox" id="autoReplenishToggle" checked style="display:none !important;">
+    <span class="visually-hidden" id="autoReplenishA11yLabel">Auto-Replenish</span>
   </div>
 </div>
 </div>
@@ -1619,10 +2364,11 @@ html.no-transitions, html.no-transitions * {
     <button class="btn btn-secondary btn-sm flex-fill" id="clearCuttingButton" onclick="clearCuttingInputs()">
     <i class="fas fa-times me-1"></i>清除輸入
                                     </button>
-    <select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="min-width:110px; max-width:160px; white-space:nowrap">
+    <select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="display:none !important">
     <option selected="selected" value="metric">公</option>
     <option value="imperial">英</option>
     </select>
+<button class="btn btn-success btn-sm flex-shrink-0" id="globalCutUnitBtn" type="button" data-bs-toggle="modal" data-bs-target="#unitPickerModal" data-target-select="globalCutUnit" style="height:31px;width:48px;font-size:1rem;font-weight:800;padding:0;">公</button>
     </div>
     </div>
     </div>
@@ -1704,10 +2450,11 @@ html.no-transitions, html.no-transitions * {
               <button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
                 <i class="fas fa-times me-1"></i>清除輸入
               </button>
-              <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0" id="globalMaterialUnit" style="min-width:110px; max-width:160px; white-space:nowrap">
+              <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0" id="globalMaterialUnit" style="display:none !important">
                 <option selected="selected" value="metric">公</option>
                 <option value="imperial">英</option>
               </select>
+<button class="btn btn-success btn-sm flex-shrink-0" id="globalMaterialUnitBtn" type="button" data-bs-toggle="modal" data-bs-target="#unitPickerModal" data-target-select="globalMaterialUnit" style="height:31px;width:48px;font-size:1rem;font-weight:800;padding:0;">公</button>
             </div>
           </div>
         </div>
@@ -1748,7 +2495,7 @@ html.no-transitions, html.no-transitions * {
 <div class="card-body text-center">
 
 <div class="button-group">
-<button class="btn" id="calculateButton" onclick="calculate()">
+<button class="btn" id="calculateButton" onclick="calculateAndScroll()">
 <i class="fas fa-calculator me-2"></i>計算
                     </button>
 <button class="btn btn-danger" id="resetButton" onclick="reset()">
@@ -2164,6 +2911,8 @@ html.no-transitions, html.no-transitions * {
             document.title = (lang === 'zh') ? '鋁材切割排版' : 'Aluminum Cutting Optimization';
             document.body.classList.toggle("lang-en", lang === "en");
             document.body.classList.toggle("lang-zh", lang === "zh");
+            // Case / Examples button + modal
+            if (window.updateCaseHelpLanguage) window.updateCaseHelpLanguage(lang);
 
             for (const [id, texts] of Object.entries(elements)) {
                 const element = document.getElementById(id);
@@ -2286,9 +3035,8 @@ html.no-transitions, html.no-transitions * {
             var qrUrlLabel=document.getElementById('qrUrlLabel'); if(qrUrlLabel) qrUrlLabel.textContent=t.qrUrl;
             var qrCloseBtn=document.getElementById('qrCloseBtn'); if(qrCloseBtn) qrCloseBtn.textContent=t.close;
 
-            // Auto-Replenish toggle (label + description + state)
-            var arLbl=document.getElementById('autoReplenishLabel'); if(arLbl) arLbl.textContent = (lang==='zh') ? '自動補料' : 'Auto-Replenish';
-            var arDesc=document.getElementById('autoReplenishDesc'); if(arDesc) arDesc.textContent = (lang==='zh') ? '材料不足時自動補入預設長度' : 'Auto-add default length when material is insufficient';
+            // Auto-Replenish（新制按鈕上方描述）
+            var arLbl=document.getElementById('autoReplenishBtnTitle'); if(arLbl) arLbl.textContent = (lang==='zh') ? '自動補料' : 'Auto-Replenish';
             // 保持原有(英文)開關文字描述：唔跟語言變成中文
             var arA11y=document.getElementById('autoReplenishA11yLabel'); if(arA11y) arA11y.textContent = 'Auto-Replenish';
             if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
@@ -3156,6 +3904,7 @@ html.no-transitions, html.no-transitions * {
                 if (algo !== 'SizeGrouping') allCuts.sort(function(a, b) { return b.length - a.length; });
                 var availableMaterials = expandMaterials(materials).sort(function(a, b) { return a.length - b.length; });
                 var defaultLen = (materials && materials.length) ? Math.max.apply(null, materials.map(function(m) { return Number(m.length)||0; })) : 6000;
+                try { if (typeof window.isAutoReplenishEnabled==='function' && window.isAutoReplenishEnabled() && typeof window.getAutoReplenishLength==='function') { defaultLen = window.getAutoReplenishLength(defaultLen); } } catch(e) {}
                 var bins = [];
 
                 function placeIntoExisting(cut) {
@@ -3286,6 +4035,7 @@ html.no-transitions, html.no-transitions * {
             var origMats  = mats.filter(function(m){ return (m.mclass||'scrap') !== 'scrap'; }).sort(function(a,b){return a.length-b.length;});
 
             var defaultLen = (materials && materials.length) ? Math.max.apply(null, materials.map(function(m) { return Number(m.length)||0; })) : 6000;
+                try { if (typeof window.isAutoReplenishEnabled==='function' && window.isAutoReplenishEnabled() && typeof window.getAutoReplenishLength==='function') { defaultLen = window.getAutoReplenishLength(defaultLen); } } catch(e) {}
 
             function packOneBar(barLen, availableCuts) {
                 // 用 BFD 思路：每次揀「放完之後剩餘最少」嗰件
@@ -3411,7 +4161,25 @@ html.no-transitions, html.no-transitions * {
             });
         }
 
-        function calculate() {
+        
+        // === AnyGen patch: scroll to layout after calculate ===
+        function calculateAndScroll() {
+            // 標記：本次計算需要自動捲到結果（交由 renderCuttingResults 最終完成後觸發）
+            try { window.__ag_scroll_after_calc = Date.now(); } catch(e) {}
+
+            // Run existing calculation
+            calculate();
+
+            // 早期嘗試：如果結果已經可見就即刻捲
+            setTimeout(function(){
+              try {
+                var t = document.getElementById('cuttingCanvas');
+                if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              } catch(e) {}
+            }, 200);
+        }
+
+function calculate() {
             try {
                 const cuttingItems = getCuttingItems();
                 const materialItems = getMaterialItems();
@@ -3541,10 +4309,41 @@ html.no-transitions, html.no-transitions * {
                 renderCuttingResults(optimizedResult, effectiveSawThickness);
                 updateMaterialUsageStatus(optimizedResult);
 
+                function __agScrollTo(el){
+                  if (!el) return;
+                  // 找最近可滾動容器；否則用 window
+                  var p = el.parentElement;
+                  while (p) {
+                    var st = window.getComputedStyle(p);
+                    var oy = st.overflowY;
+                    if ((oy === 'auto' || oy === 'scroll') && p.scrollHeight > p.clientHeight + 5) break;
+                    p = p.parentElement;
+                  }
+                  if (p) {
+                    var top = el.offsetTop;
+                    p.scrollTo({ top: Math.max(0, top - 10), behavior: 'smooth' });
+                  } else {
+                    var rect = el.getBoundingClientRect();
+                    var y = (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + rect.top - 10;
+                    (document.scrollingElement || document.documentElement).scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+                  }
+                }
+
                 const resultsCard = document.getElementById("results-card");
                 if (resultsCard) {
                     resultsCard.style.display = "block";
-                    resultsCard.scrollIntoView({ behavior: "smooth" });
+
+                    // 目標：捲到「優化摘要」置頂（即 resultDetails 入面個 opt-summary-box 標題）
+                    var anchor = null;
+                    try {
+                      var rd = document.getElementById('resultDetails');
+                      if (rd) {
+                        anchor = rd.querySelector('.opt-summary-box h4') || rd.querySelector('.opt-summary-box') || rd.querySelector('h4');
+                      }
+                    } catch(e) {}
+
+                    // scrollIntoView 係某啲 Android WebView/Content URI 會失效，所以用自家 scrollTo
+                    __agScrollTo(anchor || resultsCard);
                 }
 
                 console.log("計算完成:", optimizedResult);
@@ -4462,6 +5261,9 @@ document.addEventListener("DOMContentLoaded", function() {
       let bins = [];
       let availableMaterials = materials.flatMap(item => Array.from({length: item.quantity}, () => ({...item}))).sort((a, b) => a.length - b.length);
       const defaultLength = materials.length > 0 ? materials.reduce((max, item) => Math.max(max, item.length || 0), 0) : 6000;
+      let __arLen = null;
+      try { if (typeof window.isAutoReplenishEnabled==='function' && window.isAutoReplenishEnabled() && typeof window.getAutoReplenishLength==='function') { __arLen = window.getAutoReplenishLength(defaultLength); } } catch(e) {}
+      const __defaultLength = (__arLen && __arLen>0) ? __arLen : defaultLength;
 
       if(algoType === 'FFD') {
         allCuts.forEach(cut => {
@@ -4488,7 +5290,7 @@ document.addEventListener("DOMContentLoaded", function() {
                   ? '材料不足：已關閉自動補料，請先加入足夠材料。'
                   : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
               }
-              binLength = defaultLength;
+              binLength = __defaultLength;
               autoAdded = true;
             }
             bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)});
@@ -4540,7 +5342,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     ? '材料不足：已關閉自動補料，請先加入足夠材料。'
                     : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
                 }
-                binLength = defaultLength;
+                binLength = __defaultLength;
                 autoAdded = true;
               }
               const newBin = {length: binLength, cuts: [], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)};
@@ -4589,7 +5391,7 @@ document.addEventListener("DOMContentLoaded", function() {
                   ? '材料不足：已關閉自動補料，請先加入足夠材料。'
                   : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
               }
-              binLength = defaultLength;
+              binLength = __defaultLength;
               autoAdded = true;
             }
             bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)});
@@ -4605,16 +5407,37 @@ document.addEventListener("DOMContentLoaded", function() {
   window.optimizeCutsSizeGrouping = createOptimizer('SizeGrouping');
 
   // 供其他地方讀取自動補料設定
-  window.isAutoReplenishEnabled = function(){
-    const el = document.getElementById('autoReplenishToggle');
-    if (el) return !!el.checked;
+  
+  // 供其他地方讀取自動補料設定（len>0 代表 ON）
+  window.getAutoReplenishLength = function(fallback){
     try {
       const saved = localStorage.getItem('aluminum_cut_user_prefs_v1');
       if (saved) {
         const s = JSON.parse(saved);
-        return !(s && s.autoReplenish === false);
+        const len = Number(s && s.autoReplenishLen);
+        if (!Number.isNaN(len) && len > 0) return len;
+        // OFF 時保留 lastLen，方便下次開返
+        const last = Number(s && s.autoReplenishLastLen);
+        // OFF / 或者讀唔到 len 時：優先用 lastLen（用戶最後一次揀過嘅補料長度）
+        if (!Number.isNaN(last) && last > 0) return last;
       }
     } catch(e) {}
+    // 如果冇任何自動補料設定，就用 fallback；否則用一個安全預設（6000mm）
+    return (fallback !== undefined ? fallback : 6000);
+  };
+
+  window.isAutoReplenishEnabled = function(){
+    try {
+      const saved = localStorage.getItem('aluminum_cut_user_prefs_v1');
+      if (saved) {
+        const s = JSON.parse(saved);
+        const len = Number(s && s.autoReplenishLen);
+        if (!Number.isNaN(len)) return len > 0;
+      }
+    } catch(e) {}
+    // 回退：舊版本 checkbox
+    const el = document.getElementById('autoReplenishToggle');
+    if (el) return !!el.checked;
     return true;
   };
 
@@ -4651,6 +5474,23 @@ document.addEventListener("DOMContentLoaded", function() {
     if(typeof originalRender === 'function') {
       originalRender.call(this, bins, sawThickness);
     }
+
+    // 計算完成後自動捲到排版圖（比 setTimeout 更可靠：等 render 真係畫完先捲）
+    try {
+      if (window.__ag_scroll_after_calc) {
+        var now = Date.now();
+        // 只係 5 秒內嘅「最近一次計算」先觸發，避免其他渲染誤觸
+        if (now - window.__ag_scroll_after_calc < 5000) {
+          setTimeout(function(){
+            var target = document.getElementById('cuttingCanvas') || document.getElementById('results-card') || document.getElementById('resultDetails');
+            if (target && target.scrollIntoView) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }, 50);
+        }
+        window.__ag_scroll_after_calc = 0;
+      }
+    } catch(e) {}
   };
 })();
 </script>
@@ -4664,8 +5504,8 @@ document.addEventListener("DOMContentLoaded", function() {
   function normalizeNumericString(v){
     const s = v.trim();
     if (s === '') return '';
-    if (/^\d+$/.test(s)) return String(Number(s));
-    if (/^0\.[0-9]+$/.test(s)) return s;
+    if (/^\\d+$/.test(s)) return String(Number(s));
+    if (/^0\\.[0-9]+$/.test(s)) return s;
     const num = Number(s);
     if (!Number.isNaN(num)) return String(num);
     return s;
@@ -4686,7 +5526,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     el.addEventListener('input', function(){
       const v = this.value;
-      if (/^\d+$/.test(v)) {
+      if (/^\\d+$/.test(v)) {
         const normalized = String(Number(v));
         if (normalized !== v) this.value = normalized;
       }
@@ -5119,16 +5959,66 @@ document.addEventListener('DOMContentLoaded', function() {
   let isRestoring = false;
 
   // Auto-Replenish UI：同步顯示「開/閂」
+  
+  // Auto-Replenish UI：同步顯示「OFF／長度」
   window.updateAutoReplenishUI = function(){
-    const el = document.getElementById('autoReplenishToggle');
     const state = document.getElementById('autoReplenishState');
-    if (!el || !state) return;
+    const btn = document.getElementById('autoReplenishPickerBtn');
+    const hint = null;
+
+    function shortLabel(len, label){
+      // 盡量短：配合 48px 按鈕
+      const n = Number(len);
+      if (!Number.isFinite(n) || n <= 0) return 'OFF';
+      const m = n / 1000;
+      if (Math.abs(m - Math.round(m)) < 1e-6) return String(Math.round(m)) + 'm';
+      const ft = Math.round(n / 304.8);
+      if (Math.abs(n - ft * 304.8) < 0.6) return String(ft) + 'ft';
+      return String(Math.round(n)) + 'mm';
+    }
     const langEl = document.getElementById('language');
     const lang = langEl ? langEl.value : 'zh';
-    const on = !!el.checked;
-    state.textContent = (lang === 'zh') ? (on ? '開' : '閂') : (on ? 'ON' : 'OFF');
-    state.classList.toggle('on', on);
-    state.classList.toggle('off', !on);
+
+    let len = 0;
+    let label = '';
+    let hasSaved = false;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        hasSaved = true;
+        const s = JSON.parse(saved);
+        len = Number(s && s.autoReplenishLen);
+        if (Number.isNaN(len)) len = 0;
+        if (len > 0) {
+          label = (lang === 'zh') ? (s.autoReplenishLenLabelZh || '') : (s.autoReplenishLenLabelEn || '');
+        }
+      }
+    } catch(e) {}
+
+    const checkbox = document.getElementById('autoReplenishToggle');
+    // 首次未有儲存設定時：維持「預設開啟」，並用 6000mm 做預設長度
+    if (!hasSaved) {
+      const on0 = checkbox ? !!checkbox.checked : true;
+      len = on0 ? 6000 : 0;
+      label = on0 ? '6000 mm' : '';
+    }
+
+    const on = len > 0;
+    if (checkbox) checkbox.checked = on;
+
+    if (state) {
+      const text = on ? (label || (Math.round(len*1000)/1000 + ' mm')) : 'OFF';
+      state.textContent = text;
+      state.classList.toggle('on', on);
+      state.classList.toggle('off', !on);
+    }
+    if (btn) {
+      btn.textContent = on ? shortLabel(len, label) : 'OFF';
+      // ON：綠色；OFF：灰色（同下方 unit 按鈕風格一致）
+      btn.classList.toggle('btn-success', on);
+      btn.classList.toggle('btn-secondary', !on);
+    }
+    if (hint) hint.textContent = (lang === 'zh') ? '（揀長度=開；揀OFF=閂）' : '(Pick length=ON; pick OFF=OFF)';
   };
 
   function saveSettings(){
@@ -5143,7 +6033,27 @@ document.addEventListener('DOMContentLoaded', function() {
         sawThickness: document.getElementById('sawThickness') ? document.getElementById('sawThickness').value : '',
         theme: document.body.classList.contains('sepia-mode') ? 'sepia' : 'normal',
         fontSize: document.documentElement.style.fontSize || '',
-        autoReplenish: document.getElementById('autoReplenishToggle') ? !!document.getElementById('autoReplenishToggle').checked : true
+        // autoReplenish（舊版）保留兼容
+        autoReplenish: document.getElementById('autoReplenishToggle') ? !!document.getElementById('autoReplenishToggle').checked : true,
+        // 新版：len=0 代表 OFF；>0 代表 ON
+        autoReplenishLen: (function(){
+          try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); const v=Number(s&&s.autoReplenishLen); if(!Number.isNaN(v)) return v; } } catch(e) {}
+          // 回退：如果 checkbox 開住，預設用 6000
+          const chk = document.getElementById('autoReplenishToggle');
+          return (chk && chk.checked) ? 6000 : 0;
+        })(),
+        autoReplenishLastLen: (function(){
+          try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); const v=Number(s&&s.autoReplenishLastLen); if(!Number.isNaN(v)) return v; } } catch(e) {}
+          return 6000;
+        })(),
+        autoReplenishLenLabelZh: (function(){
+          try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); return s && s.autoReplenishLenLabelZh; } } catch(e) {}
+          return '';
+        })(),
+        autoReplenishLenLabelEn: (function(){
+          try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); return s && s.autoReplenishLenLabelEn; } } catch(e) {}
+          return '';
+        })()
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     } catch(e) {}
@@ -5197,8 +6107,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const autoRepEl = document.getElementById('autoReplenishToggle');
       if (autoRepEl) {
-        // 預設開啟；只有明確儲存為 false 才關閉
-        autoRepEl.checked = !(s && s.autoReplenish === false);
+        // 新版：優先讀 autoReplenishLen（len>0=ON；0=OFF）
+        const len = Number(s && s.autoReplenishLen);
+        if (!Number.isNaN(len)) {
+          autoRepEl.checked = len > 0;
+        } else {
+          // 回退：舊設定 autoReplenish
+          autoRepEl.checked = !(s && s.autoReplenish === false);
+        }
       }
       if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
 
@@ -5223,21 +6139,210 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Auto-Replenish：即時更新「開/閂」標籤
     const _ar = document.getElementById('autoReplenishToggle');
-    const _arWrap = document.getElementById('autoReplenishControl');
+    const _arWrap = document.getElementById('autoReplenishPickerBtn');
     if (_ar) {
       _ar.addEventListener('change', () => {
         if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
       });
 
-      // 令「整個控制區」都可以點擊切換（避免以為已關但其實冇切到）
-      if (_arWrap) {
-        _arWrap.addEventListener('click', (ev) => {
-          // 如果直接點到 input，本身已會 toggle，避免 double toggle
-          if (ev.target === _ar) return;
-          _ar.checked = !_ar.checked;
-          _ar.dispatchEvent(new Event('change', { bubbles: true }));
+      // 新制：按鈕本身已用 data-bs-toggle 觸發 modal；呢度毋須再手動 show
+
+      // 綁定 modal 選項：選長度=ON；選 OFF=OFF（但保留 lastLen）
+      (function(){
+        const wrap = document.getElementById('autoReplenishOptions');
+        if (!wrap) return;
+
+        function applyAutoReplenish(len, labelZh, labelEn){
+          if (Number.isNaN(len)) return;
+          try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            const s = saved ? (JSON.parse(saved) || {}) : {};
+            if (len > 0) {
+              s.autoReplenishLen = len;
+              s.autoReplenishLastLen = len;
+              s.autoReplenishLenLabelZh = labelZh || (Math.round(len*1000)/1000 + ' mm');
+              s.autoReplenishLenLabelEn = labelEn || (Math.round(len*1000)/1000 + ' mm');
+              s.autoReplenish = true; // 舊版兼容
+            } else {
+              s.autoReplenishLen = 0;
+              s.autoReplenish = false; // 舊版兼容
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+          } catch(e) {}
+
+          const chk = document.getElementById('autoReplenishToggle');
+          if (chk) {
+            chk.checked = (len > 0);
+            // 重要：觸發 change，令依賴 checkbox 嘅舊邏輯都即時生效
+            try { chk.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+          }
+          if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
+
+          // close modal
+          try {
+            const modalEl = document.getElementById('autoReplenishModal');
+            if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const inst = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+              inst.hide();
+            }
+          } catch(e) {}
+
+          // 重新計算（如果已有資料）
+          try {
+            const hasData = document.querySelector('#cuttingItemsTable tbody tr') || document.querySelector('#materialItemsTable tbody tr');
+            if (hasData && typeof calculate === 'function') calculate();
+          } catch(e) {}
+        }
+
+        function refreshAutoReplenishOptionLabels(){
+          const u = getAutoReplenishInputUnit();
+          wrap.querySelectorAll('button[data-ar-len]').forEach(btn => {
+            const mm = Number(btn.getAttribute('data-ar-len'));
+            if (!Number.isFinite(mm)) return;
+            // OFF 按鈕保持原樣
+            if (mm <= 0) return;
+
+            // 只更新顯示文字（保留原 data-ar-len 仍然係 mm）
+            if (!btn.dataset._origText) btn.dataset._origText = (btn.textContent || '').trim();
+
+            // 關鍵修正：
+            // 「常用(mm)」嗰批按鈕應該永遠顯示 mm，唔好因為瀏覽器/本機已保存嘅 unit 設定而自動轉成 ft/in。
+            // 只係：
+            // - 明確標記 data-ar-display="ft" / "in" 嘅按鈕，或者
+            // - 自訂輸入根據用戶目前選擇嘅單位
+            // 先會顯示英制。
+            const force = (btn.getAttribute('data-ar-display') || '').toLowerCase();
+            const orig = (btn.dataset._origText || '').toLowerCase();
+            const isMetricFixed = (force === 'mm') || (orig.indexOf('mm') >= 0) || (orig.indexOf('毫米') >= 0);
+
+            let disp;
+            if (force === 'ft') {
+              const ft = mm / FT_TO_MM;
+              const ftTxt = (Math.abs(ft - Math.round(ft)) < 0.01) ? String(Math.round(ft)) : ft.toFixed(2);
+              disp = ftTxt + ' ft';
+            } else if (force === 'in') {
+              const inch = mm / INCH_TO_MM;
+              const inTxt = (Math.abs(inch - Math.round(inch)) < 0.01) ? String(Math.round(inch)) : inch.toFixed(2);
+              disp = inTxt + ' in';
+            } else if (isMetricFixed) {
+              disp = Math.round(mm) + ' mm';
+            } else if (u === 'imperial') {
+              const ft = mm / FT_TO_MM;
+              const ftTxt = (Math.abs(ft - Math.round(ft)) < 0.01) ? String(Math.round(ft)) : ft.toFixed(2);
+              disp = ftTxt + ' ft';
+            } else if (u === 'imperial_decimal') {
+              const inch = mm / INCH_TO_MM;
+              const inTxt = (Math.abs(inch - Math.round(inch)) < 0.01) ? String(Math.round(inch)) : inch.toFixed(2);
+              disp = inTxt + ' in';
+            } else {
+              disp = Math.round(mm) + ' mm';
+            }
+
+            btn.textContent = disp;
+            btn.setAttribute('data-ar-label-zh', disp);
+            btn.setAttribute('data-ar-label-en', disp);
+          });
+          // 更新自訂輸入提示（避免 hint/input 因為宣告位置導致 TDZ）
+          const hintEl = document.getElementById('autoReplenishCustomHint');
+          if (hintEl) {
+            hintEl.textContent = (u === 'imperial')
+              ? '以英尺輸入（可小數），會自動換算成 mm。'
+              : (u === 'imperial_decimal')
+                ? '以英寸輸入（可小數），會自動換算成 mm。'
+                : '只接受正數（以 mm 計）。';
+          }
+          const inputEl = document.getElementById('autoReplenishCustomLen');
+          if (inputEl) {
+            inputEl.placeholder = (u === 'imperial') ? '例如 20 (ft)' : (u === 'imperial_decimal') ? '例如 240 (in)' : '例如 6500 / 7000 (mm)';
+          }
+        }
+
+        // 點選預設選項
+        wrap.addEventListener('click', (ev) => {
+          const b = ev.target && ev.target.closest ? ev.target.closest('button[data-ar-len]') : null;
+          if (!b) return;
+          const len = Number(b.getAttribute('data-ar-len'));
+          const labelZh = b.getAttribute('data-ar-label-zh') || (b.textContent || '').trim();
+          const labelEn = b.getAttribute('data-ar-label-en') || (b.textContent || '').trim();
+          applyAutoReplenish(len, labelZh, labelEn);
         });
-      }
+
+        // 每次開 modal 都刷新一次顯示（避免切換公制/英制後仍然顯示舊單位）
+        try {
+          const modalEl = document.getElementById('autoReplenishModal');
+          if (modalEl) {
+            modalEl.addEventListener('shown.bs.modal', refreshAutoReplenishOptionLabels);
+          }
+        } catch(e) {}
+
+        // 初次亦刷新一次
+        refreshAutoReplenishOptionLabels();
+
+        // 自訂長度
+        const input = document.getElementById('autoReplenishCustomLen');
+        const applyBtn = document.getElementById('autoReplenishCustomApply');
+        const hint = document.getElementById('autoReplenishCustomHint');
+
+        function getAutoReplenishInputUnit(){
+          // 補料長度應該跟「材料」嘅顯示單位（globalMaterialUnit），其次先跟全局 unit
+          const gm = document.getElementById('globalMaterialUnit');
+          return (gm && gm.value) ? gm.value : ((document.getElementById('unit') && document.getElementById('unit').value) ? document.getElementById('unit').value : 'metric');
+        }
+
+        function toMMFromAutoReplenishInput(v, u){
+          // u: metric / imperial / imperial_decimal
+          if (!Number.isFinite(v) || v <= 0) return NaN;
+          if (u === 'imperial') {
+            // 允許用戶直接輸入「英尺（可小數）」
+            return v * FT_TO_MM;
+          }
+          if (u === 'imperial_decimal') {
+            // 允許用戶直接輸入「英寸（可小數）」
+            return v * INCH_TO_MM;
+          }
+          // metric：仍然用 mm
+          return v;
+        }
+
+        function applyCustom(){
+          if (!input) return;
+          const raw = String(input.value || '').trim();
+          const v = Number(raw);
+          const u = getAutoReplenishInputUnit();
+          const mm = toMMFromAutoReplenishInput(v, u);
+
+          if (!Number.isFinite(mm) || mm <= 0) {
+            if (hint) {
+              hint.textContent = (u === 'imperial')
+                ? '請輸入有效正數（英尺，可小數）。'
+                : (u === 'imperial_decimal')
+                  ? '請輸入有效正數（英寸，可小數）。'
+                  : '請輸入有效正數（mm）。';
+            }
+            return;
+          }
+
+          if (hint) {
+            hint.textContent = (u === 'imperial')
+              ? '以英尺輸入（可小數），會自動換算成 mm。'
+              : (u === 'imperial_decimal')
+                ? '以英寸輸入（可小數），會自動換算成 mm。'
+                : '只接受正數（以 mm 計）。';
+          }
+
+          // 顯示標籤用目前單位去格式化，避免「你揀英尺，但顯示 mm」造成誤會
+          const dispZh = (typeof formatLengthForDisplay === 'function') ? formatLengthForDisplay(mm, u) : (Math.round(mm) + ' mm');
+          const dispEn = dispZh;
+          const labelZh = dispZh + '（自訂）';
+          const labelEn = dispEn + ' (custom)';
+          applyAutoReplenish(mm, labelZh, labelEn);
+        }
+
+        if (applyBtn) applyBtn.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); applyCustom(); });
+        if (input) input.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') { ev.preventDefault(); ev.stopPropagation(); applyCustom(); }
+        });
+      })();
 
       // 首次渲染
       if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
@@ -5261,7 +6366,246 @@ document.addEventListener('DOMContentLoaded', function() {
   else init();
 })();
 </script>
-</body>
+
+<script>
+// === AnyGen patch: ensure blur triggers with Bootstrap modal events ===
+(function(){
+  function on(){ document.body.classList.add('ag-modal-blur'); }
+  function off(){ document.body.classList.remove('ag-modal-blur'); }
+  document.addEventListener('shown.bs.modal', on);
+  document.addEventListener('hidden.bs.modal', off);
+})();
+</script>
+
+
+<!-- Auto-Replenish length picker modal -->
+<div class="modal fade" id="autoReplenishModal" tabindex="-1" aria-labelledby="autoReplenishModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="autoReplenishModalLabel">自動補料：選擇補料長度</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="small text-muted mb-2">提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。</div>
+        <div class="d-grid gap-2" id="autoReplenishOptions">
+          <button type="button" class="btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
+
+          <div class="small text-muted mt-2">自訂（mm）</div>
+          <div class="input-group">
+            <input type="number" inputmode="decimal" class="form-control" id="autoReplenishCustomLen" placeholder="例如 6500 / 7000" min="1" step="1">
+            <button type="button" class="btn btn-outline-dark" id="autoReplenishCustomApply">套用</button>
+          </div>
+          <div class="small text-muted" id="autoReplenishCustomHint">只接受正數（以 mm 計）。</div>
+
+          <div class="small text-muted mt-2">常用（mm）</div>
+          <button type="button" class="btn btn-outline-success" data-ar-len="6000" data-ar-label-zh="6000 mm" data-ar-label-en="6000 mm">6000 mm</button>
+          <button type="button" class="btn btn-outline-success" data-ar-len="5000" data-ar-label-zh="5000 mm" data-ar-label-en="5000 mm">5000 mm</button>
+          <button type="button" class="btn btn-outline-success" data-ar-len="4000" data-ar-label-zh="4000 mm" data-ar-label-en="4000 mm">4000 mm</button>
+          <button type="button" class="btn btn-outline-success" data-ar-len="3000" data-ar-label-zh="3000 mm" data-ar-label-en="3000 mm">3000 mm</button>
+          <button type="button" class="btn btn-outline-success" data-ar-len="2000" data-ar-label-zh="2000 mm" data-ar-label-en="2000 mm">2000 mm</button>
+
+          <div class="small text-muted mt-2">常用（英尺）</div>
+          <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="2438.4" data-ar-label-zh="8 ft" data-ar-label-en="8 ft">8 ft</button>
+          <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="1828.8" data-ar-label-zh="6 ft" data-ar-label-en="6 ft">6 ft</button>
+          <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="1219.2" data-ar-label-zh="4 ft" data-ar-label-en="4 ft">4 ft</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Unit picker modal (replaces native <select> popup so we can show descriptions) -->
+<div class="modal fade" id="unitPickerModal" tabindex="-1" aria-labelledby="unitPickerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="unitPickerModalLabel">選擇顯示單位</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="d-grid gap-2">
+          <button type="button" class="btn btn-outline-success" data-unit-value="metric">
+            <div style="font-size:1.1rem;font-weight:800;">公</div>
+            <div class="small text-muted">公制（Metric）</div>
+          </button>
+          <button type="button" class="btn btn-outline-primary" data-unit-value="imperial">
+            <div style="font-size:1.1rem;font-weight:800;">英</div>
+            <div class="small text-muted">英制（Imperial）</div>
+          </button>
+          <button type="button" class="btn btn-outline-primary" id="unitPickDecimal" data-unit-value="imperial_decimal">
+            <div style="font-size:1.1rem;font-weight:800;">英(D)</div>
+            <div class="small text-muted">英制小數顯示（Decimal）</div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<script>
+// === AnyGen patch: unit picker wiring (multi-target) ===
+(function(){
+  const modal = document.getElementById('unitPickerModal');
+  if(!modal) return;
+
+  let targetSelectId = 'unit';
+  const decimalBtn = document.getElementById('unitPickDecimal');
+
+  const labelMap = { metric: '公', imperial: '英', imperial_decimal: '英(D)' };
+
+  function getTargetSelect(){
+    return document.getElementById(targetSelectId) || document.getElementById('unit');
+  }
+
+  function syncTriggerLabel(){
+    const sel = getTargetSelect();
+    if(!sel) return;
+    const v = sel.value;
+    const label = labelMap[v] || '公';
+    const colorClass = (v === 'imperial' || v === 'imperial_decimal') ? 'btn-primary' : 'btn-success';
+
+    // all triggers pointing to this select
+    document.querySelectorAll('[data-target-select="'+targetSelectId+'"]')
+      .forEach((b)=>{
+        b.textContent = label;
+        // ensure metric=green, imperial=blue
+        b.classList.remove('btn-success','btn-primary');
+        b.classList.add(colorClass);
+      });
+  }
+
+  // capture which select opened the modal
+  modal.addEventListener('show.bs.modal', function(ev){
+    const opener = ev.relatedTarget;
+    const t = opener?.getAttribute?.('data-target-select');
+    if(t) targetSelectId = t;
+
+    const sel = getTargetSelect();
+    if(decimalBtn){
+      const hasDecimal = !!sel?.querySelector('option[value="imperial_decimal"]');
+      decimalBtn.style.display = hasDecimal ? '' : 'none';
+    }
+    syncTriggerLabel();
+  });
+
+  modal.addEventListener('click', function(e){
+    const t = e.target.closest('[data-unit-value]');
+    if(!t) return;
+    const v = t.getAttribute('data-unit-value');
+    const sel = getTargetSelect();
+    if(!sel) return;
+
+    sel.value = v;
+    // 重要：用彈窗按鈕改值屬於「程式改值」，唔會自動觸發 change/input
+    // 但我哋嘅「記憶設定」係靠監聽 change/input 去 saveSettings()。
+    // 所以要手動 dispatch，確保公/英制選擇會被記住。
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    sel.dispatchEvent(new Event('input',  { bubbles: true }));
+
+    syncTriggerLabel();
+
+    // update placeholders/labels for current unit
+    if(typeof window.updateInputLabels === 'function') window.updateInputLabels();
+
+    const inst = window.bootstrap?.Modal?.getInstance(modal);
+    if(inst) inst.hide();
+  });
+
+  // 任何地方（包括 loadSettings restore）只要改到 select 值，就同步更新按鈕文字/顏色
+  ['unit','globalCutUnit','globalMaterialUnit'].forEach((id)=>{
+    const sel = document.getElementById(id);
+    if (sel) {
+      sel.addEventListener('change', ()=>{ targetSelectId = id; syncTriggerLabel(); });
+      sel.addEventListener('input',  ()=>{ targetSelectId = id; syncTriggerLabel(); });
+    }
+  });
+
+  // initial sync for all unit triggers
+  ['unit','globalCutUnit','globalMaterialUnit'].forEach((id)=>{
+    targetSelectId = id;
+    syncTriggerLabel();
+  });
+})();
+</script>
+
+
+<script>
+// === AnyGen patch: native select blur (mobile system pickers) v2 ===
+(function(){
+  let lastOpenAt = 0;
+  const on = () => { lastOpenAt = Date.now(); document.body.classList.add('ag-modal-blur'); };
+  const off = () => document.body.classList.remove('ag-modal-blur');
+
+  function anyBootstrapModalOpen(){
+    return !!document.querySelector('.modal.show');
+  }
+
+  function isNativeSelectFocused(){
+    const ae = document.activeElement;
+    return ae && ae.tagName === 'SELECT';
+  }
+
+  // Safety cleanup
+  // - 一般情況：冇 modal + 冇 select focus → 移除 blur
+  // - 但某些瀏覽器揀完 option 後，select 仍然 keep focus（你講嘅「要再撳一下先清」）
+  //   呢個時候其實 system picker 已經收咗，所以 change 之後要「強制」清 blur。
+  function cleanupSoon(delay, force){
+    setTimeout(function(){
+      if (force) { off(); return; }
+      if (!anyBootstrapModalOpen() && !isNativeSelectFocused()) off();
+    }, delay);
+  }
+
+  function bind(el){
+    // When opening system picker (mobile)
+    el.addEventListener('focus', () => { on(); }, { passive: true });
+    el.addEventListener('mousedown', () => { on(); }, { passive: true });
+    el.addEventListener('touchstart', () => { on(); }, { passive: true });
+
+    // When closing picker
+    // change：代表已完成選擇，強制清 blur（避免要再點一下）
+    el.addEventListener('change', () => cleanupSoon(60, true), { passive: true });
+    // blur：保留作保險（未必一定會發生）
+    el.addEventListener('blur', () => cleanupSoon(60), { passive: true });
+  }
+
+  // Bind current selects
+  document.querySelectorAll('select').forEach(bind);
+
+  // Global listeners：有啲瀏覽器「揀返同一個 option」唔會觸發 change。
+  // 但又要避免「一撳落去開 picker 就即刻清 blur」：所以加時間門檻。
+  function shouldForceClearNow(){
+    // 開 picker 後頭 350ms 內嘅 click/mouseup/touchend 通常係「開啟動作」本身，唔應該清 blur。
+    return (Date.now() - lastOpenAt) > 350;
+  }
+
+  document.addEventListener('touchend', () => { if(shouldForceClearNow()) cleanupSoon(160, true); }, { passive: true });
+  document.addEventListener('mouseup',  () => { if(shouldForceClearNow()) cleanupSoon(160, true); }, { passive: true });
+  document.addEventListener('click',    () => { if(shouldForceClearNow()) cleanupSoon(160, true); }, { passive: true });
+  window.addEventListener('focus',      () => { if(shouldForceClearNow()) cleanupSoon(160, true); });
+
+  // In case UI adds selects dynamically
+  const mo = new MutationObserver((ms)=>{
+    for(const m of ms){
+      m.addedNodes && m.addedNodes.forEach((n)=>{
+        if(n.nodeType!==1) return;
+        if(n.tagName==='SELECT') bind(n);
+        n.querySelectorAll && n.querySelectorAll('select').forEach(bind);
+      });
+    }
+  });
+  mo.observe(document.body, { childList: true, subtree: true });
+})();
+</script>
+
+
+
+
 <script>
 (function(){
   function getLang(){
@@ -5484,6 +6828,12 @@ document.addEventListener('DOMContentLoaded', function() {
       if(algo!=='SizeGrouping') allCuts.sort(function(a,b){ return b.length-a.length; });
       var availableMaterials = expandMaterials(materials).sort(function(a,b){ return a.length-b.length; });
       var defaultLen = materials && materials.length ? Math.max.apply(null, materials.map(function(m){ return m.length||0; })) : 6000;
+      // 重要：自動補料開啟時，補料長度必須跟用戶所選（而唔係回落用材料最長/3米）
+      try {
+        if (typeof window.isAutoReplenishEnabled==='function' && window.isAutoReplenishEnabled() && typeof window.getAutoReplenishLength==='function') {
+          defaultLen = window.getAutoReplenishLength(defaultLen);
+        }
+      } catch(e) {}
       var bins=[];
 
       function placeIntoExisting(cut){
@@ -5957,6 +7307,80 @@ textarea:focus {
   transform: translateY(0) !important;
 }
 
+/* 全局按鈕：字體放大時可換行，按鈕高度自動加高 */
+button.btn,
+.btn{
+  white-space: normal !important;
+  height: auto !important;
+  min-height: 38px;
+  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* 有啲掣入面包咗 span / i / small，佢哋自己可能仍然 nowrap，強制繼承換行 */
+.btn *{ white-space: inherit !important; }
+
+/* 注意：頂部工具列係固定圓形掣，唔應該因為字體放大而變形 */
+.top-tools .tool-btn{
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
+  line-height: 1 !important;
+}
+
+/* 取消所有彈窗/遮罩造成的背景模糊（保留遮罩變暗，但完全唔 blur） */
+
+/* 1) Bootstrap modal/backdrop */
+.modal-backdrop,
+.modal-backdrop.show{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+}
+
+/* 2) body 被加 modal-open / ag-modal-blur 時，原本會 blur 背景：全部取消 */
+body.modal-open .container-fluid,
+body.modal-open .container,
+body.modal-open .card,
+body.ag-modal-blur .container-fluid,
+body.ag-modal-blur .container,
+body.ag-modal-blur .card{
+  -webkit-filter: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* 3) 有啲遮罩會用 backdrop-filter 落喺 ::backdrop 或自製 overlay，全部禁用 */
+*, *::before, *::after, ::backdrop{
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 4) 針對常見 blur utility class（Tailwind / 自訂） */
+.blur, .blur-sm, .blur-md, .blur-lg, .blur-xl,
+.backdrop-blur, .backdrop-blur-sm, .backdrop-blur-md, .backdrop-blur-lg, .backdrop-blur-xl{
+  -webkit-filter: none !important;
+  filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* 5) style inline 直接寫 blur()：都清走 */
+[style*="blur("]{
+  -webkit-filter: none !important;
+  filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
 body.sepia-mode #resetButton {
   box-shadow: 0 4px 12px rgba(0,0,0,.26) !important;
 }
@@ -6017,18 +7441,14 @@ body.sepia-mode #resetButton {
                         (target.onclick || target.getAttribute('onclick'))) {
 
                         setTimeout(function() {
-                            var modals = document.querySelectorAll('.modal.show');
-                            modals.forEach(function(modal) {
-                                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                                    var bsModal = bootstrap.Modal.getInstance(modal);
-                                    if (bsModal) {
-                                        bsModal.hide();
-                                    } else {
-                                        var newModal = new bootstrap.Modal(modal);
-                                        newModal.hide();
-                                    }
-                                }
-                            });
+                            // 只關閉「方案管理」個 modal，唔好一嘢關晒全部 modal
+                            //（避免用戶想開其他彈窗，例如時間/時差設定，但未彈出就被 hide）
+                            var schemeModal = schemeList.closest('.modal');
+                            if (schemeModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                                var bsModal = bootstrap.Modal.getInstance(schemeModal);
+                                if (!bsModal) bsModal = new bootstrap.Modal(schemeModal);
+                                bsModal.hide();
+                            }
                         }, 400);
                         break;
                     }
@@ -6058,5 +7478,8 @@ body.sepia-mode #resetButton {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 })();
+
 </script>
+
+</body>
 </html>
