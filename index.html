@@ -336,6 +336,15 @@ button.btn:not(.btn-close):not(.tool-btn){
     0 6px 14px rgba(0,0,0,0.18);
 }
 
+/* === AnyGen patch: results grey background unify === */
+/* 紅圈位置的深灰「轉色」：改成純色，跟卡片灰一致 */
+#results-card,
+#results-card .card-body{
+  /* 同大背景灰一致 */
+  background-color: #6b7280 !important;
+  background-image: none !important;
+}
+
 .btn:not(.btn-close):not(.tool-btn)::before{
   content: '';
   position: absolute;
