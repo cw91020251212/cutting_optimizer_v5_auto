@@ -412,7 +412,8 @@ body.ag-modal-blur .container-fluid{
   margin-bottom: 12px !important;
   font-size: 1.65rem !important;
 }
-#pageTitle .fa-ruler-combined{ font-size: 1.25em !important; }
+#pageTitle .title-ruler{ width: 86px !important; height: 86px !important; }
+#pageTitle .title-ruler canvas{ width: 100% !important; height: 100% !important; display:block; background: transparent !important; border: none !important; }
 .title-nut{ width: 86px !important; height: 86px !important; }
 
 /* IMPORTANT: never use negative margin here (it causes the 5 round buttons to stick to the banner) */
@@ -443,6 +444,7 @@ body.ag-modal-blur .container-fluid{
 @media (max-width: 480px){
   #pageTitle{ height: 64px !important; min-height: 64px !important; font-size: 1.4rem !important; margin-bottom: 10px !important; }
   .title-nut{ width: 72px !important; height: 72px !important; }
+  #pageTitle .title-ruler{ width: 72px !important; height: 72px !important; }
   .top-tools{ margin: 6px 0 12px 0 !important; gap: 6px !important; }
   .tool-btn{ width: 28px !important; height: 28px !important; }
   /* 手機上同樣放大少少「使用說明」 */
@@ -458,7 +460,7 @@ body.ag-modal-blur .container-fluid{
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
         body {
-            background-color: #2c3e50;
+            background-color: #6b7280; /* 改灰色底（原：#2c3e50 深藍） */
             background-image:
               linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
               linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px);
@@ -784,7 +786,8 @@ body.ag-modal-blur .container-fluid{
         }
 
         #pageTitle {
-            background: linear-gradient(45deg, #4b6cb7, #182848);
+            /* 標題橫幅背景：調淺（原：#4b6cb7 → #182848） */
+            background: linear-gradient(45deg, #6f8fe0, #2f4a86);
             padding: 10px 14px;
             height: 100px;
             box-sizing: border-box;
@@ -821,8 +824,28 @@ body.ag-modal-blur .container-fluid{
             border: none !important;
             margin-top: 0 !important;
         }
+
+        /* 3D 曲尺（右側圖示）：尺寸/Canvas 行為跟螺絲母一致 */
+        .title-ruler{
+            width: 112px;
+            height: 112px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            background: transparent !important;
+        }
+        .title-ruler canvas{
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+            background: transparent !important;
+            border: none !important;
+            margin-top: 0 !important;
+        }
         @media (max-width: 767.98px){
             .title-nut{ width: 84px; height: 84px; }
+            .title-ruler{ width: 84px; height: 84px; }
         }
 
         /* Title header: true center using CSS Grid (stable on mobile/zoom) */
@@ -836,6 +859,8 @@ body.ag-modal-blur .container-fluid{
         }
         #pageTitle .title-nut{ justify-self: start; }
         #pageTitle #titleText{ justify-self: center; text-align: center; line-height: 1.1; }
+        /* 右側 3D 曲尺不使用 CSS wiggle，改由 Three.js 控制旋轉 */
+        #pageTitle .title-ruler{ justify-self: end; margin-right: 6px; }
         #pageTitle .ruler-anim{ justify-self: end; margin-right: 6px; }
 
         @media (max-width: 767.98px){
@@ -1740,7 +1765,7 @@ body.sepia-mode .opt-material-box {
 <style>
 html.preload-normal,
 html.preload-normal body {
-  background-color: #2c3e50 !important;
+  background-color: #6b7280 !important; /* 改灰色底（原：#2c3e50 深藍） */
   background-image:
     linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
     linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
@@ -1759,7 +1784,7 @@ html.preload-sepia body {
   color: #3e2a10 !important;
 }
 body:not(.sepia-mode) {
-  background-color: #2c3e50 !important;
+  background-color: #6b7280 !important; /* 改灰色底（原：#2c3e50 深藍） */
   background-image:
     linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
     linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
@@ -1938,7 +1963,7 @@ html.no-transitions, html.no-transitions * {
 <span id="titleNut" class="title-nut" aria-hidden="true"></span>
 <span id="titleText">鋁材切割排版</span>
 
-<i class="fa-solid fa-ruler-combined fa-2x ms-2 ruler-anim"></i>
+<span id="titleRuler" class="title-ruler" aria-hidden="true"></span>
 </h2>
 
 <div class="top-tools" aria-label="工具列">
@@ -6177,6 +6202,216 @@ document.addEventListener('DOMContentLoaded', function() {
       document.addEventListener('DOMContentLoaded', initTitleNut);
     } else {
       initTitleNut();
+    }
+  })();
+  </script>
+
+  <script>
+  (function(){
+    // 右側大標題圖示：3D 曲尺（盡量貼近 3D曲尺.html：雙面刻度 + 可拖曳翻轉）
+    function initTitleRuler(){
+      if (typeof THREE === 'undefined') return;
+      var container = document.getElementById('titleRuler');
+      if (!container || container.dataset.inited) return;
+      container.dataset.inited = '1';
+
+      var w = container.clientWidth || 112;
+      var h = container.clientHeight || 112;
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 1000);
+      camera.position.z = 17;
+
+      var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(w, h);
+      renderer.setPixelRatio(window.devicePixelRatio || 1);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25; // 調亮少少，令金屬更光
+      renderer.setClearColor(0x000000, 0);
+      container.appendChild(renderer.domElement);
+
+      // 游標提示（跟原檔案一致：可拖曳）
+      container.style.cursor = 'grab';
+
+      // --- 3D 曲尺主體（貼近原本 3D曲尺.html 的結構） ---
+      var rulerGroup = new THREE.Group();
+      var rulerBody = new THREE.Group();
+      rulerGroup.add(rulerBody);
+      scene.add(rulerGroup);
+
+      var thickness = 2.0;
+      var length = 7.0;
+      var depth = 0.6;
+      var bevelSize = 0.1;
+
+      var shape = new THREE.Shape();
+      shape.moveTo(0, 0);
+      shape.lineTo(length, 0);
+      shape.lineTo(length, thickness);
+      shape.lineTo(thickness, thickness);
+      shape.lineTo(thickness, length);
+      shape.lineTo(0, length);
+      shape.lineTo(0, 0);
+
+      var geometry = new THREE.ExtrudeGeometry(shape, {
+        steps: 1,
+        depth: depth,
+        bevelEnabled: true,
+        bevelThickness: bevelSize,
+        bevelSize: bevelSize,
+        bevelSegments: 4
+      });
+
+      var material = new THREE.MeshStandardMaterial({
+        color: 0xffd36b,   // 調淺金色（更亮）
+        metalness: 0.9,
+        roughness: 0.18
+      });
+      var mainMesh = new THREE.Mesh(geometry, material);
+      rulerBody.add(mainMesh);
+
+      // --- 雙面刻度（縮細/減量，但同一套「雙面」邏輯） ---
+      var markMaterial = new THREE.MeshStandardMaterial({
+        color: 0x000000,
+        metalness: 0.0,
+        roughness: 1.0
+      });
+
+      var markDepth = 0.1;
+      var frontZ = depth + bevelSize + (markDepth / 2) - 0.01;
+      var backZ  = -bevelSize - (markDepth / 2) + 0.01;
+
+      // 比原本略為精簡（標題 icon 尺寸較細），但保留 major/minor 兩種
+      var markMajorV = new THREE.BoxGeometry(0.7, 0.12, markDepth);
+      var markMinorV = new THREE.BoxGeometry(0.35, 0.10, markDepth);
+      var markMajorH = new THREE.BoxGeometry(0.12, 0.7, markDepth);
+      var markMinorH = new THREE.BoxGeometry(0.10, 0.35, markDepth);
+
+      function createDoubleSidedMark(geo, x, y) {
+        var markF = new THREE.Mesh(geo, markMaterial);
+        markF.position.set(x, y, frontZ);
+        rulerBody.add(markF);
+
+        var markB = new THREE.Mesh(geo, markMaterial);
+        markB.position.set(x, y, backZ);
+        rulerBody.add(markB);
+      }
+
+      // 0.5 間距同原本；但只生成有效範圍內（跟原本一致）
+      for (var y = thickness + 0.5; y <= length - 0.5; y += 0.5) {
+        var isMajor = (Math.abs((y % 1)) < 1e-6);
+        var geoM = isMajor ? markMajorV : markMinorV;
+        var xPos = isMajor ? (thickness / 2) : (thickness / 2 + 0.18);
+        createDoubleSidedMark(geoM, xPos, y);
+      }
+
+      for (var x = thickness + 0.5; x <= length - 0.5; x += 0.5) {
+        var isMajor2 = (Math.abs((x % 1)) < 1e-6);
+        var geoM2 = isMajor2 ? markMajorH : markMinorH;
+        var yPos = isMajor2 ? (thickness / 2) : (thickness / 2 + 0.18);
+        createDoubleSidedMark(geoM2, x, yPos);
+      }
+
+      // 置中（沿用原本 3D曲尺.html 的 boundingBox 做法，確保刻度/主體一致置中）
+      geometry.computeBoundingBox();
+      var centerX = -0.5 * (geometry.boundingBox.max.x - geometry.boundingBox.min.x);
+      var centerY = -0.5 * (geometry.boundingBox.max.y - geometry.boundingBox.min.y);
+      rulerBody.position.set(centerX, centerY, -(depth + bevelSize) / 2);
+
+      // 初始角度（跟原本風格接近）
+      rulerGroup.rotation.z = -0.1;
+      rulerGroup.rotation.x = 0.3;
+      rulerGroup.rotation.y = 0.4;
+
+      // --- 光源（跟原本概念一致：前 + 後 + 環境光） ---
+      scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+      var frontLight = new THREE.DirectionalLight(0xffffff, 2.4);
+      frontLight.position.set(5, 10, 8);
+      scene.add(frontLight);
+      var backLight = new THREE.DirectionalLight(0xffffff, 2.1);
+      backLight.position.set(-5, -10, -8);
+      scene.add(backLight);
+
+      // --- 互動（拖曳翻轉）---
+      var targetRotationY = 0.4;
+      var targetRotationX = 0.3;
+      var isDragging = false;
+      var prev = { x: 0, y: 0 };
+
+      function handleDown(clientX, clientY){
+        isDragging = true;
+        prev = { x: clientX, y: clientY };
+        container.style.cursor = 'grabbing';
+      }
+      function handleMove(clientX, clientY){
+        if (!isDragging) return;
+        var dx = clientX - prev.x;
+        var dy = clientY - prev.y;
+        targetRotationY += dx * 0.008;
+        targetRotationX += dy * 0.008;
+        prev = { x: clientX, y: clientY };
+      }
+      function handleUp(){
+        isDragging = false;
+        container.style.cursor = 'grab';
+      }
+
+      // 用 canvas 綁定，避免影響到整個頁面
+      var el = renderer.domElement;
+      el.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); handleDown(e.clientX, e.clientY); });
+      window.addEventListener('mousemove', function(e){ handleMove(e.clientX, e.clientY); });
+      window.addEventListener('mouseup', handleUp);
+
+      el.addEventListener('touchstart', function(e){
+        if (!e.touches || !e.touches[0]) return;
+        e.preventDefault(); e.stopPropagation();
+        handleDown(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: false });
+      el.addEventListener('touchmove', function(e){
+        if (!e.touches || !e.touches[0]) return;
+        e.preventDefault();
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: false });
+      el.addEventListener('touchend', function(e){ e.preventDefault(); handleUp(); }, { passive: false });
+
+      function animate(){
+        requestAnimationFrame(animate);
+
+        rulerGroup.rotation.y += (targetRotationY - rulerGroup.rotation.y) * 0.1;
+        rulerGroup.rotation.x += (targetRotationX - rulerGroup.rotation.x) * 0.1;
+        targetRotationX = Math.max(-3.14, Math.min(3.14, targetRotationX));
+
+        if (!isDragging) {
+          // 用時間增量，避免不同裝置 FPS 造成速度抖動
+          var now = performance.now();
+          var dt = Math.min(0.05, (now - (animate.__t || now)) / 1000);
+          animate.__t = now;
+          targetRotationY += dt * 0.75; // 約等於 0.0125 rad @60fps，流暢又穩定
+        }
+
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      // Resize
+      var resizeTimer;
+      window.addEventListener('resize', function(){
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function(){
+          if (!container.isConnected) return;
+          var nw = container.clientWidth || w;
+          var nh = container.clientHeight || h;
+          camera.aspect = nw / nh;
+          camera.updateProjectionMatrix();
+          renderer.setSize(nw, nh);
+        }, 120);
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initTitleRuler);
+    } else {
+      initTitleRuler();
     }
   })();
   </script>
