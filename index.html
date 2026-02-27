@@ -4738,19 +4738,33 @@ function calculate() {
 
             resultDetails.innerHTML = html;
 
+            // 統計每個尺寸出現件數（每一刀 = 一件）
+            const lengthCountMap = {};
+            bins.forEach(bin => {
+                bin.cuts.forEach(cut => {
+                    const roundedLength = Math.round(cut.length * 10) / 10;
+                    lengthCountMap[roundedLength] = (lengthCountMap[roundedLength] || 0) + 1;
+                });
+            });
+
             let legendHtml = `
                 <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid #000; border-radius: 6px;">
                     <h5 style="margin: 0 0 12px 0; color: #000; font-size: 16px;">${_rLang==='zh'?'📋 切割件尺寸圖例':'📋 Cut Size Legend'}</h5>
-                    <div style="display: grid; gap: 8px;">
+
+                    <div style="display:grid; grid-template-columns: 20px 44px 110px 1fr; gap: 10px 12px; align-items:center;">
+                      <div></div>
+                      <div style="font-weight:800; color:#000;">${_rLang==='zh'?'代號':'Label'}</div>
+                      <div style="font-weight:800; color:#000;">${_rLang==='zh'?'長度':'Length'}</div>
+                      <div style="font-weight:800; color:#000;">${_rLang==='zh'?'件數':'Qty'}</div>
             `;
 
             uniqueLengths.forEach(length => {
+                const qty = lengthCountMap[length] || 0;
                 legendHtml += `
-                    <div style="display: flex; align-items: center; padding: 6px; background: #f0f0f0; border-radius: 4px;">
-                        <div style="width: 20px; height: 20px; background: ${lengthColorMap[length]}; border: 1px solid #000; margin-right: 10px;"></div>
-                        <strong style="color: #000; min-width: 25px;">${lengthLabelMap[length]}</strong>
-                        <span style="color: #000; margin-left: 10px;">${formatLengthForDisplay(length, unit)}</span>
-                    </div>
+                      <div style="width: 20px; height: 20px; background: ${lengthColorMap[length]}; border: 1px solid #000; border-radius: 3px;"></div>
+                      <div><strong style="color: #000;">${lengthLabelMap[length]}</strong></div>
+                      <div style="color:#000;">${formatLengthForDisplay(length, unit)}</div>
+                      <div style="color:#000;">${qty} ${_rLang==='zh'?'件':'pcs'}</div>
                 `;
             });
 
