@@ -337,9 +337,9 @@ button.btn:not(.btn-close):not(.tool-btn){
 }
 
 /* === AnyGen patch: results grey background unify === */
-/* 紅圈位置的深灰「轉色」：改成純色，跟卡片灰一致 */
-#results-card,
-#results-card .card-body{
+/* 只針對灰色模式（非啡色/sepia），避免覆蓋 sepia-mode 原本嘅卡片底色 */
+body:not(.sepia-mode) #results-card,
+body:not(.sepia-mode) #results-card .card-body{
   /* 同大背景灰一致 */
   background-color: #6b7280 !important;
   background-image: none !important;
