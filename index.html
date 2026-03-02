@@ -1,6 +1,12 @@
+<!doctype html>
 <html lang="zh">
 <head>
 
+<style id="critical-preload-bg">
+  /* Prevent startup flash: match background to preload theme before the rest of CSS/JS loads */
+  html.preload-normal body { background-color: #f3f5f7 !important; }
+  html.preload-sepia  body { background-color: #f4ecd8 !important; }
+</style>
 
 <script>
 /* Anti-flash：在畫面渲染前，先套用主題/字體（避免先閃灰色畫面） */
@@ -1315,9 +1321,14 @@ body.ag-modal-blur .container-fluid{
             color: #212529;
         }
         body.light-mode .card {
-            background-color: #ffffff;
+            /* 舊書淺黃底色 */
+            background-color: #faf6ed;
             color: #212529;
             border-color: rgba(0,0,0,0.12);
+        }
+        body.light-mode .card-body-light {
+            /* 紅圈區塊：由淺灰改成舊書淺黃 */
+            background-color: #f5ead5;
         }
         body.light-mode .section-header {
             color: #fff;
@@ -6912,16 +6923,16 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="modal-body">
         <div class="d-grid gap-2">
           <button type="button" class="btn btn-outline-success" data-unit-value="metric">
-            <div style="font-size:1.1rem;font-weight:800;">公</div>
-            <div class="small text-muted">公制（Metric）</div>
+            <span style="font-size:1.1rem;font-weight:800;">公</span>
+            <span class="small text-muted">公制（Metric）</span>
           </button>
           <button type="button" class="btn btn-outline-primary" data-unit-value="imperial">
-            <div style="font-size:1.1rem;font-weight:800;">英</div>
-            <div class="small text-muted">英制（Imperial）</div>
+            <span style="font-size:1.1rem;font-weight:800;">英</span>
+            <span class="small text-muted">英制（Imperial）</span>
           </button>
           <button type="button" class="btn btn-outline-primary" id="unitPickDecimal" data-unit-value="imperial_decimal">
-            <div style="font-size:1.1rem;font-weight:800;">英(D)</div>
-            <div class="small text-muted">英制小數顯示（Decimal）</div>
+            <span style="font-size:1.1rem;font-weight:800;">英(D)</span>
+            <span class="small text-muted">英制小數顯示（Decimal）</span>
           </button>
         </div>
       </div>
@@ -7432,13 +7443,15 @@ button[onclick*="showHelp"],
 }
 
 body:not(.sepia-mode) .card {
-    background-color: #454d55 !important;
-    border: 1px solid #6c757d !important;
-    color: #1f2d2a !important;
+    /* 舊書淺黃底色（紅圈） */
+    background-color: #faf6ed !important;
+    border: 1px solid #c9a876 !important;
+    color: #212529 !important;
 }
 
 body:not(.sepia-mode) .card-body-light {
-    background-color: #e9ecef !important;
+    /* 舊書淺黃底色（紅圈） */
+    background-color: #f5ead5 !important;
     color: #212529 !important;
 }
 
