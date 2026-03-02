@@ -2656,7 +2656,7 @@ html.no-transitions, html.no-transitions * {
 </div>
 </div>
 </div>
-<div aria-hidden="true" aria-labelledby="loadSchemeModalLabel" class="modal fade" id="loadSchemeModal" tabindex="-1">
+<div aria-hidden="true" aria-labelledby="loadSchemeModalLabel" class="modal fade" id="loadSchemeModal" tabindex="-1" data-bs-focus="false">
 <div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
 <div class="modal-header">
@@ -4969,7 +4969,12 @@ function calculate() {
                 `).join("");
             }
 
-            new bootstrap.Modal(document.getElementById("loadSchemeModal")).show();
+            const _lsEl = document.getElementById("loadSchemeModal");
+            if (_lsEl) {
+                // iOS/部分瀏覽器：file input 取消後可能被 Bootstrap focus trap 卡住
+                const _lsModal = bootstrap.Modal.getOrCreateInstance(_lsEl, { focus: false });
+                _lsModal.show();
+            }
         }
 
         function loadSchemeData(index) {
