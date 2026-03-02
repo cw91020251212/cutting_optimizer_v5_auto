@@ -5,7 +5,13 @@
 <style id="critical-preload-bg">
   /* Prevent startup flash: match background to preload theme before the rest of CSS/JS loads */
   html.preload-normal body { background-color: #f3f5f7 !important; }
+
+  /* 重要：sepia-mode（你所講「光明版」）開機時，除咗 body 底色，
+     連卡片底色都要先行預載，否則會先見到灰底再跳去淺黃。 */
   html.preload-sepia  body { background-color: #f4ecd8 !important; }
+  html.preload-sepia  .card { background-color: #faf6ed !important; }
+  html.preload-sepia  .card-body,
+  html.preload-sepia  .card-body-light { background-color: #f5ead5 !important; }
 </style>
 
 <script>
@@ -6564,6 +6570,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function loadSettings(){
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) {
+      // 第一次開機（未有任何使用記錄）：將排版設定預設為「碎料優先」
+      // 之後一旦寫入 localStorage，就會沿用上次使用記錄。
+      const algoEl = document.getElementById('algorithmSelector');
+      if (algoEl) algoEl.value = 'CostFirst';
+
+      // 立即寫入一份預設設定，確保「之後就跟上一次使用記錄」
+      try { saveSettings(); } catch(e) {}
+
       document.documentElement.classList.remove('preload-sepia','preload-normal','no-transitions');
       return;
     }
