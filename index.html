@@ -1754,6 +1754,11 @@ body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width
   border-radius: 12px !important;
 }
 
+/* 優化摘要：標籤文字（所需支數/利用率/總餘料）加深 */
+.opt-summary-box strong {
+  color: #5f6368 !important; /* 深灰，提升對比 */
+}
+
 .opt-material-box {
   border: 2px solid #868e96 !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
@@ -4745,7 +4750,7 @@ function calculate() {
                             <strong>${_rLang==='zh'?'使用長度':'Used Length'}：</strong> ${formatLengthForDisplay(usedLength + kerfLength, unit)} | 
                             <strong>${_rLang==='zh'?'餘料':'Waste'}：</strong> ${formatLengthForDisplay(waste, unit)} (${wastePercentage}%)
                         </div>
-                        <div style="font-size: 11px; color: #999;">
+                        <div style="font-size: 11px; color: #666;">
                             <strong>${_rLang==='zh'?'切割順序':'Cut Order'}：</strong> 
                             ${bin.cuts.map(cut => formatLengthForDisplay(Math.round(cut.length * 10) / 10, unit)).join(" → ")}
                         </div>
