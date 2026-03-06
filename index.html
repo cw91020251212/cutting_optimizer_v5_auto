@@ -6276,7 +6276,7 @@ document.addEventListener('DOMContentLoaded', function() {
       renderer.setSize(w, h);
       renderer.setPixelRatio(window.devicePixelRatio || 1);
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.25; // 調亮少少，令金屬更光
+      renderer.toneMappingExposure = 1.32; // 再深少少（再收光）
       renderer.setClearColor(0x000000, 0);
       container.appendChild(renderer.domElement);
 
@@ -6322,7 +6322,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // --- 雙面刻度（縮細/減量，但同一套「雙面」邏輯） ---
       var markMaterial = new THREE.MeshStandardMaterial({
-        color: 0x000000,
+        color: 0x2b2b2b, // 由純黑改深灰，避免刻度令整體觀感偏暗
         metalness: 0.0,
         roughness: 1.0
       });
@@ -6373,14 +6373,22 @@ document.addEventListener('DOMContentLoaded', function() {
       rulerGroup.rotation.x = 0.3;
       rulerGroup.rotation.y = 0.4;
 
-      // --- 光源（跟原本概念一致：前 + 後 + 環境光） ---
-      scene.add(new THREE.AmbientLight(0xffffff, 0.85));
-      var frontLight = new THREE.DirectionalLight(0xffffff, 2.4);
-      frontLight.position.set(5, 10, 8);
+      // --- 光源：加強「正面主光 + 暖色補光」，令曲尺更立體更光猛 ---
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x8899aa, 1.00));
+      scene.add(new THREE.AmbientLight(0xffffff, 0.40));
+
+      var frontLight = new THREE.DirectionalLight(0xffffff, 2.25);
+      frontLight.position.set(10, 18, 14); // 往前上方打光（接近螺絲帽風格）
       scene.add(frontLight);
-      var backLight = new THREE.DirectionalLight(0xffffff, 2.1);
-      backLight.position.set(-5, -10, -8);
+
+      var backLight = new THREE.DirectionalLight(0xffffff, 1.8);
+      backLight.position.set(-8, -12, -10);
       scene.add(backLight);
+
+      // 暖色補光：提升金屬高光（仿左邊螺絲帽個 warm fill）
+      var warmFill = new THREE.PointLight(0xffc56a, 0.70);
+      warmFill.position.set(-14, -6, 10);
+      scene.add(warmFill);
 
       // --- 互動（拖曳翻轉）---
       var targetRotationY = 0.4;
