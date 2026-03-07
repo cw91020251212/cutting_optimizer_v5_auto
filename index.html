@@ -1630,8 +1630,9 @@ body select.unit-select option {
         select.unit-select:not(#unit), .unit-select:not(#unit) { text-align: center !important; text-align-last: center !important; padding-left: 0 !important; padding-right: 0 !important; line-height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
         </style>
 <style>
-      .optional-note { font-size: .85em; color: #ffc107; margin-left: 0; }
-      .card-body-light .optional-note { color: #d39e00; }
+      /* (非必填)/(optional)：改做橙紅色，更醒目但唔會太刺眼 */
+      .optional-note { font-size: .85em; color: #ff5a2a; margin-left: 0; font-weight: 700; }
+      .card-body-light .optional-note { color: #ff5a2a; }
     </style>
 <style>
       @media (max-width: 767.98px) {
@@ -3345,7 +3346,10 @@ html.no-transitions, html.no-transitions * {
             template.querySelector(".cutQty").value = "0";
             template.querySelector(".cutPurpose").value = "";
             
-            template.querySelector('[data-part="ft"]').focus();
+            // 載入方案後：唔好自動 focus 落數字輸入，避免彈出數字鍵盤（下一步通常係按「計算」）
+            if (!window.__ag_suppress_autofocus) {
+                try { template.querySelector('[data-part="ft"]').focus(); } catch(e) {}
+            }
         }
 
         function clearMaterialInputs() {
@@ -3357,7 +3361,10 @@ html.no-transitions, html.no-transitions * {
             });
             template.querySelector(".materialQty").value = "1";
             
-            template.querySelector('[data-part="ft"]').focus();
+            // 載入方案後：唔好自動 focus 落數字輸入，避免彈出數字鍵盤（下一步通常係按「計算」）
+            if (!window.__ag_suppress_autofocus) {
+                try { template.querySelector('[data-part="ft"]').focus(); } catch(e) {}
+            }
         }
 
         window.enterCuttingEditMode = function(index) {
@@ -4443,6 +4450,9 @@ html.no-transitions, html.no-transitions * {
         
         // === AnyGen patch: scroll to layout after calculate ===
         function calculateAndScroll() {
+            // 用戶手動按「計算」：解除抑制自動計算
+            window.__suppressAutoRecalc = false;
+
             // 標記：本次計算需要自動捲到結果（交由 renderCuttingResults 最終完成後觸發）
             try { window.__ag_scroll_after_calc = Date.now(); } catch(e) {}
 
@@ -4989,6 +4999,10 @@ function calculate() {
         }
 
         function loadSchemeData(index) {
+            // 載入方案後：預設先唔自動計算/唔直出結果，因為用戶通常會先微調再按「計算」
+            window.__suppressAutoRecalc = true;
+            try { window.__ag_scroll_after_calc = 0; } catch(e) {}
+
             const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
             const scheme = savedSchemes[index];
 
@@ -5123,8 +5137,27 @@ function calculate() {
                 });
             }
 
-            exitCuttingEditMode();
-            exitMaterialEditMode();
+            // 載入方案：避免 exit*() 清空時 focus 落數字欄位而彈出鍵盤
+            window.__ag_suppress_autofocus = true;
+            try { exitCuttingEditMode(); } finally {}
+            try { exitMaterialEditMode(); } finally {}
+            // 下一個 tick 恢復正常行為
+            setTimeout(function(){ window.__ag_suppress_autofocus = false; }, 0);
+
+            // 確保結果區先收起（避免之前計算殘留畫面）
+            try { if (typeof window.hideCuttingResults === 'function') window.hideCuttingResults(); } catch(e) {}
+            try {
+              ['resultDetails','cuttingCanvas','colorLegend','progressBar','schemeSelector','printOptionsButton','printButton']
+                .forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
+            } catch(e) {}
+
+            // 滾動到「計算」按鈕，方便下一步直接按
+            setTimeout(function(){
+              try {
+                var btn = document.getElementById('calculateButton');
+                if (btn && btn.scrollIntoView) btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              } catch(e) {}
+            }, 60);
 
             setTimeout(function() {
                 const settingsUnit = document.getElementById("unit");
