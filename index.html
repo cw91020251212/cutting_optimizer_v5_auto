@@ -672,8 +672,17 @@ body.ag-modal-blur .container-fluid{
             margin-left: -0.55rem;
             margin-right: -0.55rem;
         }
+        /* 顏色圖例：同上面排版圖/結果區同闊度（延伸到 card padding 外） */
+        #results-card #colorLegend {
+            margin-left: -0.55rem;
+            margin-right: -0.55rem;
+        }
         @media (max-width: 767.98px) {
             #results-card #resultDetails {
+                margin-left: -0.75rem;
+                margin-right: -0.75rem;
+            }
+            #results-card #colorLegend {
                 margin-left: -0.75rem;
                 margin-right: -0.75rem;
             }
@@ -4780,7 +4789,7 @@ function calculate() {
             });
 
             let legendHtml = `
-                <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid #000; border-radius: 6px;">
+                <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid #000; border-radius: 6px; width: 100%; box-sizing: border-box;">
                     <h5 style="margin: 0 0 12px 0; color: #000; font-size: 16px;">${_rLang==='zh'?'📋 切割件尺寸圖例':'📋 Cut Size Legend'}</h5>
 
                     <div style="display:grid; grid-template-columns: 20px 44px 110px 1fr; gap: 10px 12px; align-items:center;">
