@@ -3881,7 +3881,14 @@ html.no-transitions, html.no-transitions * {
 
         function optimizeBins(bins, sawThickness) {
             let changed = true;
+            // 防止大單時 while(changed) 太耐導致 hang
+            const __t0 = Date.now();
+            const __timeLimitMs = 180;
+            let __round = 0;
+            const __maxRounds = 60;
             while (changed) {
+                if (++__round > __maxRounds) break;
+                if (Date.now() - __t0 > __timeLimitMs) break;
                 changed = false;
                 for (let i = bins.length - 1; i >= 0; i--) {
                     if (bins.length <= 1) break;
@@ -3911,6 +3918,11 @@ html.no-transitions, html.no-transitions * {
         // 用於「碎料優先（強制）」：避免將『碎料』嗰支 bin 合併入『原裝/auto』，
         // 否則會出現：你揀碎料優先，但結果顯示碎料「未用」。
         function optimizeBinsKeepScrap(bins, sawThickness) {
+            // 防止大單時 while(changed) 太耐導致 hang
+            const __t0 = Date.now();
+            const __timeLimitMs = 180;
+            let __round = 0;
+            const __maxRounds = 60;
             function clsOf(bin) {
                 const cls = (bin && (bin.mclass || (bin.autoAdded ? 'auto' : 'scrap'))) || 'scrap';
                 return cls;
@@ -3919,6 +3931,8 @@ html.no-transitions, html.no-transitions * {
 
             let changed = true;
             while (changed) {
+                if (++__round > __maxRounds) break;
+                if (Date.now() - __t0 > __timeLimitMs) break;
                 changed = false;
                 for (let i = bins.length - 1; i >= 0; i--) {
                     if (bins.length <= 1) break;
@@ -3956,6 +3970,11 @@ html.no-transitions, html.no-transitions * {
         //       如果搬得晒就刪走嗰支 bin。
         // keepScrap=true 時：唔會將碎料 bin 搬空（亦唔會將碎料 cut 搬去非碎料 bin）。
         function rebalanceBins(bins, sawThickness, keepScrap){
+            // 防止大單時再平衡太耐導致 hang
+            const __t0 = Date.now();
+            const __timeLimitMs = 220;
+            let __round = 0;
+            const __maxRounds = 80;
             function clsOf(bin) {
                 return (bin && (bin.mclass || (bin.autoAdded ? 'auto' : 'scrap'))) || 'scrap';
             }
@@ -4010,6 +4029,8 @@ html.no-transitions, html.no-transitions * {
 
             var changed = true;
             while (changed){
+                if (++__round > __maxRounds) break;
+                if (Date.now() - __t0 > __timeLimitMs) break;
                 changed = false;
                 // 由尾到頭，盡量搬走後面啲 bin
                 for (var s=bins.length-1; s>=0; s--){
@@ -4075,13 +4096,18 @@ html.no-transitions, html.no-transitions * {
 
             // 先做一次簡單塞前（通常已經夠），再用局部搜尋微調
             var base = score(bins);
-            var maxIter = 800; // 控制時間
+            // 防止大單 / 材料不足（自動補料很多支）時局部搜尋耗時過長而「死機」：加時間上限
+            var maxIter = 120; // 原本 800
+            var _t0 = Date.now();
+            var _timeLimitMs = 250; // 超過就提早停，確保UI唔會hang
             for (var it=0; it<maxIter; it++){
+                if (Date.now() - _t0 > _timeLimitMs) break;
                 var improved=false;
                 var bestMove=null;
                 var bestScore=base;
 
                 for (var s=0; s<bins.length; s++){
+                    if (Date.now() - _t0 > _timeLimitMs) { improved=false; bestMove=null; break; }
                     var src=bins[s];
                     if(!src || !(src.cuts||[]).length) continue;
                     var srcIsScrap = isScrap(clsOf(src));
@@ -4224,7 +4250,9 @@ html.no-transitions, html.no-transitions * {
                         var reqLen = cut.length;
                         var takeMat = selectSmallestAdequate(availableMaterials, reqLen);
                         if (takeMat === null) {
-                            bins.push({ length: defaultLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
+                            // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
+                            var safeLen = Math.max(defaultLen, reqLen);
+                            bins.push({ length: safeLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
                         } else {
                             bins.push({ length: takeMat.length, cuts: [cut], autoAdded: false, mclass: takeMat.mclass || 'scrap' });
                         }
@@ -4261,7 +4289,9 @@ html.no-transitions, html.no-transitions * {
                             } else {
                                 var reqLen = len;
                                 var takeMat = selectSmallestAdequate(availableMaterials, reqLen);
-                                var newBin = { length: (takeMat === null ? defaultLen : takeMat.length), cuts: [], autoAdded: (takeMat === null), mclass: (takeMat === null ? 'auto' : (takeMat.mclass || 'scrap')) };
+                                // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料 / 死循環）
+                                var _newLen = (takeMat === null ? Math.max(defaultLen, reqLen) : takeMat.length);
+                                var newBin = { length: _newLen, cuts: [], autoAdded: (takeMat === null), mclass: (takeMat === null ? 'auto' : (takeMat.mclass || 'scrap')) };
                                 var remaining = newBin.length;
                                 while (group.length) {
                                     var cut = group[0];
@@ -4282,7 +4312,9 @@ html.no-transitions, html.no-transitions * {
                         var reqLen = cut.length;
                         var takeMat = selectSmallestAdequate(availableMaterials, reqLen);
                         if (takeMat === null) {
-                            bins.push({ length: defaultLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
+                            // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
+                            var safeLen = Math.max(defaultLen, reqLen);
+                            bins.push({ length: safeLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
                         } else {
                             bins.push({ length: takeMat.length, cuts: [cut], autoAdded: false, mclass: takeMat.mclass || 'scrap' });
                         }
@@ -4410,7 +4442,9 @@ html.no-transitions, html.no-transitions * {
                 if (placeIntoExisting(cut)) continue;
                 var takeMat = selectSmallestAdequate(availableOrig, cut.length);
                 if (takeMat === null) {
-                    bins.push({ length: defaultLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
+                    // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
+                    var safeLen = Math.max(defaultLen, Number(cut.length)||0);
+                    bins.push({ length: safeLen, cuts: [cut], autoAdded: true, mclass: 'auto' });
                 } else {
                     bins.push({ length: takeMat.length, cuts: [cut], autoAdded: false, mclass: (takeMat.mclass || 'original') });
                 }
@@ -4498,7 +4532,39 @@ function calculate() {
                     return;
                 }
 
-                const algorithm = document.getElementById("algorithmSelector").value || "BFD";
+                // ===== Rule A（正確）：計算前先檢查「最長切件」vs「可用材料/補料長度」 =====
+                // 目的：避免出現「硬塞入去而產生大負數餘料」；同時避免一入重型迴圈先 hang 到連提示都彈唔出。
+                const _lang = (document.getElementById('language')?document.getElementById('language').value:'zh');
+                const _maxCutLen = Math.max.apply(null, cuttingItems.map(it => Number(it.length)||0));
+                const _maxMatLen = Math.max.apply(null, materialItems.map(it => Number(it.length)||0));
+                let _autoOn = true;
+                try { if (typeof window.isAutoReplenishEnabled === 'function') _autoOn = !!window.isAutoReplenishEnabled(); } catch(e) {}
+                let _arLen = NaN;
+                try { if (typeof window.getAutoReplenishLength === 'function') _arLen = Number(window.getAutoReplenishLength(null)); } catch(e) {}
+
+                if (isFinite(_maxCutLen) && _maxCutLen > 0) {
+                  if (_autoOn) {
+                    if (isFinite(_arLen) && _arLen > 0 && _arLen + 1e-9 < _maxCutLen) {
+                      alert(_lang==='zh'
+                        ? ('自動補料長度不足：補料=' + _arLen + '，但最長切件需要≥' + _maxCutLen)
+                        : ('Auto-Replenish length too short: ' + _arLen + ' < required ' + _maxCutLen));
+                      return;
+                    }
+                  } else {
+                    if (!isFinite(_maxMatLen) || _maxMatLen + 1e-9 < _maxCutLen) {
+                      alert(_lang==='zh'
+                        ? ('材料不足：已關閉自動補料，而現有材料最長=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen)
+                        : ('Insufficient material: Auto-Replenish OFF, max material=' + (_maxMatLen||0) + ' < required ' + _maxCutLen));
+                      return;
+                    }
+                  }
+                }
+
+                // 重要：將重型計算延後到下一個 event loop，確保 alert/畫面可以即時反應（避免「連講都講唔到」）
+                setTimeout(function(){
+                  try {
+
+                    const algorithm = document.getElementById("algorithmSelector").value || "BFD";
                 const effectiveSawThickness = (Number(sawThickness.value) || 0);
                 let optimizedResult;
 
@@ -4596,18 +4662,31 @@ function calculate() {
                     }
                 }
 
-                // 後處理合併
+                // 後處理合併（大單會好耗時，所以加門檻）
                 // 注意：碎料優先（強制）要保留碎料使用，唔好將碎料 bin 合併走
-                if (algorithm === 'CostFirst') {
-                    optimizedResult = optimizeBinsKeepScrap(optimizedResult, effectiveSawThickness);
-                } else {
-                    optimizedResult = optimizeBins(optimizedResult, effectiveSawThickness);
-                }
+                try {
+                  var _cutsN0 = 0; optimizedResult.forEach(function(b){ if(b && b.cuts) _cutsN0 += b.cuts.length; });
+                  if (_cutsN0 <= 450 && optimizedResult.length <= 160) {
+                    if (algorithm === 'CostFirst') optimizedResult = optimizeBinsKeepScrap(optimizedResult, effectiveSawThickness);
+                    else optimizedResult = optimizeBins(optimizedResult, effectiveSawThickness);
+                  }
+                } catch(e) { /* ignore */ }
 
-                // 再平衡：逐件搬移，盡量塞滿已有材料，減少「明明有位但唔放」
-                optimizedResult = rebalanceBins(optimizedResult, effectiveSawThickness, algorithm === 'CostFirst');
+                // 再平衡：逐件搬移（大單會好耗時，所以加門檻）
+                try {
+                  var _cutsN1 = 0; optimizedResult.forEach(function(b){ if(b && b.cuts) _cutsN1 += b.cuts.length; });
+                  if (_cutsN1 <= 450 && optimizedResult.length <= 160) {
+                    optimizedResult = rebalanceBins(optimizedResult, effectiveSawThickness, algorithm === 'CostFirst');
+                  }
+                } catch(e) { /* ignore */ }
                 // 進一步局部搜尋：允許交換/前後搬移，改善『有位都唔放』
-                optimizedResult = improveBinsLocalSearch(optimizedResult, effectiveSawThickness, algorithm === 'CostFirst');
+                // 但大單時會好耗時；加保護：件數/用料支數太多就跳過，避免「死機」
+                try {
+                  var _cutsN = 0; optimizedResult.forEach(function(b){ if(b && b.cuts) _cutsN += b.cuts.length; });
+                  if (_cutsN <= 350 && optimizedResult.length <= 120) {
+                    optimizedResult = improveBinsLocalSearch(optimizedResult, effectiveSawThickness, algorithm === 'CostFirst');
+                  }
+                } catch(e) { /* ignore */ }
 
                 renderCuttingResults(optimizedResult, effectiveSawThickness);
                 updateMaterialUsageStatus(optimizedResult);
@@ -4650,6 +4729,13 @@ function calculate() {
                 }
 
                 console.log("計算完成:", optimizedResult);
+
+                  } catch (error) {
+                    console.error("Calculation error:", error);
+                    alert((document.getElementById("language")?document.getElementById("language").value:"zh")==="zh"?"計算過程出錯："+error.message:"Calculation error: "+error.message);
+                  }
+                }, 0);
+                return;
 
             } catch (error) {
                 console.error("Calculation error:", error);
@@ -5635,7 +5721,8 @@ document.addEventListener("DOMContentLoaded", function() {
                   ? '材料不足：已關閉自動補料，請先加入足夠材料。'
                   : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
               }
-              binLength = __defaultLength;
+              // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
+              binLength = Math.max(__defaultLength, Number(cut.length)||0);
               autoAdded = true;
             }
             bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)});
@@ -5687,7 +5774,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     ? '材料不足：已關閉自動補料，請先加入足夠材料。'
                     : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
                 }
-                binLength = __defaultLength;
+                // Rule B: SizeGrouping 補料長度不足時自動提升到足夠長度
+                binLength = Math.max(__defaultLength, Number(length)||0);
                 autoAdded = true;
               }
               const newBin = {length: binLength, cuts: [], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)};
@@ -5736,7 +5824,8 @@ document.addEventListener("DOMContentLoaded", function() {
                   ? '材料不足：已關閉自動補料，請先加入足夠材料。'
                   : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
               }
-              binLength = __defaultLength;
+              // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
+              binLength = Math.max(__defaultLength, Number(cut.length)||0);
               autoAdded = true;
             }
             bins.push({length: binLength, cuts: [cut], autoAdded: autoAdded, mclass: (autoAdded ? 'auto' : mclass)});
