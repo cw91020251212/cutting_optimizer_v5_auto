@@ -4544,10 +4544,13 @@ function calculate() {
 
                 if (isFinite(_maxCutLen) && _maxCutLen > 0) {
                   if (_autoOn) {
-                    if (isFinite(_arLen) && _arLen > 0 && _arLen + 1e-9 < _maxCutLen) {
+                    // 修正：就算自動補料長度較短，都應先檢查「現有原裝/碎料」有冇足夠長度。
+                    // 只有「補料長度不足」而且「現有材料亦無一支夠長」先應該阻止計算。
+                    const _hasExistingAdequate = (isFinite(_maxMatLen) && _maxMatLen + 1e-9 >= _maxCutLen);
+                    if (isFinite(_arLen) && _arLen > 0 && _arLen + 1e-9 < _maxCutLen && !_hasExistingAdequate) {
                       alert(_lang==='zh'
-                        ? ('自動補料長度不足：補料=' + _arLen + '，但最長切件需要≥' + _maxCutLen)
-                        : ('Auto-Replenish length too short: ' + _arLen + ' < required ' + _maxCutLen));
+                        ? ('材料不足：自動補料=' + _arLen + '，且現有材料最長=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen)
+                        : ('Insufficient material: Auto-Replenish=' + _arLen + ', max existing=' + (_maxMatLen||0) + ' < required ' + _maxCutLen));
                       return;
                     }
                   } else {
