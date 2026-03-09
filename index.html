@@ -108,6 +108,18 @@
         word-break: break-word;
       }
 
+      /* 自動補料長度不足警示（len < 最長切件） */
+      #autoReplenishPickerBtn.ag-ar-len-warning{
+        background: #dc3545 !important;
+        border-color: #b02a37 !important;
+        color: #fff !important;
+        box-shadow: 0 0 0 0.22rem rgba(220,53,69,.25) !important;
+      }
+      #autoReplenishBtnTitle.ag-ar-len-warning{
+        color: #dc3545 !important;
+        font-weight: 900 !important;
+      }
+
       /* 手機窄屏：參考「切割項目」controls-row 做法：兩粒方案掣平排 + 右側細粒自動補料掣（唔做全寬大掣） */
       @media (max-width: 576px){
         .scheme-actions-row{
@@ -786,6 +798,8 @@ body.ag-modal-blur .container-fluid{
             display: none;
             height: 20px;
             background-color: #6c757d;
+            position: relative; /* 讓 .progress-text 絕對定位只限於進度條內 */
+            overflow: hidden;   /* 防止文字飄出卡片 */
         }
 
         .progress-bar {
@@ -794,11 +808,14 @@ body.ag-modal-blur .container-fluid{
 
         .progress-text {
             position: absolute;
+            left: 0;
+            top: 0;
             width: 100%;
             text-align: center;
             color: #fff;
             font-size: 12px;
             line-height: 20px;
+            pointer-events: none;
         }
 
         .result-details {
@@ -1360,22 +1377,41 @@ body.ag-modal-blur .container-fluid{
 
         .form-control {
             border-width: 1px !important;
-            border-color: #ccc !important;
+            border-color: rgba(0,0,0,.18) !important;
+            background-color: rgba(255,255,255,.92) !important;
+            box-shadow: none !important; /* 減少內陰影 */
         }
 
         .form-control:focus {
-            border-color: #999 !important;
-            box-shadow: 0 0 0 .1rem rgba(0, 0, 0, .05) !important;
+            border-color: rgba(0,0,0,.28) !important;
+            box-shadow: 0 0 0 .1rem rgba(0, 0, 0, .04) !important; /* 更淡 */
         }
 
         .form-select {
             border-width: 1px !important;
-            border-color: #ccc !important;
+            border-color: rgba(0,0,0,.18) !important;
+            background-color: rgba(255,255,255,.92) !important;
+            box-shadow: none !important;
         }
 
         .form-select:focus {
-            border-color: #999 !important;
-            box-shadow: 0 0 0 .1rem rgba(0, 0, 0, .05) !important;
+            border-color: rgba(0,0,0,.28) !important;
+            box-shadow: 0 0 0 .1rem rgba(0, 0, 0, .04) !important;
+        }
+
+        /* 表格：背景陰影/底色改淡（Bootstrap table-active 預設較深） */
+        .table {
+            --bs-table-bg: rgba(255,255,255,.22);
+            --bs-table-striped-bg: rgba(255,255,255,.18);
+            --bs-table-hover-bg: rgba(255,255,255,.28);
+            border-color: rgba(0,0,0,.12);
+        }
+        .table > :not(caption) > * > * {
+            background-color: rgba(255,255,255,.55);
+        }
+        .table-active {
+            --bs-table-active-bg: rgba(255,255,255,.70);
+            --bs-table-active-color: #212529;
         }
 
         @keyframes rulerWiggle {
@@ -1760,7 +1796,7 @@ body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width
 .opt-summary-box {
   border: 2px solid #388e3c !important;
   border-left: 6px solid #4caf50 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18) !important;
   border-radius: 12px !important;
 }
 
@@ -1771,14 +1807,14 @@ body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width
 
 .opt-material-box {
   border: 2px solid #868e96 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18) !important;
   border-radius: 10px !important;
   margin-top: 20px !important;
 }
 
 body.light-mode .opt-summary-box,
 body.light-mode .opt-material-box {
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
   border-color: #adb5bd !important;
 }
 body.light-mode .opt-summary-box {
@@ -1788,11 +1824,11 @@ body.light-mode .opt-summary-box {
 body.sepia-mode .opt-summary-box {
   border: 2px solid #8b6f47 !important;
   border-left: 6px solid #8b6f47 !important;
-  box-shadow: 0 8px 24px rgba(101, 67, 33, 0.4) !important;
+  box-shadow: 0 3px 10px rgba(101, 67, 33, 0.18) !important;
 }
 body.sepia-mode .opt-material-box {
   border: 2px solid #8b6f47 !important;
-  box-shadow: 0 8px 24px rgba(101, 67, 33, 0.4) !important;
+  box-shadow: 0 3px 10px rgba(101, 67, 33, 0.18) !important;
 }
 
 @media print {
@@ -2033,6 +2069,7 @@ html.no-transitions, html.no-transitions * {
         <p class="ag-case-sub"><b>適用情況：</b>你未清楚貨倉仲有幾多現成料，只想快手估算要準備幾多新料（報價／做預算用）。</p>
         <ol class="ag-case-steps">
           <li><b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。</li>
+          <li><b>注意：</b>當有切割項目長度超出材料尺寸，系統自動製造補料，不依用家設定。</li>
           <li><b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。</li>
           <li><b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。</li>
           <li><b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。</li>
@@ -2153,6 +2190,7 @@ html.no-transitions, html.no-transitions * {
       sub1: '<b>適用情況：</b>你未清楚貨倉仲有幾多現成料，只想快手估算要準備幾多新料（報價／做預算用）。',
       steps1: [
         '<b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。',
+        '<b>注意：</b>當有切割項目長度超出材料尺寸，系統自動製造補料，不依用家設定。',
         '<b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。',
         '<b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。',
         '<b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。'
@@ -2178,6 +2216,7 @@ html.no-transitions, html.no-transitions * {
       sub1: '<b>When to use:</b> You don\'t know how much stock is left in the warehouse, and you just want a quick estimate of how many new bars you need (for quoting/budgeting).',
       steps1: [
         '<b>Set the standard stock length:</b> Choose the unit and set the default bar length for auto top-up (e.g., timber 8 ft, aluminum 3 m).',
+        '<b>Note:</b> If any cutting item is longer than the stock length, the system will auto-create a bar that is long enough regardless of your setting.',
         '<b>Enter cutting requirements:</b> In the Cutting Items table, fill in length and quantity row by row.',
         '<b>In Material, input only 1 standard bar:</b> Because you\'re budgeting, start with one bar. The system will use <i>Auto top-up</i> to infer how many bars are needed in total.',
         '<b>Click Calculate and review the layout:</b> The layout shows the best cutting plan, so you can quickly see the approximate number of bars required.'
@@ -2223,11 +2262,14 @@ html.no-transitions, html.no-transitions * {
     if(p1){
       const h = p1.querySelector('.ag-case-h');
       const sub = p1.querySelector('.ag-case-sub');
-      const lis = p1.querySelectorAll('.ag-case-steps li');
       const tip = p1.querySelector('.ag-case-tip');
       if(h) h.textContent = t.h1;
       if(sub) sub.innerHTML = t.sub1;
-      (t.steps1 || []).forEach((txt,i)=>{ if(lis[i]) lis[i].innerHTML = txt; });
+      const ol = p1.querySelector('.ag-case-steps');
+      if(ol){
+        const steps = Array.isArray(t.steps1) ? t.steps1 : [];
+        ol.innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+      }
       if(tip) tip.innerHTML = t.tip1;
     }
 
@@ -2236,13 +2278,17 @@ html.no-transitions, html.no-transitions * {
     if(p2){
       const h = p2.querySelector('.ag-case-h');
       const sub = p2.querySelector('.ag-case-sub');
-      const lis = p2.querySelectorAll('.ag-case-steps li');
       if(h) h.textContent = t.h2;
       if(sub) sub.innerHTML = t.sub2;
-      (t.steps2 || []).forEach((txt,i)=>{ if(lis[i]) lis[i].innerHTML = txt; });
+      const ol = p2.querySelector('.ag-case-steps');
+      if(ol){
+        const steps = Array.isArray(t.steps2) ? t.steps2 : [];
+        ol.innerHTML = steps.map(s => `<li>${s}</li>`).join('');
+      }
     }
-  }
 
+    if (typeof applyStepBadges === 'function') applyStepBadges();
+  }
   // 初次載入時，同步一次語言
   updateCaseHelpLanguageImpl((document.getElementById('language')||{}).value || 'zh');
 
@@ -3140,6 +3186,56 @@ html.no-transitions, html.no-transitions * {
             if(_hBtn) _hBtn.innerHTML = '<i class="fas fa-question-circle me-2"></i>'+(_xl==='zh'?'使用說明':'User Guide');
 
             var _usB = document.getElementById('uploadSchemeBtn'); if(_usB) _usB.innerHTML = _xl==='zh'?'📤 上載':'📤 Upload';
+
+            // --- Ensure existing table rows follow current language (avoid mixed language) ---
+            (function refreshExistingRows(){
+              const isZh = (lang === 'zh');
+
+              // Cutting items table: action button tooltips
+              document.querySelectorAll('#cuttingItemsTable tbody tr').forEach(row => {
+                const btnEdit = row.querySelector('button.btn-outline-warning');
+                const btnDel  = row.querySelector('button.btn-outline-danger');
+                if (btnEdit) btnEdit.title = isZh ? '編輯' : 'Edit';
+                if (btnDel)  btnDel.title  = isZh ? '刪除' : 'Delete';
+              });
+
+              // Materials table: type badge + usage status + action button tooltips
+              document.querySelectorAll('#materialItemsTable tbody tr').forEach(row => {
+                const mclass = row.dataset.mclass || 'scrap';
+                const badge = row.querySelector('.mclass-badge');
+                if (badge) {
+                  badge.textContent = (mclass === 'original') ? (isZh ? '原裝' : 'Original') : (isZh ? '碎料' : 'Scrap');
+                }
+
+                const btnEdit = row.querySelector('button.btn-outline-warning');
+                const btnDel  = row.querySelector('button.btn-outline-danger');
+                if (btnEdit) btnEdit.title = isZh ? '編輯' : 'Edit';
+                if (btnDel)  btnDel.title  = isZh ? '刪除' : 'Delete';
+
+                const status = row.querySelector('.usage-status');
+                if (status) {
+                  const t = (status.textContent || '').trim();
+
+                  // Full used
+                  if (t.includes('✓')) {
+                    status.innerHTML = '<span style="color:green;">' + (isZh ? '✓全用' : '✓ Used') + '</span>';
+                  }
+                  // Partial
+                  else if (t.includes('⚠') || /partial/i.test(t) || t.includes('部分')) {
+                    const m = t.match(/\((\s*\d+\s*)\/(\s*\d+\s*)\)/);
+                    const used = m ? m[1].trim() : '';
+                    const qty  = m ? m[2].trim() : '';
+                    const tail = (used && qty) ? ` (${used}/${qty})` : '';
+                    status.innerHTML = `<span style="color:#f39c12;">${isZh ? '⚠部分' : '⚠ Partial'}${tail}</span>`;
+                  }
+                  // Unused
+                  else if (t.includes('✗') || /unused/i.test(t) || t.includes('未用')) {
+                    status.innerHTML = '<span style="color:red;">' + (isZh ? '✗未用' : '✗ Unused') + '</span>';
+                  }
+                }
+              });
+            })();
+
         }
 
         function updateImperialLabels(template) {
@@ -4233,6 +4329,8 @@ html.no-transitions, html.no-transitions * {
                         var rem = bin.length - (used + kerf + req);
                         const eps = __epsFor(bin.length);
                         if (rem >= -eps && rem < bestRem) {
+                            // 不用負數處理：只容許極細浮點誤差，並將負數夾到 0
+                            if (rem < 0) rem = 0;
                             bestRem = rem;
                             best = bin;
                         }
@@ -4299,7 +4397,8 @@ html.no-transitions, html.no-transitions * {
                                     const eps = __epsFor(newBin.length);
                                     if (req <= remaining + eps) {
                                         newBin.cuts.push(group.shift());
-                                        remaining -= req;
+                                        // 不用負數處理（避免 remaining 變負）
+                                        remaining = Math.max(0, remaining - req);
                                     } else break;
                                 }
                                 bins.push(newBin);
@@ -4375,6 +4474,8 @@ html.no-transitions, html.no-transitions * {
                         var rem = remaining - req;
                         const eps = __epsFor(barLen);
                         if (rem >= -eps && rem < bestRem) {
+                            // 不用負數處理：只容許極細浮點誤差，並將負數夾到 0
+                            if (rem < 0) rem = 0;
                             bestRem = rem;
                             bestIdx = i;
                         }
@@ -4383,7 +4484,8 @@ html.no-transitions, html.no-transitions * {
                     var chosen = availableCuts.splice(bestIdx,1)[0];
                     var req2 = chosen.length + (cutsInBar.length>0 ? sawThickness : 0);
                     cutsInBar.push(chosen);
-                    remaining -= req2;
+                    // 不用負數處理（避免顯示/計算出負餘料）
+                    remaining = Math.max(0, remaining - req2);
                 }
                 return cutsInBar;
             }
@@ -4425,6 +4527,8 @@ html.no-transitions, html.no-transitions * {
                     var rem = bin.length - (used + kerf + req);
                     const eps = __epsFor(bin.length);
                     if (rem >= -eps && rem < bestRem) {
+                        // 不用負數處理：只容許極細浮點誤差，並將負數夾到 0
+                        if (rem < 0) rem = 0;
                         bestRem = rem;
                         best = bin;
                     }
@@ -4491,6 +4595,170 @@ html.no-transitions, html.no-transitions * {
         }
 
         
+        // === AnyGen patch: run calculation in Web Worker (anti-freeze) ===
+        (function(){
+          function ensureWorker(){
+            try { if (window.__calcWorker) return window.__calcWorker; } catch(e) {}
+
+            const workerCode = `
+            let __cancelled = false;
+            function post(type, payload){ try{ self.postMessage({type, ...payload}); }catch(e){} }
+
+            function expandCuts(cuts){
+              const arr=[];
+              for (const it of (cuts||[])){
+                const q = Number(it.quantity||0);
+                const len = Number(it.length||0);
+                for(let i=0;i<q;i++) arr.push({length:len, purpose:it.purpose||'', display:it.display||''});
+              }
+              return arr;
+            }
+            function expandMaterials(mats){
+              const arr=[];
+              for (const m of (mats||[])){
+                const q = Number(m.quantity||0);
+                const len = Number(m.length||0);
+                const mclass = m.mclass || 'scrap';
+                for(let i=0;i<q;i++) arr.push({length:len, mclass});
+              }
+              return arr;
+            }
+            function createOptimizer(algoType){
+              return function(cuts, materials, sawThickness, autoLen, autoEnabled){
+                let allCuts = expandCuts(cuts);
+                if(algoType !== 'SizeGrouping') allCuts.sort((a,b)=>b.length-a.length);
+                let mats = expandMaterials(materials).sort((a,b)=>a.length-b.length);
+                const defaultLength = (materials||[]).reduce((mx,it)=>Math.max(mx, Number(it.length)||0), 0) || 6000;
+                const stockLen = Math.max(Number(autoLen||0)||0, defaultLength);
+
+                let bins=[];
+                function newBin(firstCut){
+                  let binLength=0, autoAdded=false, mclass='scrap';
+                  if (mats.length>0){
+                    const mat=mats.shift();
+                    binLength=Number(mat.length)||0;
+                    mclass=mat.mclass||'scrap';
+                  } else {
+                    // 材料用完：如果 Auto-Replenish ON，就按用家設定長度自動補料；否則報錯
+                    if(!autoEnabled){
+                      throw new Error('材料不足：已關閉自動補料，請自行增加材料或調整切割項目。');
+                    }
+                    autoAdded=true;
+                    // 重要：補料長度用用家設定 autoLen（計算前已保證 >= 最長切件），唔做任何自動提升
+                    binLength = Number(autoLen)||0;
+                    if(!(binLength>0)) throw new Error('自動補料長度未設定或無效，無法補料。');
+                    mclass='auto';
+                  }
+                  const b={length:binLength, cuts:[firstCut], autoAdded, mclass};
+                  bins.push(b);
+                  return b;
+                }
+                function canPlace(bin, cut){
+                  const used = bin.cuts.reduce((s,c)=>s+(Number(c.length)||0),0);
+                  const kerf = bin.cuts.length>0 ? (bin.cuts.length-1)*sawThickness : 0;
+                  const req = (Number(cut.length)||0) + (bin.cuts.length>0 ? sawThickness : 0);
+                  return used + kerf + req <= bin.length + 1e-9;
+                }
+
+                if(algoType==='FFD'){
+                  for(let idx=0; idx<allCuts.length; idx++){
+                    if(__cancelled) return {cancelled:true};
+                    const cut=allCuts[idx];
+                    let placed=false;
+                    for(let i=0;i<bins.length;i++){
+                      if(canPlace(bins[i], cut)){ bins[i].cuts.push(cut); placed=true; break; }
+                    }
+                    if(!placed) newBin(cut);
+                    if(idx%500===0) post('progress',{pct:Math.min(95, Math.round(idx/allCuts.length*90)+5)});
+                  }
+                } else if(algoType==='BFD'){
+                  for(let idx=0; idx<allCuts.length; idx++){
+                    if(__cancelled) return {cancelled:true};
+                    const cut=allCuts[idx];
+                    let best=-1, bestRem=Infinity;
+                    for(let i=0;i<bins.length;i++){
+                      if(!canPlace(bins[i], cut)) continue;
+                      const used = bins[i].cuts.reduce((s,c)=>s+(Number(c.length)||0),0);
+                      const kerf = bins[i].cuts.length>0 ? (bins[i].cuts.length-1)*sawThickness : 0;
+                      const rem = (bins[i].length) - (used + kerf + cut.length + (bins[i].cuts.length>0?sawThickness:0));
+                      if(rem<bestRem){ bestRem=rem; best=i; }
+                    }
+                    if(best>=0) bins[best].cuts.push(cut); else newBin(cut);
+                    if(idx%500===0) post('progress',{pct:Math.min(95, Math.round(idx/allCuts.length*90)+5)});
+                  }
+                } else {
+                  // SizeGrouping (simple): group same length, then BFD inside
+                  const groups=new Map();
+                  for (const c of allCuts){ groups.set(c.length, (groups.get(c.length)||[]).concat([c])); }
+                  const lengths=[...groups.keys()].sort((a,b)=>b-a);
+                  let idx=0, total=allCuts.length;
+                  for (const L of lengths){
+                    const group=groups.get(L);
+                    while(group.length){
+                      if(__cancelled) return {cancelled:true};
+                      const cut=group.shift();
+                      let best=-1, bestRem=Infinity;
+                      for(let i=0;i<bins.length;i++){
+                        if(!canPlace(bins[i], cut)) continue;
+                        const used = bins[i].cuts.reduce((s,c)=>s+(Number(c.length)||0),0);
+                        const kerf = bins[i].cuts.length>0 ? (bins[i].cuts.length-1)*sawThickness : 0;
+                        const rem = (bins[i].length) - (used + kerf + cut.length + (bins[i].cuts.length>0?sawThickness:0));
+                        if(rem<bestRem){ bestRem=rem; best=i; }
+                      }
+                      if(best>=0) bins[best].cuts.push(cut); else newBin(cut);
+                      idx++;
+                      if(idx%500===0) post('progress',{pct:Math.min(95, Math.round(idx/total*90)+5)});
+                    }
+                  }
+                }
+                return {bins};
+              }
+            }
+
+            const optBFD = createOptimizer('BFD');
+            const optFFD = createOptimizer('FFD');
+            const optSG  = createOptimizer('SizeGrouping');
+
+            self.onmessage = (ev)=>{
+              const msg=ev.data||{};
+              if(msg.type==='cancel'){ __cancelled=true; post('cancelled',{}); return; }
+              if(msg.type!=='run') return;
+              __cancelled=false;
+              const {cuts, materials, sawThickness, algorithm, autoLen, autoEnabled} = msg;
+              post('progress',{pct:5});
+              let res;
+              try{
+                const _ae = !!autoEnabled;
+                if(algorithm==='FFD') res=optFFD(cuts, materials, sawThickness, autoLen, _ae);
+                else if(algorithm==='SizeGrouping') res=optSG(cuts, materials, sawThickness, autoLen, _ae);
+                else res=optBFD(cuts, materials, sawThickness, autoLen, _ae);
+                if(res && res.cancelled){ post('cancelled',{}); return; }
+                post('progress',{pct:98});
+                post('done',{bins:res.bins||[]});
+              }catch(e){
+                post('error',{message:String(e&&e.message||e)});
+              }
+            };
+            `;
+
+            const blob = new Blob([workerCode], {type:'text/javascript'});
+            const url = URL.createObjectURL(blob);
+            const w = new Worker(url);
+            window.__calcWorker = w;
+            return w;
+          }
+
+          window.__runCalcWorker = function(payload){
+            const w = ensureWorker();
+            try { w.postMessage({type:'run', ...payload}); } catch(e) {}
+            return w;
+          };
+
+          window.__cancelCalcWorker = function(){
+            try { if(window.__calcWorker) window.__calcWorker.postMessage({type:'cancel'}); } catch(e) {}
+          };
+        })();
+
         // === AnyGen patch: scroll to layout after calculate ===
         function calculateAndScroll() {
             // 用戶手動按「計算」：解除抑制自動計算
@@ -4499,16 +4767,35 @@ html.no-transitions, html.no-transitions * {
             // 標記：本次計算需要自動捲到結果（交由 renderCuttingResults 最終完成後觸發）
             try { window.__ag_scroll_after_calc = Date.now(); } catch(e) {}
 
-            // Run existing calculation
-            calculate();
+            // === 防「撳咗冇反應」：先即刻顯示進度，再下一個 tick 先開始重型計算 ===
+            try {
+              var pb = document.getElementById('progressBar');
+              var pbi = document.getElementById('progressBarInner');
+              var pbt = document.getElementById('progressText');
+              if (pb) pb.style.display = 'block';
+              if (pbi) { pbi.style.width = '8%'; pbi.setAttribute('aria-valuenow','8'); }
+              if (pbt) pbt.textContent = (document.getElementById('language')?document.getElementById('language').value:'zh')==='zh' ? '開始計算…' : 'Starting…';
+            } catch(e) {}
 
-            // 早期嘗試：如果結果已經可見就即刻捲
+            // disable button，避免連按
+            try { var b=document.getElementById('calculateButton'); if(b){ b.disabled=true; b.classList.add('disabled'); } } catch(e) {}
+
+            // 下一個 event loop 先跑，確保 UI 已經 repaint
             setTimeout(function(){
               try {
-                var t = document.getElementById('cuttingCanvas');
-                if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              } catch(e) {}
-            }, 200);
+                calculate();
+              } finally {
+                try { var b=document.getElementById('calculateButton'); if(b){ b.disabled=false; b.classList.remove('disabled'); } } catch(e) {}
+              }
+
+              // 早期嘗試：如果結果已經可見就即刻捲
+              setTimeout(function(){
+                try {
+                  var t = document.getElementById('cuttingCanvas');
+                  if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch(e) {}
+              }, 200);
+            }, 0);
         }
 
 function calculate() {
@@ -4542,33 +4829,206 @@ function calculate() {
                 let _arLen = NaN;
                 try { if (typeof window.getAutoReplenishLength === 'function') _arLen = Number(window.getAutoReplenishLength(null)); } catch(e) {}
 
+                // 規則：不足就警告並中止。
+                // 原則：補料長度／數量由用家輸入，系統唔可以擅自自動提升長度或自動新增補料。
+
                 if (isFinite(_maxCutLen) && _maxCutLen > 0) {
+                  // Auto-Replenish 規則：
+                  // - OFF：必須靠現有材料；最長材料不足就中止
+                  // - ON ：允許用「你設定的補料長度」補料；但補料長度不足就中止（唔自動改）
+
+                  // Auto-Replenish 規則（改良）：
+                  // - 當 Auto-Replenish ON 但補料長度不足時，如果「你提供嘅材料」本身夠長，就應該照計、照排版。
+                  // - 只有當「補料」同「材料」兩者都不足，先中止。
+                  // 同時：為避免 Worker/演算法只考慮短補料而誤判，本次計算會暫時停用 Auto-Replenish。
                   if (_autoOn) {
-                    // 修正：自動補料 ON 時，最長切件只要「現有材料(原裝/碎料)」或「自動補料長度」其中之一夠長就可以。
-                    // 舊邏輯只檢查補料長度，會誤判：雖然有原裝/碎料夠長，但仍彈出『補料長度不足』。
-                    var _okByMat = (isFinite(_maxMatLen) && _maxMatLen > 0 && _maxMatLen + 1e-9 >= _maxCutLen);
-                    var _okByAR  = (isFinite(_arLen) && _arLen > 0 && _arLen + 1e-9 >= _maxCutLen);
-                    if (!_okByMat && !_okByAR) {
-                      alert(_lang==='zh'
-                        ? ('材料/補料都不足：現有材料最長=' + (_maxMatLen||0) + '，補料=' + (_arLen||0) + '，但最長切件需要≥' + _maxCutLen)
-                        : ('Insufficient length: max material=' + (_maxMatLen||0) + ', auto-replenish=' + (_arLen||0) + ' < required ' + _maxCutLen));
-                      return;
+                    const _matCanHandle = (isFinite(_maxMatLen) && _maxMatLen + 1e-9 >= _maxCutLen);
+
+                    // 未設定補料長度：若材料夠長，照計（本次停用補料）；否則先中止
+                    if (!isFinite(_arLen) || _arLen <= 0) {
+                      if (_matCanHandle) {
+                        _autoOn = false;
+                        _arLen = 0;
+                      } else {
+                        alert(_lang==='zh'
+                          ? ('已開啟自動補料，但未設定補料長度，而且現有材料亦不足以應付最長切件。\n請先設定補料長度，或加入更長材料。')
+                          : ('Auto-Replenish is ON but length is not set, and existing materials are also too short.\nPlease set the length or add longer material.'));
+                        return;
+                      }
                     }
+
+                    // 補料長度不足：若材料夠長，照計（本次停用補料）；否則先中止
+                    if (isFinite(_arLen) && _arLen > 0 && _arLen + 1e-9 < _maxCutLen) {
+                      if (_matCanHandle) {
+                        _autoOn = false;
+                        // 保留 UI 狀態，但本次計算唔用補料
+                        try {
+                          const rd = document.getElementById('resultDetails');
+                          if (rd) {
+                            rd.style.display = 'block';
+                            const msg = (_lang==='zh')
+                              ? ('<div style="margin: 12px 0; padding: 10px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">'
+                                + '<strong>提示：</strong> 自動補料長度不足（補料=' + (_arLen||0) + '，最長切件需要≥' + _maxCutLen + '），但你提供嘅材料夠長。<br>'
+                                + '本次會先用你提供嘅材料排版；如需用補料，請把補料長度調到足夠。</div>')
+                              : ('<div style="margin: 12px 0; padding: 10px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">'
+                                + '<strong>Note:</strong> Auto-Replenish is too short (auto=' + (_arLen||0) + ' < required ' + _maxCutLen + '), but your materials are long enough.<br>'
+                                + 'This run will use your materials first; increase auto length if you want replenishment.</div>');
+                            rd.insertAdjacentHTML('afterbegin', msg);
+                          }
+                        } catch(e) {}
+
+                        _arLen = 0;
+                      } else {
+                        alert(_lang==='zh'
+                          ? ('處理唔到：你設定嘅補料長度不足，而且現有材料亦不足。\n補料=' + (_arLen||0) + '，最長材料=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen + '。\n請自行加長補料，或加入更長材料。')
+                          : ('Cannot process: auto-replenish length is too short and existing materials are also too short.\nAuto=' + (_arLen||0) + ', Max material=' + (_maxMatLen||0) + ', Required ≥ ' + _maxCutLen + '.\nPlease increase auto length or add longer material.'));
+                        return;
+                      }
+                    }
+
+                    // 注意：Auto-Replenish ON 且補料長度足夠時，即使現有材料最長不足，都應該允許計算（由補料負責）。
                   } else {
+                    // Auto-Replenish OFF：只可用現有材料
                     if (!isFinite(_maxMatLen) || _maxMatLen + 1e-9 < _maxCutLen) {
                       alert(_lang==='zh'
-                        ? ('材料不足：已關閉自動補料，而現有材料最長=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen)
-                        : ('Insufficient material: Auto-Replenish OFF, max material=' + (_maxMatLen||0) + ' < required ' + _maxCutLen));
+                        ? ('處理唔到：材料長度不足（已關閉自動補料）。\n最長材料=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen + '。\n請加入更長材料，或開啟自動補料。')
+                        : ('Cannot process: material length insufficient (Auto-Replenish OFF).\nMax material=' + (_maxMatLen||0) + ' < required ' + _maxCutLen + '.\nPlease add longer material or enable Auto-Replenish.'));
                       return;
                     }
                   }
                 }
 
+                // 防 hang：若切件數量過大，改用快速估算（避免瀏覽器卡死）
+                const __totalPieces = cuttingItems.reduce((s,it)=>s+(Number(it.quantity)||0),0);
+                // 重要：呢個工具係純前端單線程；件數一大 DOM+演算法好易令 browser 假死
+                const __MAX_PIECES_FOR_EXACT = 2000;
+                if (__totalPieces > __MAX_PIECES_FOR_EXACT) {
+                  const _u = (document.getElementById('unit')?document.getElementById('unit').value:'metric');
+                  const __stockLen = Math.max((isFinite(_maxMatLen)?_maxMatLen:0),(isFinite(_arLen)?_arLen:0),_maxCutLen);
+                  const __sumLen = cuttingItems.reduce((s,it)=>s+(Number(it.length)||0)*(Number(it.quantity)||0),0);
+                  const __kerf = (Number(sawThickness.value)||0);
+                  const __cutsCount = __totalPieces;
+                  const __kerfTotal = (__cutsCount>0? (__cutsCount-1)*__kerf : 0);
+                  const __needBars = (__stockLen>0) ? Math.ceil((__sumLen+__kerfTotal)/__stockLen) : 0;
+
+                  const resultDetails = document.getElementById('resultDetails');
+                  const resultsCard = document.getElementById('results-card');
+                  if (resultsCard) resultsCard.style.display = 'block';
+                  if (resultDetails) {
+                    resultDetails.style.display = 'block';
+                    const fmt = (typeof formatLengthForDisplay==='function') ? (v)=>formatLengthForDisplay(v,_u) : (v)=>String(v);
+                    resultDetails.innerHTML = `
+                      <div style="margin: 12px 0; padding: 12px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">
+                        <strong>${_lang==='zh'?'⚠️ 資料量過大，已改用快速估算':'⚠️ Too many pieces, switched to fast estimate'}</strong><br>
+                        ${_lang==='zh'?
+                          ('切件總數='+__cutsCount+'（上限 '+__MAX_PIECES_FOR_EXACT+'）｜為避免 hang 機，暫停詳細排版。'):
+                          ('Total pieces='+__cutsCount+' (limit '+__MAX_PIECES_FOR_EXACT+')｜Detailed layout skipped to prevent freeze.')}
+                        <hr style="margin:10px 0;">
+                        <div>${_lang==='zh'?'估算所需標準料：':'Estimated bars needed: '} <b>${__needBars}</b></div>
+                        <div>${_lang==='zh'?'採用標準長度：':'Stock length used: '} <b>${fmt(__stockLen)}</b></div>
+                      </div>`;
+                  }
+                  try { if (typeof window.hideCuttingResults==='function') window.hideCuttingResults(); } catch(e) {}
+                  return;
+                }
+
+                // === 新方案：重型計算搬去 Web Worker，避免主線程 hang ===
+                try {
+                  const _pb = document.getElementById('progressBar');
+                  const _pbi = document.getElementById('progressBarInner');
+                  const _pbt = document.getElementById('progressText');
+                  if (_pb) _pb.style.display = 'block';
+                  if (_pbi) { _pbi.style.width = '12%'; _pbi.setAttribute('aria-valuenow','12'); }
+                  if (_pbt) _pbt.textContent = (_lang==='zh') ? '計算中（防 hang 模式）…' : 'Computing (anti-freeze)…';
+                } catch(e) {}
+
+                let algorithm = document.getElementById("algorithmSelector").value || "BFD";
+                // AutoBest 會同時跑 3 個演算法；Worker 版先用 BFD 作穩定預設
+                if (algorithm === 'AutoBest') algorithm = 'BFD';
+                // 碎料優先 / CostFirst：Worker 版暫時當 BFD（避免卡死，先穩定）
+                if (algorithm === 'CostFirst') algorithm = 'BFD';
+
+                let _autoLenForWorker = _arLen;
+                try { if (!isFinite(_autoLenForWorker) || _autoLenForWorker<=0) _autoLenForWorker = Math.max(_maxMatLen||0, _maxCutLen||0, 6000); } catch(e) {}
+
+                const w = (typeof window.__runCalcWorker==='function') ? window.__runCalcWorker({
+                  cuts: cuttingItems,
+                  materials: materialItems,
+                  sawThickness: Number(sawThickness.value)||0,
+                  algorithm: algorithm,
+                  autoLen: _autoLenForWorker,
+                  autoEnabled: _autoOn
+                }) : null;
+
+                if (!w) {
+                  throw new Error(_lang==='zh' ? '無法啟動防 hang 計算器' : 'Cannot start anti-freeze worker');
+                }
+
+                w.onmessage = function(ev){
+                  const msg = ev.data || {};
+                  try {
+                    const pbi = document.getElementById('progressBarInner');
+                    const pbt = document.getElementById('progressText');
+                    if (msg.type === 'progress') {
+                      const pct = Math.max(5, Math.min(99, Number(msg.pct)||0));
+                      if (pbi) { pbi.style.width = pct + '%'; pbi.setAttribute('aria-valuenow', String(pct)); }
+                      if (pbt) pbt.textContent = (_lang==='zh') ? ('計算中… ' + pct + '%') : ('Computing… ' + pct + '%');
+                    } else if (msg.type === 'done') {
+                      if (pbi) { pbi.style.width = '100%'; pbi.setAttribute('aria-valuenow','100'); }
+                      if (pbt) pbt.textContent = (_lang==='zh') ? '計算完成' : 'Done';
+                      const bins = msg.bins || [];
+                      // 用 window.renderCuttingResults 以確保「計算後自動捲動」等 wrapper 生效
+                      (window.renderCuttingResults || renderCuttingResults)(bins, Number(sawThickness.value)||0);
+                      // 修補：Worker 版計算完成後，同步更新材料「使用狀態」
+                      try { if (typeof updateMaterialUsageStatus === 'function') updateMaterialUsageStatus(bins); } catch(e) {}
+                      // 計算完成後：自動收起進度條/「計算完成」提示，避免長期停留畫面
+                      try {
+                        setTimeout(function(){
+                          var pb = document.getElementById('progressBar');
+                          var pbi = document.getElementById('progressBarInner');
+                          var pbt = document.getElementById('progressText');
+                          if (pb) pb.style.display = 'none';
+                          if (pbi) { pbi.style.width = '0%'; pbi.setAttribute('aria-valuenow','0'); }
+                          if (pbt) pbt.textContent = '';
+                        }, 800);
+                      } catch(e) {}
+                    } else if (msg.type === 'error') {
+                      throw new Error(msg.message || 'Worker error');
+                    } else if (msg.type === 'cancelled') {
+                      if (pbt) pbt.textContent = (_lang==='zh') ? '已取消' : 'Cancelled';
+                    }
+                  } catch(err) {
+                    console.error(err);
+                    alert((_lang==='zh' ? '計算過程出錯：' : 'Calculation error: ') + (err && err.message ? err.message : err));
+                  } finally {
+                    // （已移除強制補料模式）
+                  }
+                };
+
+                return; // 重要：唔再喺主線程跑舊版重型 setTimeout 計算
+
                 // 重要：將重型計算延後到下一個 event loop，確保 alert/畫面可以即時反應（避免「連講都講唔到」）
                 setTimeout(function(){
                   try {
 
-                    const algorithm = document.getElementById("algorithmSelector").value || "BFD";
+                    let algorithm = document.getElementById("algorithmSelector").value || "BFD";
+                    // AutoBest 會同時跑 3 個演算法，件數稍大都好易 hang
+                    if (algorithm === 'AutoBest' && __totalPieces > 1200) {
+                      algorithm = 'BFD';
+                      try {
+                        const _lang2 = (document.getElementById('language')?document.getElementById('language').value:'zh');
+                        const rd = document.getElementById('resultDetails');
+                        if (rd) {
+                          rd.style.display='block';
+                          rd.innerHTML = `<div style="margin: 12px 0; padding: 12px; background:#e3f2fd; border:1px solid #bbdefb; border-radius:6px; color:#0d47a1;">
+                            <strong>${_lang2==='zh'?'已自動降級演算法':'Algorithm downgraded automatically'}</strong><br>
+                            ${_lang2==='zh'?
+                              ('由於切件數量='+__totalPieces+'，AutoBest 會太重，已改用 BFD 以避免 hang 機。'):
+                              ('Because total pieces='+__totalPieces+', AutoBest is too heavy; switched to BFD to avoid freeze.')}
+                          </div>`;
+                        }
+                      } catch(e) {}
+                    }
                 const effectiveSawThickness = (Number(sawThickness.value) || 0);
                 let optimizedResult;
 
@@ -4692,7 +5152,8 @@ function calculate() {
                   }
                 } catch(e) { /* ignore */ }
 
-                renderCuttingResults(optimizedResult, effectiveSawThickness);
+                // 用 window.renderCuttingResults 以確保「計算後自動捲動」等 wrapper 生效
+                (window.renderCuttingResults || renderCuttingResults)(optimizedResult, effectiveSawThickness);
                 updateMaterialUsageStatus(optimizedResult);
 
                 function __agScrollTo(el){
@@ -4737,6 +5198,11 @@ function calculate() {
                   } catch (error) {
                     console.error("Calculation error:", error);
                     alert((document.getElementById("language")?document.getElementById("language").value:"zh")==="zh"?"計算過程出錯："+error.message:"Calculation error: "+error.message);
+                  } finally {
+                    // 清理強制模式，避免影響其他計算
+                    try {
+
+                    } catch(e) {}
                   }
                 }, 0);
                 return;
@@ -4750,17 +5216,28 @@ function calculate() {
         function renderCuttingResults(bins, sawThickness) {
             const unit = document.getElementById("unit").value;
 
-            let uniqueLengths = [];
-            bins.forEach(bin => {
-                bin.cuts.forEach(cut => {
-                    const roundedLength = Math.round(cut.length * 10) / 10;
-                    if (!uniqueLengths.includes(roundedLength)) {
-                        uniqueLengths.push(roundedLength);
-                    }
-                });
-            });
+            // === 防 hang：結果量太大時，唔做逐支逐刀渲染（DOM 會爆）===
+            let __totalCuts = 0;
+            try {
+              for (let bi=0; bi<bins.length; bi++) {
+                const b = bins[bi];
+                if (b && b.cuts) __totalCuts += b.cuts.length;
+              }
+            } catch(e) {}
+            const __MAX_BINS_RENDER = 200;
+            const __MAX_CUTS_RENDER = 2500;
 
-            uniqueLengths.sort((a, b) => b - a);
+            // 用 Set 取代 includes（避免 O(n^2)）
+            const uniqueSet = new Set();
+            for (let bi=0; bi<bins.length; bi++) {
+              const bin = bins[bi];
+              const cuts = (bin && bin.cuts) ? bin.cuts : [];
+              for (let ci=0; ci<cuts.length; ci++) {
+                const roundedLength = Math.round((Number(cuts[ci].length)||0) * 10) / 10;
+                uniqueSet.add(roundedLength);
+              }
+            }
+            let uniqueLengths = Array.from(uniqueSet).filter(v=>isFinite(v)).sort((a,b)=>b-a);
 
             const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2"];
             const lengthColorMap = {};
@@ -4775,18 +5252,73 @@ function calculate() {
             resultDetails.style.display = "block";
 
             const totalBins = bins.length;
+
+            // 大量結果：只顯示摘要（避免 per-bin HTML / legend 令 browser hang）
+            if (totalBins > __MAX_BINS_RENDER || __totalCuts > __MAX_CUTS_RENDER) {
+              const _rLang = document.getElementById('language')?document.getElementById('language').value:'zh';
+              const totalUsedLength = bins.reduce((sum, bin) => sum + (bin.cuts||[]).reduce((s,c)=>s+(Number(c.length)||0),0), 0);
+              const totalMaterialLength = bins.reduce((sum, bin) => sum + (Number(bin.length)||0), 0);
+              let __negWasteCount = 0;
+              const totalWaste = bins.reduce((sum, bin) => {
+                const used = (bin.cuts||[]).reduce((s,c)=>s+(Number(c.length)||0),0);
+                const kerf = (bin.cuts && bin.cuts.length>0) ? (bin.cuts.length-1)*sawThickness : 0;
+                const wasteRaw = (Number(bin.length)||0) - used - kerf;
+                const eps = (typeof __epsFor === 'function') ? __epsFor(Number(bin.length)||0) : 1e-6;
+                if (wasteRaw < -eps) __negWasteCount++;
+                return sum + Math.max(0, wasteRaw);
+              }, 0);
+              const utilizationRate = (totalMaterialLength>0) ? ((totalUsedLength/totalMaterialLength)*100).toFixed(1) : '0.0';
+              resultDetails.innerHTML = `
+                <div class="opt-summary-box" style="margin-bottom: 12px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
+                  <h4 style="margin: 0 0 10px 0; color: #1b5e20;">${_rLang==='zh'?'📊 優化摘要':'📊 Optimization Summary'}</h4>
+                  <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:14px;">
+                    <div><strong>${_rLang==='zh'?'所需支數':'Bars Needed'}</strong><br><span style="color:#d32f2f; font-size:24px; font-weight:700;">${totalBins}</span></div>
+                    <div><strong>${_rLang==='zh'?'利用率':'Utilization'}</strong><br><span style="color:#388e3c; font-size:24px; font-weight:700;">${utilizationRate}%</span></div>
+                    <div><strong>${_rLang==='zh'?'總餘料':'Total Waste'}</strong><br><span style="color:#f57c00; font-size:16px;">${formatLengthForDisplay(totalWaste, unit)}</span></div>
+                  </div>
+                </div>
+                ${__negWasteCount>0 ? (`
+                  <div style="margin: 12px 0 12px 0; padding: 12px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">
+                    <strong><i class=\"fa-solid fa-triangle-exclamation\"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
+                    ${_rLang==='zh'?
+                      ('受影響支數：'+__negWasteCount+'。請檢查：材料長度／鋸縫／單位換算。'):
+                      ('Affected bars: '+__negWasteCount+'. Please check material length / kerf / unit conversion.')}
+                  </div>
+                `) : ''}
+                <div style="margin: 12px 0; padding: 12px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">
+                  <strong>${_rLang==='zh'?'⚠️ 結果太多，已省略明細':'⚠️ Too many results, details omitted'}</strong><br>
+                  ${_rLang==='zh'?
+                    ('本次計算：'+__totalCuts+' 件，'+totalBins+' 支。為避免 hang 機，已停用逐支顯示/圖例。'):
+                    ('This run: '+__totalCuts+' cuts, '+totalBins+' bars. Per-bar details and legend are disabled to prevent freeze.')}
+                </div>
+              `;
+              try {
+                var lg=document.getElementById('colorLegend'); if(lg) lg.style.display='none';
+                var cn=document.getElementById('cuttingCanvas'); if(cn) cn.style.display='none';
+              } catch(e) {}
+              document.getElementById("printOptionsButton").style.display = "inline-block";
+              document.getElementById("printButton").style.display = "inline-block";
+              return;
+            }
+
             const totalUsedLength = bins.reduce((sum, bin) => {
                 return sum + bin.cuts.reduce((cutSum, cut) => cutSum + cut.length, 0);
             }, 0);
 
             const totalMaterialLength = bins.reduce((sum, bin) => sum + bin.length, 0);
-            const totalWaste = bins.reduce((sum, bin) => {
+            const negativeWasteBins = [];
+            const totalWaste = bins.reduce((sum, bin, idx) => {
                 const usedLength = bin.cuts.reduce((cutSum, cut) => cutSum + cut.length, 0);
                 const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
-                return sum + (bin.length - usedLength - kerfLength);
+                const wasteRaw = bin.length - usedLength - kerfLength;
+                const eps = (typeof __epsFor === 'function') ? __epsFor(bin.length) : 1e-6;
+                if (wasteRaw < -eps) {
+                    negativeWasteBins.push({ idx: idx + 1, waste: wasteRaw });
+                }
+                return sum + Math.max(0, wasteRaw);
             }, 0);
 
-            const utilizationRate = ((totalUsedLength / totalMaterialLength) * 100).toFixed(1);
+            const utilizationRate = (totalMaterialLength > 0 ? ((totalUsedLength / totalMaterialLength) * 100) : 0).toFixed(1);
 
             var _rLang = document.getElementById('language')?document.getElementById('language').value:'zh';
             var _t = {
@@ -4815,11 +5347,25 @@ function calculate() {
                 </div>
             `;
 
+            // 不用負數處理：如出現「餘料 < 0」，改用警告提示
+            if (negativeWasteBins.length > 0) {
+                const list = negativeWasteBins.map(o => '#' + o.idx).join(', ');
+                html += `
+                  <div style="margin: 12px 0 18px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 6px; color: #856404;">
+                    <strong><i class="fa-solid fa-triangle-exclamation"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
+                    ${_rLang==='zh'?
+                      ('受影響原料：'+list+'。請檢查：材料長度／鋸縫／單位換算。'):
+                      ('Affected bars: '+list+'. Please check material length / kerf / unit conversion.')}
+                  </div>
+                `;
+            }
+
             bins.forEach((bin, binIndex) => {
                 const usedLength = bin.cuts.reduce((sum, cut) => sum + cut.length, 0);
                 const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
                 const waste = bin.length - usedLength - kerfLength;
-                const wastePercentage = ((waste / bin.length) * 100).toFixed(1);
+                const wasteSafe = (waste < 0 ? 0 : waste);
+                const wastePercentage = ((wasteSafe / bin.length) * 100).toFixed(1);
 
                 html += `
                     <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9;">
@@ -4844,8 +5390,8 @@ function calculate() {
                     `;
                 });
 
-                if (waste > 0) {
-                    const wastePercentageVisual = (waste / bin.length) * 100;
+                if (wasteSafe > 0) {
+                    const wastePercentageVisual = (wasteSafe / bin.length) * 100;
                     html += `
                         <div style="width: ${wastePercentageVisual.toFixed(1)}%; background: repeating-linear-gradient(45deg, #ffcccc 0px, #ffcccc 5px, #ff9999 5px, #ff9999 10px); display: flex; align-items: center; justify-content: center; color: #a00; font-weight: bold; font-size: 11px; padding: 0 4px;">
                             ${_rLang==='zh'?'餘料':'Waste'}
@@ -4857,7 +5403,7 @@ function calculate() {
                         </div>
                         <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
                             <strong>${_rLang==='zh'?'使用長度':'Used Length'}：</strong> ${formatLengthForDisplay(usedLength + kerfLength, unit)} | 
-                            <strong>${_rLang==='zh'?'餘料':'Waste'}：</strong> ${formatLengthForDisplay(waste, unit)} (${wastePercentage}%)
+                            <strong>${_rLang==='zh'?'餘料':'Waste'}：</strong> ${formatLengthForDisplay(wasteSafe, unit)} (${wastePercentage}%)
                         </div>
                         <div style="font-size: 11px; color: #666;">
                             <strong>${_rLang==='zh'?'切割順序':'Cut Order'}：</strong> 
@@ -5861,7 +6407,8 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     } catch(e) {}
     // 如果冇任何自動補料設定，就用 fallback；否則用一個安全預設（6000mm）
-    return (fallback !== undefined ? fallback : 6000);
+    let v = (fallback !== undefined ? fallback : 6000);
+    return v;
   };
 
   window.isAutoReplenishEnabled = function(){
@@ -5913,18 +6460,45 @@ document.addEventListener("DOMContentLoaded", function() {
       originalRender.call(this, bins, sawThickness);
     }
 
-    // 計算完成後自動捲到排版圖（比 setTimeout 更可靠：等 render 真係畫完先捲）
+    // 計算完成後自動捲到「優化摘要」置頂（等 render 真係畫完先捲）
+    // 只移植舊檔捲動邏輯：以 resultDetails 入面 .opt-summary-box 作錨點
     try {
       if (window.__ag_scroll_after_calc) {
         var now = Date.now();
-        // 只係 5 秒內嘅「最近一次計算」先觸發，避免其他渲染誤觸
-        if (now - window.__ag_scroll_after_calc < 5000) {
+        // Worker 計算可能超過 5 秒：放寬到 3 分鐘
+        if (now - window.__ag_scroll_after_calc < 180000) {
           setTimeout(function(){
-            var target = document.getElementById('cuttingCanvas') || document.getElementById('results-card') || document.getElementById('resultDetails');
-            if (target && target.scrollIntoView) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            function __agScrollTo(el){
+              if (!el) return;
+              // 找最近可滾動容器；否則用 window
+              var p = el.parentElement;
+              while (p) {
+                var st = window.getComputedStyle(p);
+                var oy = st.overflowY;
+                if ((oy === 'auto' || oy === 'scroll') && p.scrollHeight > p.clientHeight + 5) break;
+                p = p.parentElement;
+              }
+              if (p) {
+                var top = el.offsetTop;
+                p.scrollTo({ top: Math.max(0, top - 10), behavior: 'smooth' });
+              } else {
+                var rect = el.getBoundingClientRect();
+                var y = (window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0) + rect.top - 10;
+                (document.scrollingElement || document.documentElement).scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+              }
             }
-          }, 50);
+
+            var anchor = null;
+            try {
+              var rd = document.getElementById('resultDetails');
+              if (rd) {
+                anchor = rd.querySelector('.opt-summary-box h4') || rd.querySelector('.opt-summary-box') || rd.querySelector('h4');
+              }
+            } catch(e) {}
+
+            var resultsCard = document.getElementById('results-card');
+            __agScrollTo(anchor || resultsCard);
+          }, 80);
         }
         window.__ag_scroll_after_calc = 0;
       }
@@ -6675,7 +7249,77 @@ document.addEventListener('DOMContentLoaded', function() {
       btn.classList.toggle('btn-secondary', !on);
     }
     if (hint) hint.textContent = (lang === 'zh') ? '（揀長度=開；揀OFF=閂）' : '(Pick length=ON; pick OFF=OFF)';
+
+    // 同步檢查：補料長度是否不足
+    try { if (typeof window.updateAutoReplenishWarning === 'function') window.updateAutoReplenishWarning(); } catch(e) {}
   };
+
+  // 自動補料長度不足：即時顏色警示（len < 最長切件）
+  window.updateAutoReplenishWarning = function(){
+    const btn = document.getElementById('autoReplenishPickerBtn');
+    const title = document.getElementById('autoReplenishBtnTitle');
+    if (!btn) return;
+
+    // 讀取目前補料長度（mm）；len<=0 視為 OFF
+    let len = 0;
+    try {
+      if (typeof window.getAutoReplenishLen === 'function') len = Number(window.getAutoReplenishLen(0));
+      else {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const s = JSON.parse(saved);
+          len = Number(s && s.autoReplenishLen);
+        }
+      }
+    } catch(e) {}
+    if (!Number.isFinite(len)) len = 0;
+
+    // 計算最長切件（mm）
+    let maxCut = 0;
+    try {
+      if (typeof getCuttingItems === 'function') {
+        const items = getCuttingItems() || [];
+        for (let i=0;i<items.length;i++) {
+          const v = Number(items[i] && items[i].length);
+          if (Number.isFinite(v) && v > maxCut) maxCut = v;
+        }
+      }
+    } catch(e) {}
+
+    const warn = (len > 0 && maxCut > 0 && (len + 1e-9) < maxCut);
+    btn.classList.toggle('ag-ar-len-warning', warn);
+    if (title) title.classList.toggle('ag-ar-len-warning', warn);
+
+    // 提示文字：只喺警示時加，正常時清掉（避免長期佔用 title）
+    try {
+      const lang = (document.getElementById('language') ? document.getElementById('language').value : 'zh');
+      if (warn) {
+        btn.title = (lang === 'zh')
+          ? ('補料長度不足：補料=' + Math.round(len) + 'mm < 最長切件=' + Math.round(maxCut) + 'mm')
+          : ('Auto-Replenish too short: ' + Math.round(len) + 'mm < max cut ' + Math.round(maxCut) + 'mm');
+      } else {
+        // 只清掉我加嘅 title（避免覆蓋其他用途）
+        if (btn.title && (btn.title.indexOf('補料長度不足') >= 0 || btn.title.indexOf('Auto-Replenish too short') >= 0)) btn.title = '';
+      }
+    } catch(e) {}
+  };
+
+  // 啟動：監聽切割項目變動，同步更新警示
+  (function(){
+    function hook(){
+      try { if (typeof window.updateAutoReplenishWarning === 'function') window.updateAutoReplenishWarning(); } catch(e) {}
+      const tbody = document.querySelector('#cuttingItemsTable tbody');
+      if (!tbody) return;
+      try {
+        const ob = new MutationObserver(function(){
+          try { window.updateAutoReplenishWarning(); } catch(e) {}
+        });
+        ob.observe(tbody, { childList:true, subtree:true, attributes:true });
+      } catch(e) {}
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', hook);
+    else hook();
+  })();
 
   function saveSettings(){
     if (isRestoring) return;
@@ -7559,7 +8203,7 @@ document.addEventListener('DOMContentLoaded', function() {
               }
               var newBin = { length: (takeLen===null? defaultLen: takeLen), cuts: [], autoAdded: (takeLen===null) };
               var remaining = newBin.length;
-              while(group.length){ var cut=group[0]; var req=cut.length+(newBin.cuts.length>0? sawThickness:0); if(req<=remaining){ newBin.cuts.push(group.shift()); remaining-=req; } else break; }
+              while(group.length){ var cut=group[0]; var req=cut.length+(newBin.cuts.length>0? sawThickness:0); if(req<=remaining){ newBin.cuts.push(group.shift()); remaining = Math.max(0, remaining-req); } else break; }
               bins.push(newBin);
             }
           }
@@ -7665,7 +8309,7 @@ body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
         0 1px 0 rgba(0,0,0,0.3) inset,
         -1px 0 0 rgba(255,255,255,0.3) inset,
         1px 0 0 rgba(0,0,0,0.2) inset,
-        0 4px 15px rgba(0,0,0,0.4) !important;
+        0 2px 8px rgba(0,0,0,0.22) !important;
 }
 
 #calculateButton:hover {
@@ -7674,7 +8318,7 @@ body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
         0 2px 0 rgba(0,0,0,0.3) inset,
         -2px 0 0 rgba(255,255,255,0.4) inset,
         2px 0 0 rgba(0,0,0,0.2) inset,
-        0 6px 20px rgba(0,0,0,0.5) !important;
+        0 3px 10px rgba(0,0,0,0.26) !important;
     transform: translateY(-1px);
 }
 
@@ -7682,7 +8326,7 @@ body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
     box-shadow: 
         0 1px 0 rgba(0,0,0,0.4) inset,
         0 -1px 0 rgba(255,255,255,0.2) inset,
-        0 2px 8px rgba(0,0,0,0.3) !important;
+        0 1px 4px rgba(0,0,0,0.22) !important;
     transform: translateY(1px);
 }
 
@@ -7948,13 +8592,15 @@ body.sepia-mode #globalMaterialUnit {
 .form-control,
 .form-select,
 textarea {
-  box-shadow: 0 3px 10px rgba(0,0,0,.18), 0 1px 3px rgba(0,0,0,.12) !important;
+  /* 輸入欄位外陰影：改到非常淺色 */
+  box-shadow: 0 1px 2px rgba(0,0,0,.08) !important;
   transition: box-shadow .15s ease !important;
 }
 .form-control:focus,
 .form-select:focus,
 textarea:focus {
-  box-shadow: 0 0 0 .16rem rgba(0,0,0,.08), 0 6px 16px rgba(0,0,0,.22) !important;
+  /* focus 光暈亦再淡少少 */
+  box-shadow: 0 0 0 .12rem rgba(0,0,0,.05), 0 2px 6px rgba(0,0,0,.10) !important;
 }
 
 .btn,
