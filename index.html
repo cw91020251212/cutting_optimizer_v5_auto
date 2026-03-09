@@ -7785,11 +7785,11 @@ document.addEventListener('DOMContentLoaded', function() {
           // 更新自訂輸入提示：改成「自由輸入單位」，唔需要再跟 unit 設定
           const hintEl = document.getElementById('autoReplenishCustomHint');
           if (hintEl) {
-            hintEl.textContent = '可直接輸入任何單位：mm/cm/m（米）、尺(ft)、寸/吋(in)、分(1/8寸)。冇寫單位會當 mm。';
+            hintEl.textContent = '支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。';
           }
           const inputEl = document.getElementById('autoReplenishCustomLen');
           if (inputEl) {
-            inputEl.placeholder = '例如 30寸(吋) / 6尺 / 2.5米 / 2500mm';
+            inputEl.placeholder = '例如：6尺 / 68寸 / 2.5m / 1500mm';
           }
         }
 
@@ -7884,11 +7884,11 @@ document.addEventListener('DOMContentLoaded', function() {
           const mm = parseAnyLenToMM(raw);
 
           if (!Number.isFinite(mm) || mm <= 0) {
-            if (hint) hint.textContent = '格式例子：30寸(吋) / 6尺 / 2.5米 / 2500mm（冇寫單位會當 mm）。';
+            if (hint) hint.textContent = '格式例子：6尺 / 68寸(吋) / 2.5m / 1500mm（唔寫單位＝mm）。';
             return;
           }
 
-          if (hint) hint.textContent = '可直接輸入任何單位：mm/cm/m（米）、尺(ft)、寸/吋(in)、分(1/8寸)。冇寫單位會當 mm。';
+          if (hint) hint.textContent = '支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。';
 
           // 顯示標籤：
           // - Modal/記錄：仍然保留換算（方便核對）
@@ -7954,12 +7954,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="d-grid gap-2" id="autoReplenishOptions">
           <button type="button" class="btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
 
-          <div class="small text-muted mt-2">自訂（mm）</div>
+          <div class="small text-muted mt-2">自訂</div>
           <div class="input-group">
-            <input type="text" inputmode="text" class="form-control" id="autoReplenishCustomLen" placeholder="例如 30寸(吋) / 6尺 / 2.5米 / 2500mm">
+            <input type="text" inputmode="text" class="form-control" id="autoReplenishCustomLen" placeholder="例如：6尺 / 68寸 / 2.5m / 1500mm">
             <button type="button" class="btn btn-outline-dark" id="autoReplenishCustomApply">套用</button>
           </div>
-          <div class="small text-muted" id="autoReplenishCustomHint">可直接輸入任何單位：mm/cm/m（米）、尺(ft)、寸/吋(in)、分(1/8寸)。冇寫單位會當 mm。</div>
+          <div class="small text-muted" id="autoReplenishCustomHint">支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。</div>
 
           <div class="small text-muted mt-2">常用（mm）</div>
           <button type="button" class="btn btn-outline-success" data-ar-len="6000" data-ar-label-zh="6000 mm" data-ar-label-en="6000 mm">6000 mm</button>
