@@ -7383,12 +7383,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function shortLabel(len, label){
       // 盡量短：配合 48px 按鈕
+      // 優先：如果已有 label（例如「68寸 ≈ 1727 mm（自訂）」），就直接抽前半段「68寸」顯示
+      let lab = String(label || '').trim();
+      if (lab) {
+        lab = lab.replace(/\s+/g,'');
+        lab = lab.split('≈')[0];
+        lab = lab.split('(')[0].split('（')[0];
+        // 有明確單位字樣就直接用（寸/吋/in/ft/mm/m/米）
+        if (/(寸|吋|in|ft|mm|cm|m|米)/i.test(lab)) return lab;
+      }
+
       const n = Number(len);
       if (!Number.isFinite(n) || n <= 0) return 'OFF';
       const m = n / 1000;
       if (Math.abs(m - Math.round(m)) < 1e-6) return String(Math.round(m)) + 'm';
       const ft = Math.round(n / 304.8);
       if (Math.abs(n - ft * 304.8) < 0.6) return String(ft) + 'ft';
+      const inch = Math.round(n / 25.4);
+      if (Math.abs(n - inch * 25.4) < 0.6) return String(inch) + (String((document.getElementById('language')||{}).value||'zh')==='zh' ? '寸' : 'in');
       return String(Math.round(n)) + 'mm';
     }
     const langEl = document.getElementById('language');
@@ -7428,7 +7440,18 @@ document.addEventListener('DOMContentLoaded', function() {
       state.classList.toggle('off', !on);
     }
     if (btn) {
-      btn.textContent = on ? shortLabel(len, label) : 'OFF';
+      // 優先用已保存嘅「按鈕面顯示」字樣（例如：5尺 / 68寸 / 2.5m / 1500mm）
+      let btnLabel = '';
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const s = JSON.parse(saved);
+          btnLabel = (lang === 'zh') ? (s && s.autoReplenishBtnLabelZh) : (s && s.autoReplenishBtnLabelEn);
+        }
+      } catch(e) {}
+      btnLabel = String(btnLabel || '').trim();
+
+      btn.textContent = on ? (btnLabel || shortLabel(len, label)) : 'OFF';
       // ON：綠色；OFF：灰色（同下方 unit 按鈕風格一致）
       btn.classList.toggle('btn-success', on);
       btn.classList.toggle('btn-secondary', !on);
@@ -7651,8 +7674,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const wrap = document.getElementById('autoReplenishOptions');
         if (!wrap) return;
 
-        function applyAutoReplenish(len, labelZh, labelEn){
+        function applyAutoReplenish(len, labelZh, labelEn, btnLabelZh, btnLabelEn){
           if (Number.isNaN(len)) return;
+
+          function normalizeBtnFaceLabel(txt){
+            let t = String(txt || '').trim();
+            if (!t) return '';
+            // button 面盡量短：去空白、去「≈...」後綴、去括號備註
+            t = t.replace(/\s+/g,'');
+            t = t.split('≈')[0];
+            t = t.split('(')[0].split('（')[0];
+            return t.trim();
+          }
+
           try {
             const saved = localStorage.getItem(STORAGE_KEY);
             const s = saved ? (JSON.parse(saved) || {}) : {};
@@ -7661,6 +7695,13 @@ document.addEventListener('DOMContentLoaded', function() {
               s.autoReplenishLastLen = len;
               s.autoReplenishLenLabelZh = labelZh || (Math.round(len*1000)/1000 + ' mm');
               s.autoReplenishLenLabelEn = labelEn || (Math.round(len*1000)/1000 + ' mm');
+
+              // 新增：按鈕面顯示（用家輸入原文優先）
+              const _btnZh = normalizeBtnFaceLabel(btnLabelZh || labelZh);
+              const _btnEn = normalizeBtnFaceLabel(btnLabelEn || labelEn);
+              s.autoReplenishBtnLabelZh = _btnZh || normalizeBtnFaceLabel(Math.round(len) + 'mm');
+              s.autoReplenishBtnLabelEn = _btnEn || normalizeBtnFaceLabel(Math.round(len) + 'mm');
+
               s.autoReplenish = true; // 舊版兼容
             } else {
               s.autoReplenishLen = 0;
@@ -7741,18 +7782,14 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.setAttribute('data-ar-label-zh', disp);
             btn.setAttribute('data-ar-label-en', disp);
           });
-          // 更新自訂輸入提示（避免 hint/input 因為宣告位置導致 TDZ）
+          // 更新自訂輸入提示：改成「自由輸入單位」，唔需要再跟 unit 設定
           const hintEl = document.getElementById('autoReplenishCustomHint');
           if (hintEl) {
-            hintEl.textContent = (u === 'imperial')
-              ? '以英尺輸入（可小數），會自動換算成 mm。'
-              : (u === 'imperial_decimal')
-                ? '以英寸輸入（可小數），會自動換算成 mm。'
-                : '只接受正數（以 mm 計）。';
+            hintEl.textContent = '可直接輸入任何單位：mm/cm/m（米）、尺(ft)、寸/吋(in)、分(1/8寸)。冇寫單位會當 mm。';
           }
           const inputEl = document.getElementById('autoReplenishCustomLen');
           if (inputEl) {
-            inputEl.placeholder = (u === 'imperial') ? '例如 20 (ft)' : (u === 'imperial_decimal') ? '例如 240 (in)' : '例如 6500 / 7000 (mm)';
+            inputEl.placeholder = '例如 30寸(吋) / 6尺 / 2.5米 / 2500mm';
           }
         }
 
@@ -7788,53 +7825,80 @@ document.addEventListener('DOMContentLoaded', function() {
           return (gm && gm.value) ? gm.value : ((document.getElementById('unit') && document.getElementById('unit').value) ? document.getElementById('unit').value : 'metric');
         }
 
-        function toMMFromAutoReplenishInput(v, u){
-          // u: metric / imperial / imperial_decimal
-          if (!Number.isFinite(v) || v <= 0) return NaN;
-          if (u === 'imperial') {
-            // 允許用戶直接輸入「英尺（可小數）」
-            return v * FT_TO_MM;
+        function parseAnyLenToMM(raw){
+          const s0 = String(raw||'').trim();
+          if (!s0) return NaN;
+
+          const s = s0
+            .toLowerCase()
+            .replace(/，/g, ',')
+            .replace(/\s+/g, '');
+
+          // 支援：
+          // - 公制：mm/cm/m/米/公尺/厘米/公分
+          // - 英制：ft/尺, in/寸, 分(=1/8寸)
+          // - 冇單位：當 mm
+          const unitMap = [
+            { re: /^(mm|毫米)$/, mul: 1 },
+            { re: /^(cm|厘米|公分)$/, mul: 10 },
+            { re: /^(m|米|公尺)$/, mul: 1000 },
+            { re: /^(ft|feet|foot|英尺|尺)$/, mul: FT_TO_MM },
+            { re: /^(in|inch|inches|\"|英寸|寸|吋)$/, mul: INCH_TO_MM },
+            { re: /^(分)$/, mul: INCH_TO_MM / 8 }
+          ];
+
+          // 允許多段相加，例如：6尺3寸2分
+          let total = 0;
+          let matchedAny = false;
+          const re = /([0-9]+(?:\.[0-9]+)?)\s*([a-z\"\u4e00-\u9fff]+)?/g;
+          let m;
+          while ((m = re.exec(s)) !== null) {
+            const num = Number(m[1]);
+            if (!Number.isFinite(num) || num <= 0) continue;
+            const u = (m[2] || '').trim();
+            if (!u) {
+              total += num; // default mm
+              matchedAny = true;
+              continue;
+            }
+            let mul = null;
+            for (const it of unitMap) {
+              if (it.re.test(u)) { mul = it.mul; break; }
+            }
+            if (mul == null) {
+              // 未知單位：唔計，等最後當 invalid
+              continue;
+            }
+            total += num * mul;
+            matchedAny = true;
           }
-          if (u === 'imperial_decimal') {
-            // 允許用戶直接輸入「英寸（可小數）」
-            return v * INCH_TO_MM;
-          }
-          // metric：仍然用 mm
-          return v;
+
+          if (!matchedAny) return NaN;
+          if (!(total > 0)) return NaN;
+          return total;
         }
 
         function applyCustom(){
           if (!input) return;
           const raw = String(input.value || '').trim();
-          const v = Number(raw);
-          const u = getAutoReplenishInputUnit();
-          const mm = toMMFromAutoReplenishInput(v, u);
+          const mm = parseAnyLenToMM(raw);
 
           if (!Number.isFinite(mm) || mm <= 0) {
-            if (hint) {
-              hint.textContent = (u === 'imperial')
-                ? '請輸入有效正數（英尺，可小數）。'
-                : (u === 'imperial_decimal')
-                  ? '請輸入有效正數（英寸，可小數）。'
-                  : '請輸入有效正數（mm）。';
-            }
+            if (hint) hint.textContent = '格式例子：30寸(吋) / 6尺 / 2.5米 / 2500mm（冇寫單位會當 mm）。';
             return;
           }
 
-          if (hint) {
-            hint.textContent = (u === 'imperial')
-              ? '以英尺輸入（可小數），會自動換算成 mm。'
-              : (u === 'imperial_decimal')
-                ? '以英寸輸入（可小數），會自動換算成 mm。'
-                : '只接受正數（以 mm 計）。';
-          }
+          if (hint) hint.textContent = '可直接輸入任何單位：mm/cm/m（米）、尺(ft)、寸/吋(in)、分(1/8寸)。冇寫單位會當 mm。';
 
-          // 顯示標籤用目前單位去格式化，避免「你揀英尺，但顯示 mm」造成誤會
-          const dispZh = (typeof formatLengthForDisplay === 'function') ? formatLengthForDisplay(mm, u) : (Math.round(mm) + ' mm');
-          const dispEn = dispZh;
-          const labelZh = dispZh + '（自訂）';
-          const labelEn = dispEn + ' (custom)';
-          applyAutoReplenish(mm, labelZh, labelEn);
+          // 顯示標籤：
+          // - Modal/記錄：仍然保留換算（方便核對）
+          // - 按鈕面：直顯示用家輸入原文（例如 5尺 / 68寸 / 2.5m / 1500mm）
+          const dispMm = Math.round(mm);
+          const labelZh = raw + ' ≈ ' + dispMm + ' mm（自訂）';
+          const labelEn = raw + ' ≈ ' + dispMm + ' mm (custom)';
+          const btnZh = raw;
+          const btnEn = raw;
+          applyAutoReplenish(mm, labelZh, labelEn, btnZh, btnEn);
         }
 
         if (applyBtn) applyBtn.addEventListener('click', (ev) => { ev.preventDefault(); ev.stopPropagation(); applyCustom(); });
@@ -7892,10 +7956,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
           <div class="small text-muted mt-2">自訂（mm）</div>
           <div class="input-group">
-            <input type="number" inputmode="decimal" class="form-control" id="autoReplenishCustomLen" placeholder="例如 6500 / 7000" min="1" step="1">
+            <input type="text" inputmode="text" class="form-control" id="autoReplenishCustomLen" placeholder="例如 30寸(吋) / 6尺 / 2.5米 / 2500mm">
             <button type="button" class="btn btn-outline-dark" id="autoReplenishCustomApply">套用</button>
           </div>
-          <div class="small text-muted" id="autoReplenishCustomHint">只接受正數（以 mm 計）。</div>
+          <div class="small text-muted" id="autoReplenishCustomHint">可直接輸入任何單位：mm/cm/m（米）、尺(ft)、寸/吋(in)、分(1/8寸)。冇寫單位會當 mm。</div>
 
           <div class="small text-muted mt-2">常用（mm）</div>
           <button type="button" class="btn btn-outline-success" data-ar-len="6000" data-ar-label-zh="6000 mm" data-ar-label-en="6000 mm">6000 mm</button>
