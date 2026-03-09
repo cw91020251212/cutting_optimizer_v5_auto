@@ -110,15 +110,48 @@
 
       /* 自動補料長度不足警示（len < 最長切件） */
       #autoReplenishPickerBtn.ag-ar-len-warning{
-        background: #dc3545 !important;
-        border-color: #b02a37 !important;
-        color: #fff !important;
-        box-shadow: 0 0 0 0.22rem rgba(220,53,69,.25) !important;
+        /* 警示按鈕：表面淺色（低調啲），但仍然易睇得出係 warning */
+        background: #f7c7c0 !important;   /* 淺橙粉紅 */
+        border-color: #e8a6a0 !important;
+        color: #7a2f2f !important;
+        box-shadow: 0 0 0 0.22rem rgba(232,166,160,.28) !important;
+        position: relative;
+        overflow: hidden;
       }
       #autoReplenishBtnTitle.ag-ar-len-warning{
-        color: #dc3545 !important;
+        /* 標題字：深色返少少（但唔好太搶） */
+        color: #c96f5c !important;
         font-weight: 900 !important;
       }
+
+      /* 標題旁細字（平放） */
+      #autoReplenishBtnTitle{ white-space: nowrap; }
+      .ag-ar-warn-text{
+        display:inline-block;
+        margin-left: 6px;
+        font-size: .78rem;
+        font-weight: 800;
+        color: #c96f5c;
+        letter-spacing: .02em;
+      }
+
+      /* 按鈕大交叉（提示暫時唔用得） */
+      #autoReplenishPickerBtn.ag-ar-len-warning::before,
+      #autoReplenishPickerBtn.ag-ar-len-warning::after{
+        content: "";
+        position: absolute;
+        left: 10%;
+        top: 50%;
+        width: 80%;
+        height: 4px;
+        background: rgba(255,255,255,.92);
+        border-radius: 3px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.18);
+        transform-origin: center;
+        pointer-events: none;
+      }
+      #autoReplenishPickerBtn.ag-ar-len-warning::before{ transform: translateY(-50%) rotate(25deg); }
+      #autoReplenishPickerBtn.ag-ar-len-warning::after{  transform: translateY(-50%) rotate(-25deg); }
 
       /* 手機窄屏：參考「切割項目」controls-row 做法：兩粒方案掣平排 + 右側細粒自動補料掣（唔做全寬大掣） */
       @media (max-width: 576px){
@@ -1675,9 +1708,9 @@ body select.unit-select option {
         select.unit-select:not(#unit), .unit-select:not(#unit) { text-align: center !important; text-align-last: center !important; padding-left: 0 !important; padding-right: 0 !important; line-height: 38px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; }
         </style>
 <style>
-      /* (非必填)/(optional)：改做橙紅色，更醒目但唔會太刺眼 */
-      .optional-note { font-size: .85em; color: #ff5a2a; margin-left: 0; font-weight: 700; }
-      .card-body-light .optional-note { color: #ff5a2a; }
+      /* (非必填)/(optional)：字深色返少少（但仍然柔和） */
+      .optional-note { font-size: .85em; color: #d7836e; margin-left: 0; font-weight: 700; }
+      .card-body-light .optional-note { color: #d7836e; }
     </style>
 <style>
       @media (max-width: 767.98px) {
@@ -2410,7 +2443,7 @@ html.no-transitions, html.no-transitions * {
 
   <!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
   <div class="scheme-right" id="autoReplenishWrap">
-    <div class="auto-replenish-title" id="autoReplenishBtnTitle">自動補料</div>
+    <div class="auto-replenish-title" id="autoReplenishBtnTitle">自動補料 <span id="autoReplenishWarnText" class="ag-ar-warn-text" aria-live="polite" style="display:none;">（長度不足）</span></div>
     <button class="btn btn-success btn-sm" id="autoReplenishPickerBtn" type="button"
             data-bs-toggle="modal" data-bs-target="#autoReplenishModal"
             title="自動補料" aria-label="自動補料">OFF</button>
@@ -4760,6 +4793,7 @@ html.no-transitions, html.no-transitions * {
         })();
 
         // === AnyGen patch: scroll to layout after calculate ===
+        // 參考舊檔做法：唔喺呢度 hard reset 結果，避免 cancel/清 flag 令滾動失效
         function calculateAndScroll() {
             // 用戶手動按「計算」：解除抑制自動計算
             window.__suppressAutoRecalc = false;
@@ -4835,52 +4869,118 @@ function calculate() {
                 if (isFinite(_maxCutLen) && _maxCutLen > 0) {
                   // Auto-Replenish 規則：
                   // - OFF：必須靠現有材料；最長材料不足就中止
-                  // - ON ：允許用「你設定的補料長度」補料；但補料長度不足就中止（唔自動改）
+                  // - ON ：允許用「補料長度」補料；如補料長度不足但材料夠長，系統會自動用最長材料長度修正補料長度並繼續
 
                   // Auto-Replenish 規則（改良）：
                   // - 當 Auto-Replenish ON 但補料長度不足時，如果「你提供嘅材料」本身夠長，就應該照計、照排版。
                   // - 只有當「補料」同「材料」兩者都不足，先中止。
-                  // 同時：為避免 Worker/演算法只考慮短補料而誤判，本次計算會暫時停用 Auto-Replenish。
+                  // 如需要，系統會同步更新「自動補料長度」設定，等用家之後唔使再手動改。
                   if (_autoOn) {
                     const _matCanHandle = (isFinite(_maxMatLen) && _maxMatLen + 1e-9 >= _maxCutLen);
 
-                    // 未設定補料長度：若材料夠長，照計（本次停用補料）；否則先中止
+                    // 未設定補料長度：
+                    // - 若材料夠長：系統會直接用「最長材料長度」當作補料長度，繼續用補料排版
+                    // - 否則：先中止
                     if (!isFinite(_arLen) || _arLen <= 0) {
                       if (_matCanHandle) {
-                        _autoOn = false;
-                        _arLen = 0;
+                        const _newAr = Number(_maxMatLen) || 0;
+                        if (_newAr > 0) {
+                          _arLen = _newAr;
+                          // 同步寫入設定（等用家之後再計都唔使再手動改）
+                          try {
+                            const saved = localStorage.getItem(STORAGE_KEY);
+                            const s = saved ? (JSON.parse(saved) || {}) : {};
+                            s.autoReplenishLen = _newAr;
+                            s.autoReplenishLastLen = _newAr;
+                            s.autoReplenishLenLabelZh = (Math.round(_newAr*1000)/1000 + ' mm');
+                            s.autoReplenishLenLabelEn = (Math.round(_newAr*1000)/1000 + ' mm');
+                            s.autoReplenish = true;
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+                          } catch(e) {}
+
+                          try {
+                            const chk = document.getElementById('autoReplenishToggle');
+                            if (chk) {
+                              chk.checked = true;
+                              try { chk.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+                            }
+                            if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
+                          } catch(e) {}
+
+                          // 提示用家：系統已自動修正
+                          try {
+                            const rd = document.getElementById('resultDetails');
+                            if (rd) {
+                              rd.style.display = 'block';
+                              const msg = (_lang==='zh')
+                                ? ('<div style="margin: 12px 0; padding: 10px; background:#d1ecf1; border:1px solid #bee5eb; border-radius:6px; color:#0c5460;">'
+                                  + '<strong>提示：</strong>【自動修正】偵測到你嘅材料夠長（最長材料=' + (_maxMatLen||0) + ' ≥ 最長切件需要=' + _maxCutLen + '）。<br>'
+                                  + '系統已自動將「自動補料長度」設為最長材料長度（' + (_newAr||0) + '），並即時用補料繼續排版。<br>'
+                                  + '如你想用其他補料長度，可以到「自動補料」再手動修改。</div>')
+                                : ('<div style="margin: 12px 0; padding: 10px; background:#d1ecf1; border:1px solid #bee5eb; border-radius:6px; color:#0c5460;">'
+                                  + '<strong>Note:</strong> Auto-fix applied. Materials are long enough; auto length is set to max material length (' + (_newAr||0) + ') and layout continues.</div>');
+                              rd.insertAdjacentHTML('afterbegin', msg);
+                            }
+                          } catch(e) {}
+                        }
                       } else {
                         alert(_lang==='zh'
-                          ? ('已開啟自動補料，但未設定補料長度，而且現有材料亦不足以應付最長切件。\n請先設定補料長度，或加入更長材料。')
+                          ? ('處理唔到：【情境B：補料未設定 + 材料不足】\n最長材料=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen + '（仲差' + Math.max(0, (_maxCutLen-(_maxMatLen||0))).toFixed(1) + '）。\n\n請用以下兩個方法其中一個：\n1）到「自動補料」設定並加長補料長度至 ≥ 最長切件需要（用途：用補料頂最長切件）；\n2）到「材料」新增／增加更長嘅材料，並視乎需要增加材料數量（用途：用材料供應頂排版需要）。')
                           : ('Auto-Replenish is ON but length is not set, and existing materials are also too short.\nPlease set the length or add longer material.'));
                         return;
                       }
                     }
 
-                    // 補料長度不足：若材料夠長，照計（本次停用補料）；否則先中止
+                    // 補料長度不足：
+                    // - 若材料夠長：系統會把「最長材料長度」當作補料長度，直接用補料繼續排版
+                    // - 否則：先中止
                     if (isFinite(_arLen) && _arLen > 0 && _arLen + 1e-9 < _maxCutLen) {
                       if (_matCanHandle) {
-                        _autoOn = false;
-                        // 保留 UI 狀態，但本次計算唔用補料
-                        try {
-                          const rd = document.getElementById('resultDetails');
-                          if (rd) {
-                            rd.style.display = 'block';
-                            const msg = (_lang==='zh')
-                              ? ('<div style="margin: 12px 0; padding: 10px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">'
-                                + '<strong>提示：</strong> 自動補料長度不足（補料=' + (_arLen||0) + '，最長切件需要≥' + _maxCutLen + '），但你提供嘅材料夠長。<br>'
-                                + '本次會先用你提供嘅材料排版；如需用補料，請把補料長度調到足夠。</div>')
-                              : ('<div style="margin: 12px 0; padding: 10px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">'
-                                + '<strong>Note:</strong> Auto-Replenish is too short (auto=' + (_arLen||0) + ' < required ' + _maxCutLen + '), but your materials are long enough.<br>'
-                                + 'This run will use your materials first; increase auto length if you want replenishment.</div>');
-                            rd.insertAdjacentHTML('afterbegin', msg);
-                          }
-                        } catch(e) {}
+                        const _oldAr = _arLen;
+                        const _newAr = Number(_maxMatLen) || 0;
+                        if (_newAr > 0) {
+                          _arLen = _newAr;
 
-                        _arLen = 0;
+                          // 同步寫入設定
+                          try {
+                            const saved = localStorage.getItem(STORAGE_KEY);
+                            const s = saved ? (JSON.parse(saved) || {}) : {};
+                            s.autoReplenishLen = _newAr;
+                            s.autoReplenishLastLen = _newAr;
+                            s.autoReplenishLenLabelZh = (Math.round(_newAr*1000)/1000 + ' mm');
+                            s.autoReplenishLenLabelEn = (Math.round(_newAr*1000)/1000 + ' mm');
+                            s.autoReplenish = true;
+                            localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+                          } catch(e) {}
+
+                          try {
+                            const chk = document.getElementById('autoReplenishToggle');
+                            if (chk) {
+                              chk.checked = true;
+                              try { chk.dispatchEvent(new Event('change', { bubbles: true })); } catch(e) {}
+                            }
+                            if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
+                          } catch(e) {}
+
+                          // 提示用家：已自動修正並繼續
+                          try {
+                            const rd = document.getElementById('resultDetails');
+                            if (rd) {
+                              rd.style.display = 'block';
+                              const msg = (_lang==='zh')
+                                ? ('<div style="margin: 12px 0; padding: 10px; background:#d1ecf1; border:1px solid #bee5eb; border-radius:6px; color:#0c5460;">'
+                                  + '<strong>提示：</strong>【自動修正】偵測到你嘅材料夠長（最長材料=' + (_maxMatLen||0) + ' ≥ 最長切件需要=' + _maxCutLen + '）。<br>'
+                                  + '原本補料=' + (_oldAr||0) + '（唔夠長，仲差' + Math.max(0, (_maxCutLen-(_oldAr||0))).toFixed(1) + '）。系統已自動將「自動補料長度」改為最長材料長度（' + (_newAr||0) + '），並即時用補料繼續排版。<br>'
+                                  + '如畫面長時間停留喺「計算中…」，代表計算量太大／瀏覽器卡住；請按「重置」，然後減少切件數量或再調整設定後重試。</div>')
+                                : ('<div style="margin: 12px 0; padding: 10px; background:#d1ecf1; border:1px solid #bee5eb; border-radius:6px; color:#0c5460;">'
+                                  + '<strong>Note:</strong> Auto-fix applied. Auto length set to max material length (' + (_newAr||0) + ') and layout continues.</div>');
+                              rd.insertAdjacentHTML('afterbegin', msg);
+                            }
+                          } catch(e) {}
+                        }
                       } else {
                         alert(_lang==='zh'
-                          ? ('處理唔到：你設定嘅補料長度不足，而且現有材料亦不足。\n補料=' + (_arLen||0) + '，最長材料=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen + '。\n請自行加長補料，或加入更長材料。')
+                          ? ('處理唔到：【情境B：補料不足 + 材料不足】\n補料=' + (_arLen||0) + '（仲差' + Math.max(0, (_maxCutLen-(_arLen||0))).toFixed(1) + '），最長材料=' + (_maxMatLen||0) + '（仲差' + Math.max(0, (_maxCutLen-(_maxMatLen||0))).toFixed(1) + '），但最長切件需要≥' + _maxCutLen + '。\n\n請用以下兩個方法其中一個：\n1）到「自動補料」將補料長度加長至 ≥ 最長切件需要（用途：用補料頂最長切件）；\n2）到「材料」新增／增加更長嘅材料，並視乎需要增加材料數量（用途：用材料供應頂排版需要）。')
                           : ('Cannot process: auto-replenish length is too short and existing materials are also too short.\nAuto=' + (_arLen||0) + ', Max material=' + (_maxMatLen||0) + ', Required ≥ ' + _maxCutLen + '.\nPlease increase auto length or add longer material.'));
                         return;
                       }
@@ -4891,7 +4991,7 @@ function calculate() {
                     // Auto-Replenish OFF：只可用現有材料
                     if (!isFinite(_maxMatLen) || _maxMatLen + 1e-9 < _maxCutLen) {
                       alert(_lang==='zh'
-                        ? ('處理唔到：材料長度不足（已關閉自動補料）。\n最長材料=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen + '。\n請加入更長材料，或開啟自動補料。')
+                        ? ('處理唔到：【情境B：自動補料已關閉 + 材料不足】\n最長材料=' + (_maxMatLen||0) + '，但最長切件需要≥' + _maxCutLen + '（仲差' + Math.max(0, (_maxCutLen-(_maxMatLen||0))).toFixed(1) + '）。\n\n請用以下兩個方法其中一個：\n1）開啟「自動補料」，並將補料長度加長至 ≥ 最長切件需要（用途：用補料頂最長切件）；\n2）到「材料」新增／增加更長嘅材料，並視乎需要增加材料數量（用途：用材料供應頂排版需要）。')
                         : ('Cannot process: material length insufficient (Auto-Replenish OFF).\nMax material=' + (_maxMatLen||0) + ' < required ' + _maxCutLen + '.\nPlease add longer material or enable Auto-Replenish.'));
                       return;
                     }
@@ -6428,37 +6528,47 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const originalRender = window.renderCuttingResults;
   window.renderCuttingResults = function(bins, sawThickness) {
-    let missingMaterials = {};
-    bins.forEach(bin => {
-      if(bin && bin.autoAdded) {
-        const len = bin.length;
-        missingMaterials[len] = (missingMaterials[len] || 0) + 1;
-      }
-    });
-
-    if(Object.keys(missingMaterials).length > 0) {
-      const resultDetails = document.getElementById('resultDetails');
-      if(resultDetails) {
-        let missingHtml = `<div style="margin: 15px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 5px; color: #856404;">
-          <strong><i class="fa-solid fa-triangle-exclamation"></i> ${(document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'材料不足，自動補料 (Auto-Replenish):':'Insufficient material, Auto-Replenish:'}</strong>
-          <ul style="margin: 8px 0 0 20px; padding-left: 0;">`;
-
-        for(const [length, count] of Object.entries(missingMaterials)) {
-          const displayLen = (typeof formatLengthForDisplay === 'function') ? formatLengthForDisplay(parseFloat(length), document.getElementById('unit') ? document.getElementById('unit').value : 'metric') : length;
-          missingHtml += `<li>${displayLen} x ${count} ${(document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'?'支':'bar(s)'}</li>`;
-        }
-        missingHtml += `</ul></div>`;
-
-        const summaryBox = resultDetails.querySelector('[style*="background: #e8f5e9"]') || resultDetails.querySelector('[style*="background-color: #e8f5e9"]');
-        if(summaryBox) {
-          summaryBox.insertAdjacentHTML('afterend', missingHtml);
-        }
-      }
-    }
-
+    // 先用原本 render 畫結果；否則我哋插入嘅提示會被覆蓋掉
     if(typeof originalRender === 'function') {
       originalRender.call(this, bins, sawThickness);
     }
+
+    // 再做「材料不足 → 自動補料」提示（以免被原本 render 重新寫入 DOM 覆蓋）
+    try {
+      let missingMaterials = {};
+      (bins || []).forEach(bin => {
+        if(bin && bin.autoAdded) {
+          const len = bin.length;
+          missingMaterials[len] = (missingMaterials[len] || 0) + 1;
+        }
+      });
+
+      const resultDetails = document.getElementById('resultDetails');
+      if(resultDetails) {
+        // 防止重複插入
+        const old = resultDetails.querySelector('#agAutoReplenishWarning');
+        if (old) old.remove();
+
+        if(Object.keys(missingMaterials).length > 0) {
+          const lang = (document.getElementById('language')?document.getElementById('language').value:'zh');
+          let missingHtml = `<div id="agAutoReplenishWarning" style="margin: 15px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 5px; color: #856404;">
+            <strong><i class="fa-solid fa-triangle-exclamation"></i> ${lang==='zh'?'材料不足，自動補料 (Auto-Replenish):':'Insufficient material, Auto-Replenish:'}</strong>
+            <ul style="margin: 8px 0 0 20px; padding-left: 0;">`;
+
+          for(const [length, count] of Object.entries(missingMaterials)) {
+            const displayLen = (typeof formatLengthForDisplay === 'function')
+              ? formatLengthForDisplay(parseFloat(length), document.getElementById('unit') ? document.getElementById('unit').value : 'metric')
+              : length;
+            missingHtml += `<li>${displayLen} x ${count} ${lang==='zh'?'支':'bar(s)'}</li>`;
+          }
+          missingHtml += `</ul></div>`;
+
+          const summaryBox = resultDetails.querySelector('[style*="background: #e8f5e9"]') || resultDetails.querySelector('[style*="background-color: #e8f5e9"]') || resultDetails.querySelector('.opt-summary-box');
+          if(summaryBox) summaryBox.insertAdjacentHTML('afterend', missingHtml);
+          else resultDetails.insertAdjacentHTML('afterbegin', missingHtml);
+        }
+      }
+    } catch(e) {}
 
     // 計算完成後自動捲到「優化摘要」置頂（等 render 真係畫完先捲）
     // 只移植舊檔捲動邏輯：以 resultDetails 入面 .opt-summary-box 作錨點
@@ -6488,13 +6598,20 @@ document.addEventListener("DOMContentLoaded", function() {
               }
             }
 
+            // 優先捲到「排版圖」（cuttingCanvas）；搵唔到先捲到摘要/結果卡
             var anchor = null;
             try {
-              var rd = document.getElementById('resultDetails');
-              if (rd) {
-                anchor = rd.querySelector('.opt-summary-box h4') || rd.querySelector('.opt-summary-box') || rd.querySelector('h4');
-              }
+              var cn = document.getElementById('cuttingCanvas');
+              if (cn && (!cn.style || cn.style.display !== 'none')) anchor = cn;
             } catch(e) {}
+            if (!anchor) {
+              try {
+                var rd = document.getElementById('resultDetails');
+                if (rd) {
+                  anchor = rd.querySelector('.opt-summary-box h4') || rd.querySelector('.opt-summary-box') || rd.querySelector('h4');
+                }
+              } catch(e) {}
+            }
 
             var resultsCard = document.getElementById('results-card');
             __agScrollTo(anchor || resultsCard);
@@ -6789,43 +6906,111 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
     (function(){
-      function hideResults(){
-        const ids = [
-          'resultDetails','cuttingCanvas','colorLegend','progressBar',
-          'schemeSelector','printOptionsButton','printButton'
-        ];
-        ids.forEach(id => {
-          const el = document.getElementById(id);
-          if (!el) return;
-          if (id === 'progressBar') {
-            el.style.display = 'none';
-          } else {
-            el.style.display = 'none';
+      // 目標：一旦任何輸入/設定有變動，就「清走舊結果」
+      // - 只 hide 唔夠：舊 HTML/banner/canvas 會殘留，下一次 render 可能重疊
+      // - 所以要同時：停止正在跑嘅 Worker、清空內容、再隱藏結果區
+      function hardResetResults(ev){
+        // 0) 只處理「用戶真係手動」嘅改動；
+        //    程式內部 dispatchEvent(change/input) 會令 isTrusted=false，唔應該清走結果/取消計算/清滾動旗標。
+        try { if (ev && ev.isTrusted === false) return; } catch(e) {}
+
+        // 1) 停止計算（避免改緊設定但舊計算仍然回傳結果）
+        try { if (typeof window.__cancelCalcWorker === 'function') window.__cancelCalcWorker(); } catch(e) {}
+
+        // 2) 清空/重置內容
+        try {
+          var rd = document.getElementById('resultDetails');
+          if (rd) { rd.innerHTML = ''; rd.style.display = 'none'; }
+        } catch(e) {}
+        try {
+          var lgItems = document.getElementById('colorLegendItems');
+          if (lgItems) lgItems.innerHTML = '';
+          var lg = document.getElementById('colorLegend');
+          if (lg) lg.style.display = 'none';
+        } catch(e) {}
+        try {
+          var cn = document.getElementById('cuttingCanvas');
+          if (cn) {
+            // 清 canvas，避免殘影
+            try {
+              var ctx = cn.getContext && cn.getContext('2d');
+              if (ctx) ctx.clearRect(0,0,cn.width||0,cn.height||0);
+            } catch(e) {}
+            cn.style.display = 'none';
           }
+        } catch(e) {}
+
+        // 3) 進度條/列印按鈕/方案選擇器等 UI 一律收起
+        try {
+          var pb = document.getElementById('progressBar');
+          var pbi = document.getElementById('progressBarInner');
+          var pbt = document.getElementById('progressText');
+          if (pb) pb.style.display = 'none';
+          if (pbi) { pbi.style.width = '0%'; pbi.setAttribute('aria-valuenow','0'); }
+          if (pbt) pbt.textContent = '';
+        } catch(e) {}
+        ['schemeSelector','printOptionsButton','printButton'].forEach(function(id){
+          try { var el=document.getElementById(id); if(el) el.style.display='none'; } catch(e) {}
         });
+
+        // 4) 清除「計算後自動捲動」旗標，避免改完設定都硬捲落去
+        try { window.__ag_scroll_after_calc = 0; } catch(e) {}
       }
+
       function bind(el){
         if (!el) return;
-        el.addEventListener('input', hideResults);
-        el.addEventListener('change', hideResults);
+        el.addEventListener('input', hardResetResults);
+        el.addEventListener('change', hardResetResults);
       }
+
       function attachAutoHide(){
+        // 基本設定
         ['#language','#unit','#algorithmSelector','#sawThickness',
          '#globalCutUnit','#globalMaterialUnit']
-         .forEach(sel => document.querySelectorAll(sel).forEach(bind));
-        document.querySelectorAll('.cutLengthPart,.cutQty,.cutPurpose')
-          .forEach(bind);
-        document.querySelectorAll('.materialLengthPart,.materialQty')
-          .forEach(bind);
+         .forEach(function(sel){ document.querySelectorAll(sel).forEach(bind); });
+
+        // 自動補料（新制）
+        // 注意：picker / apply 係 button，主要靠 click；其他 input 就用 input/change
+        ['#autoReplenishToggle','#autoReplenishCustomLen']
+          .forEach(function(sel){ document.querySelectorAll(sel).forEach(bind); });
+
+        ['#autoReplenishPickerBtn','#autoReplenishCustomApply']
+          .forEach(function(sel){
+            document.querySelectorAll(sel).forEach(function(el){
+              // click 即刻清結果（最常見情景）
+              el.addEventListener('click', hardResetResults, true);
+              // 保險：部分瀏覽器可能觸發 change
+              bind(el);
+            });
+          });
+        // 補料 modal 內嘅預設長度按鈕（動態生成）
+        var arOpts = document.getElementById('autoReplenishOptions');
+        if (arOpts) {
+          arOpts.addEventListener('click', function(){ hardResetResults(); }, true);
+        }
+
+        // 切割/材料輸入
+        document.querySelectorAll('.cutLengthPart,.cutQty,.cutPurpose').forEach(bind);
+        document.querySelectorAll('.materialLengthPart,.materialQty').forEach(bind);
+
+        // 新增/更新/清除按鈕
         ['#addCuttingButton','#clearCuttingButton','#updateCuttingButton',
          '#addMaterialButton','#clearMaterialButton','#updateMaterialButton']
-         .forEach(id => { const b=document.querySelector(id); if(b){ b.addEventListener('click', hideResults); }});
+         .forEach(function(id){
+           var b = document.querySelector(id);
+           if (b) b.addEventListener('click', hardResetResults);
+         });
+
+        // 表格內 edit/delete
         document.addEventListener('click', function(e){
-          const btn = e.target.closest('.action-buttons button');
-          if(btn) hideResults();
-        });
-        window.hideCuttingResults = hideResults;
+          var btn = e.target && e.target.closest ? e.target.closest('.action-buttons button') : null;
+          if (btn) hardResetResults();
+        }, true);
+
+        // 對外
+        window.hideCuttingResults = hardResetResults;
       }
+
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', attachAutoHide);
       } else {
@@ -7258,6 +7443,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.updateAutoReplenishWarning = function(){
     const btn = document.getElementById('autoReplenishPickerBtn');
     const title = document.getElementById('autoReplenishBtnTitle');
+    const warnText = document.getElementById('autoReplenishWarnText');
     if (!btn) return;
 
     // 讀取目前補料長度（mm）；len<=0 視為 OFF
@@ -7289,6 +7475,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const warn = (len > 0 && maxCut > 0 && (len + 1e-9) < maxCut);
     btn.classList.toggle('ag-ar-len-warning', warn);
     if (title) title.classList.toggle('ag-ar-len-warning', warn);
+    if (warnText) {
+      const lang = (document.getElementById('language') ? document.getElementById('language').value : 'zh');
+      warnText.textContent = (lang === 'zh') ? '（長度不足）' : '(Too short)';
+      warnText.style.display = warn ? 'inline-block' : 'none';
+    }
 
     // 提示文字：只喺警示時加，正常時清掉（避免長期佔用 title）
     try {
