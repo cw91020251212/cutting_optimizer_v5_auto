@@ -4666,22 +4666,35 @@ html.no-transitions, html.no-transitions * {
 
                 let bins=[];
                 function newBin(firstCut){
+                  // FIX: 一定要揀「夠長」嘅材料先開新 bin。
+                  // 舊版直接 mats.shift()（最短嗰支）會導致：49寸 會被塞入 12寸 碎料，之後先靠 UI 黃色警告兜底。
+                  const need = Number(firstCut && firstCut.length)||0;
                   let binLength=0, autoAdded=false, mclass='scrap';
-                  if (mats.length>0){
-                    const mat=mats.shift();
-                    binLength=Number(mat.length)||0;
-                    mclass=mat.mclass||'scrap';
+
+                  // 由短到長搵第一支足夠長嘅材料
+                  let pickIdx = -1;
+                  for (let i=0;i<mats.length;i++){
+                    const L = Number(mats[i] && mats[i].length)||0;
+                    if (L + 1e-9 >= need){ pickIdx = i; break; }
+                  }
+
+                  if (pickIdx >= 0){
+                    const mat = mats.splice(pickIdx,1)[0];
+                    binLength = Number(mat.length)||0;
+                    mclass = mat.mclass||'scrap';
                   } else {
-                    // 材料用完：如果 Auto-Replenish ON，就按用家設定長度自動補料；否則報錯
+                    // 冇任何材料夠長：如果 Auto-Replenish ON，就用 autoLen 補料；否則報錯
                     if(!autoEnabled){
-                      throw new Error('材料不足：已關閉自動補料，請自行增加材料或調整切割項目。');
+                      throw new Error('材料長度不足：現有材料都唔夠長去放入切件（含鋸縫請自行預留/設定）。請增加更長材料或開啟自動補料。');
                     }
                     autoAdded=true;
-                    // 重要：補料長度用用家設定 autoLen（計算前已保證 >= 最長切件），唔做任何自動提升
                     binLength = Number(autoLen)||0;
                     if(!(binLength>0)) throw new Error('自動補料長度未設定或無效，無法補料。');
+                    // 如用家設定嘅 autoLen 都短過需要，至少要補到夠長（安全兜底）
+                    if (binLength + 1e-9 < need) binLength = need;
                     mclass='auto';
                   }
+
                   const b={length:binLength, cuts:[firstCut], autoAdded, mclass};
                   bins.push(b);
                   return b;
@@ -4832,6 +4845,137 @@ html.no-transitions, html.no-transitions * {
             }, 0);
         }
 
+// === 情景提示引擎（Scenario Advisor）===
+// 目標：當材料不足/設定矛盾/單位疑似出錯時，唔止彈「錯誤」，而係提供下一步建議。
+(function(){
+  function lang(){ return (document.getElementById('language')?document.getElementById('language').value:'zh'); }
+  function fmtMm(n){ return (Math.round(Number(n||0)*10)/10) + 'mm'; }
+  function bullets(arr){
+    const l=lang();
+    if(!arr||!arr.length) return '';
+    const head = (l==='zh'?'\n\n建議你：\n':'\n\nSuggestions:\n');
+    return head + arr.map(s=>'• ' + s).join('\n');
+  }
+  function showPanel(level, title, lines){
+    try{
+      const rd=document.getElementById('resultDetails');
+      if(!rd) return;
+      rd.style.display='block';
+      const l=lang();
+      const bg = level==='error'?'#f8d7da':(level==='warn'?'#fff3cd':'#d1ecf1');
+      const bd = level==='error'?'#f5c2c7':(level==='warn'?'#ffecb5':'#bee5eb');
+      const fg = level==='error'?'#842029':(level==='warn'?'#856404':'#0c5460');
+      const t = title || (l==='zh'?'提示':'Note');
+      const body = (lines||[]).map(x=>'<div style="margin:2px 0;">'+String(x)+'</div>').join('');
+      const html = '<div class="ag-advice" style="margin:12px 0; padding:12px; background:'+bg+'; border:1px solid '+bd+'; border-radius:8px; color:'+fg+';">'
+        + '<div style="font-weight:900; margin-bottom:6px;">'+t+'</div>' + body + '</div>';
+      rd.insertAdjacentHTML('afterbegin', html);
+    }catch(e){}
+  }
+  function detectScenario(cuttingItems, materialItems, sawMm){
+    const l=lang();
+    const cuts=(cuttingItems||[]).map(it=>Number(it.length)||0).filter(x=>x>0);
+    const mats=(materialItems||[]).map(it=>Number(it.length)||0).filter(x=>x>0);
+    const maxCut = cuts.length?Math.max.apply(null,cuts):0;
+    const maxMat = mats.length?Math.max.apply(null,mats):0;
+    const tips=[];
+
+    // 1) 最長切件 > 最長材料
+    if(maxCut>0 && maxMat>0 && maxCut>maxMat+1e-6){
+      tips.push(l==='zh'
+        ? ('最長切件 '+fmtMm(maxCut)+' 大過最長材料 '+fmtMm(maxMat)+'：需要增加更長材料，或開啟自動補料並把補料長度設為 ≥ 最長切件。')
+        : ('Max cut '+fmtMm(maxCut)+' exceeds max material '+fmtMm(maxMat)+': add longer material, or enable Auto-Replenish with length ≥ max cut.'));
+    }
+
+    // 2) 鋸縫疑似單位錯（太大）
+    const saw = Number(sawMm||0);
+    if(saw>0 && maxCut>0 && saw>maxCut*0.1){
+      tips.push(l==='zh'
+        ? ('鋸縫('+fmtMm(saw)+') 相對切件太大，可能係把 "mm" 當成 "分/寸" 或反過來；請檢查鋸縫輸入單位。')
+        : ('Kerf ('+fmtMm(saw)+') looks too large vs cuts; check kerf unit.'));
+    }
+
+    // 3) 典型「寸/尺」混用提示（啟發式）
+    // 例如：切件 49寸≈1244.6mm；材料 12寸=304.8mm；同時又有 8尺≈2438.4mm
+    if(maxCut>1000 && maxCut<2000 && maxMat>2000 && mats.some(v=>v>2000) && mats.some(v=>v>200 && v<500)){
+      tips.push(l==='zh'
+        ? '你同時有「很短碎料」同「很長材料」。程式會優先用碎料，但仍必須先檢查「碎料夠唔夠長」。如結果仍怪，請先確定每一行材料/切件輸入時單位選擇一致。'
+        : 'You have both short offcuts and long bars. Offcut-first is fine, but each bar must still be long enough. Double-check unit selections per row.');
+    }
+
+    return {maxCut,maxMat,tips};
+  }
+
+  window.__agScenarioDetect = detectScenario;
+  window.__agAdvicePanel = showPanel;
+  window.__agAdviceAlert = function(title, msgLines, tips){
+    const l=lang();
+    const msg = (Array.isArray(msgLines)?msgLines.join('\n'):String(msgLines||'')) + bullets(tips||[]);
+    try{ alert(msg); }catch(e){}
+    // 同時喺結果區頂部放一份（方便翻查）
+    showPanel('warn', title || (l==='zh'?'建議':'Suggestions'), (msgLines||[]).concat((tips||[]).map(t=>(l==='zh'?'建議：':'Tip: ')+t)));
+  };
+
+  // 生成「材料不足」詳細建議（附短缺清單）
+  window.__agShortageHtml = function(negativeWasteBins, bins, sawThickness, unit){
+    const l = lang();
+    const list = (negativeWasteBins||[]).map(o=>o.idx);
+    const maxShow = 8;
+    const rows = [];
+    for (let i=0;i<Math.min(list.length, maxShow);i++){
+      const idx = list[i]-1;
+      const bin = (bins||[])[idx];
+      if(!bin||!bin.cuts) continue;
+      const used = bin.cuts.reduce((s,c)=>s+(Number(c.length)||0),0);
+      const kerf = bin.cuts.length>1 ? (bin.cuts.length-1)*(Number(sawThickness)||0) : 0;
+      const req = used + kerf;
+      const len = Number(bin.length)||0;
+      const shortBy = req - len;
+      rows.push({no:list[i], len, req, shortBy});
+    }
+    const tips = [];
+    tips.push(l==='zh'?'到「材料」增加更長材料，或把短碎料改成正確長度/數量。':'Add longer materials, or correct offcut lengths/qty.');
+    tips.push(l==='zh'?'檢查「材料/切割」單位：例如 12寸=304.8mm、8尺=2438.4mm。':'Check units: 12 in=304.8mm, 8 ft=2438.4mm.');
+    tips.push(l==='zh'?'檢查鋸縫：鋸縫會累加（每支材料切 N 件，鋸縫≈(N-1)*鋸縫）。':'Check kerf accumulation: (N-1)*kerf per bar.');
+    tips.push(l==='zh'?'如你本來預期「唔夠就補新料」：開啟自動補料並設定補料長度 ≥ 最長切件。':'If you expect top-up: enable Auto-Replenish and set length ≥ max cut.');
+
+    const title = l==='zh'?'⚠️ 材料長度不足（無法完成排版）':'⚠️ Material too short (layout not feasible)';
+    const sub = l==='zh'
+      ? ('受影響原料：' + (list.length?('#'+list.join(', #')):'-'))
+      : ('Affected bars: ' + (list.length?(''+list.join(', ')):'-'));
+
+    let table='';
+    if(rows.length){
+      table = '<div style="margin-top:8px; overflow:auto;">'
+        + '<table style="width:100%; border-collapse:collapse; font-size:12px;">'
+        + '<thead><tr>'
+        + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">#</th>'
+        + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'原料長度':'Bar')+'</th>'
+        + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'需要(含鋸縫)':'Required (incl. kerf)')+'</th>'
+        + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'短缺':'Short by')+'</th>'
+        + '</tr></thead><tbody>'
+        + rows.map(r=>(
+            '<tr>'
+            + '<td style="padding:6px; border-bottom:1px solid rgba(0,0,0,.08);">#'+r.no+'</td>'
+            + '<td style="padding:6px; border-bottom:1px solid rgba(0,0,0,.08);">'+(window.formatLengthForDisplay?window.formatLengthForDisplay(r.len, unit):fmtMm(r.len))+'</td>'
+            + '<td style="padding:6px; border-bottom:1px solid rgba(0,0,0,.08);">'+(window.formatLengthForDisplay?window.formatLengthForDisplay(r.req, unit):fmtMm(r.req))+'</td>'
+            + '<td style="padding:6px; border-bottom:1px solid rgba(0,0,0,.08); color:#b00020; font-weight:800;">'+(window.formatLengthForDisplay?window.formatLengthForDisplay(r.shortBy, unit):fmtMm(r.shortBy))+'</td>'
+            + '</tr>'
+          )).join('')
+        + '</tbody></table></div>';
+    }
+
+    const tipsHtml = '<div style="margin-top:8px;">' + tips.map(t=>'<div style="margin:2px 0;">• '+t+'</div>').join('') + '</div>';
+
+    return '<div style="margin: 12px 0 18px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 6px; color: #856404;">'
+      + '<div style="font-weight:900; margin-bottom:6px;"><i class="fa-solid fa-triangle-exclamation"></i> '+title+'</div>'
+      + '<div>'+sub+'</div>'
+      + table
+      + tipsHtml
+      + '</div>';
+  };
+})();
+
 function calculate() {
             try {
                 const cuttingItems = getCuttingItems();
@@ -4839,17 +4983,27 @@ function calculate() {
                 const sawThickness = parseSawThickness();
 
                 if (cuttingItems.length === 0) {
-                    alert((document.getElementById('language')?document.getElementById('language').value:'zh')==="zh"?"請輸入至少一個切割項目":"Please enter at least one cutting item.");
+                    const _l=(document.getElementById('language')?document.getElementById('language').value:'zh');
+                    window.__agAdviceAlert(_l==='zh'?'缺少切割項目':'No cutting items',
+                      [_l==='zh'?'你未有輸入任何切割項目。':'You have not entered any cutting items.'],
+                      [_l==='zh'?'到「切割項目」輸入長度與數量，再按「新增項目」。':'Go to Cutting Items, enter length & qty, then click Add.']);
                     return;
                 }
 
                 if (materialItems.length === 0) {
-                    alert((document.getElementById('language')?document.getElementById('language').value:'zh')==="zh"?"請輸入至少一種材料":"Please enter at least one material.");
+                    const _l=(document.getElementById('language')?document.getElementById('language').value:'zh');
+                    window.__agAdviceAlert(_l==='zh'?'缺少材料':'No materials',
+                      [_l==='zh'?'你未有輸入任何材料。':'You have not entered any materials.'],
+                      [_l==='zh'?'到「材料」輸入長度與數量，再按「新增材料」。':'Go to Materials, enter length & qty, then click Add.']);
                     return;
                 }
 
                 if (sawThickness.error) {
-                    alert(sawThickness.error);
+                    const _l=(document.getElementById('language')?document.getElementById('language').value:'zh');
+                    window.__agAdviceAlert(_l==='zh'?'鋸縫輸入有問題':'Kerf input invalid',
+                      [String(sawThickness.error||'')],
+                      [_l==='zh'?'確認鋸縫單位：如果你用英制「分」，數值 1 代表 1/8 寸。':'Confirm kerf unit: in imperial mode, 1 means 1/8 inch.',
+                       _l==='zh'?'鋸縫通常係 2–4mm 左右（視乎鋸片）。':'Typical kerf is around 2–4mm depending on blade.']);
                     return;
                 }
 
@@ -4865,6 +5019,15 @@ function calculate() {
 
                 // 規則：不足就警告並中止。
                 // 原則：補料長度／數量由用家輸入，系統唔可以擅自自動提升長度或自動新增補料。
+
+                // 先做一次情景偵測：如果偵測到高風險矛盾，提前提示用家（但唔一定中止）
+                try {
+                  const _sc = (typeof window.__agScenarioDetect==='function') ? window.__agScenarioDetect(cuttingItems, materialItems, Number(sawThickness.value)||0) : null;
+                  if (_sc && _sc.tips && _sc.tips.length) {
+                    // warn panel：不阻塞，只係提醒
+                    if (typeof window.__agAdvicePanel==='function') window.__agAdvicePanel('warn', _lang==='zh'?'⚠️ 設定提示':'⚠️ Setup tips', _sc.tips);
+                  }
+                } catch(e) {}
 
                 if (isFinite(_maxCutLen) && _maxCutLen > 0) {
                   // Auto-Replenish 規則：
@@ -5077,6 +5240,36 @@ function calculate() {
                       if (pbi) { pbi.style.width = '100%'; pbi.setAttribute('aria-valuenow','100'); }
                       if (pbt) pbt.textContent = (_lang==='zh') ? '計算完成' : 'Done';
                       const bins = msg.bins || [];
+
+                      // --- 防呆：Worker 版同樣要阻止「用短料切長件」---
+                      try {
+                        const __autoOn2 = (typeof window.isAutoReplenishEnabled==='function') ? !!window.isAutoReplenishEnabled() : false;
+                        const __kerf = Number(sawThickness.value)||0;
+                        for (let bi=0; bi<bins.length; bi++) {
+                          const bin = bins[bi];
+                          if (!bin || !bin.cuts || !bin.cuts.length) continue;
+                          const n = bin.cuts.length;
+                          const used = bin.cuts.reduce((s,c)=>s+(Number(c.length)||0),0);
+                          const kerf = n>1 ? (n-1)*__kerf : 0;
+                          const requiredTotal = used + kerf;
+                          const eps = (typeof __epsFor === 'function') ? __epsFor(Number(bin.length)||0) : 1e-6;
+                          if (requiredTotal > (Number(bin.length)||0) + eps) {
+                            if (__autoOn2) {
+                              bin.length = requiredTotal;
+                              bin.autoAdded = true;
+                              bin.mclass = 'auto';
+                            } else {
+                              throw new Error(_lang==='zh'
+                                ? ('材料長度不足：原料 #' + (bi+1) + ' 長度=' + (Number(bin.length)||0).toFixed(1) + 'mm，但需要=' + requiredTotal.toFixed(1) + 'mm（含鋸縫）。\n\n請檢查：材料長度／鋸縫／單位換算，或開啟自動補料。')
+                                : ('Material too short: Bar #' + (bi+1) + ' length=' + (Number(bin.length)||0).toFixed(1) + 'mm, required=' + requiredTotal.toFixed(1) + 'mm (incl. kerf).\nCheck length/kerf/unit, or enable Auto-Replenish.'));
+                            }
+                          }
+                        }
+                      } catch(__e2) {
+                        alert(__e2 && __e2.message ? __e2.message : __e2);
+                        return; // 阻止輸出無意義結果
+                      }
+
                       // 用 window.renderCuttingResults 以確保「計算後自動捲動」等 wrapper 生效
                       (window.renderCuttingResults || renderCuttingResults)(bins, Number(sawThickness.value)||0);
                       // 修補：Worker 版計算完成後，同步更新材料「使用狀態」
@@ -5252,6 +5445,38 @@ function calculate() {
                   }
                 } catch(e) { /* ignore */ }
 
+                // --- 防呆：確認每支原料長度足夠承載其切件（含鋸縫） ---
+                // 出現「用短料切長件」其實係：算法/單位換算有差錯時，仍然把切件塞入 bins，
+                // 之後 UI 會把負餘料夾到 0，再用黃色警告提示。
+                // 呢度做硬性檢查：
+                // - 若已開自動補料：將該支原料長度提升到「剛好夠長」(requiredTotal)
+                // - 若未開自動補料：直接拋錯，避免輸出無意義結果
+                try {
+                  const __autoOn = (typeof window.isAutoReplenishEnabled==='function') ? !!window.isAutoReplenishEnabled() : false;
+                  optimizedResult.forEach(function(bin){
+                    if(!bin || !bin.cuts || !bin.cuts.length) return;
+                    const n = bin.cuts.length;
+                    const used = bin.cuts.reduce(function(s,c){ return s + (Number(c.length)||0); }, 0);
+                    const kerf = n>1 ? (n-1) * (Number(effectiveSawThickness)||0) : 0;
+                    const requiredTotal = used + kerf;
+                    const eps = (typeof __epsFor === 'function') ? __epsFor(Number(bin.length)||0) : 1e-6;
+                    if (requiredTotal > (Number(bin.length)||0) + eps) {
+                      if (__autoOn) {
+                        bin.length = requiredTotal;
+                        bin.autoAdded = true;
+                        bin.mclass = 'auto';
+                      } else {
+                        throw new Error((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'
+                          ? '材料長度不足：有切件長度(含鋸縫)大於原料長度。請檢查：單位/材料/鋸縫，或開啟自動補料。'
+                          : 'Material too short: some cuts (incl. kerf) exceed bar length. Check unit/material/kerf, or enable Auto-Replenish.');
+                      }
+                    }
+                  });
+                } catch(__e) {
+                  alert(__e && __e.message ? __e.message : __e);
+                  throw __e;
+                }
+
                 // 用 window.renderCuttingResults 以確保「計算後自動捲動」等 wrapper 生效
                 (window.renderCuttingResults || renderCuttingResults)(optimizedResult, effectiveSawThickness);
                 updateMaterialUsageStatus(optimizedResult);
@@ -5377,14 +5602,21 @@ function calculate() {
                     <div><strong>${_rLang==='zh'?'總餘料':'Total Waste'}</strong><br><span style="color:#f57c00; font-size:16px;">${formatLengthForDisplay(totalWaste, unit)}</span></div>
                   </div>
                 </div>
-                ${__negWasteCount>0 ? (`
-                  <div style="margin: 12px 0 12px 0; padding: 12px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">
-                    <strong><i class=\"fa-solid fa-triangle-exclamation\"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
-                    ${_rLang==='zh'?
-                      ('受影響支數：'+__negWasteCount+'。請檢查：材料長度／鋸縫／單位換算。'):
-                      ('Affected bars: '+__negWasteCount+'. Please check material length / kerf / unit conversion.')}
-                  </div>
-                `) : ''}
+                ${__negWasteCount>0 ? ( (typeof window.__agShortageHtml==='function')
+                    ? window.__agShortageHtml(
+                        // 大結果模式冇逐一記錄 idx；用前 __negWasteCount 粗略生成 idx 列表
+                        Array.from({length:__negWasteCount},(_,i)=>({idx:i+1})),
+                        bins, sawThickness, unit
+                      )
+                    : (`
+                      <div style="margin: 12px 0 12px 0; padding: 12px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">
+                        <strong><i class=\"fa-solid fa-triangle-exclamation\"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
+                        ${_rLang==='zh'?
+                          ('受影響支數：'+__negWasteCount+'。請檢查：材料長度／鋸縫／單位換算。'):
+                          ('Affected bars: '+__negWasteCount+'. Please check material length / kerf / unit conversion.')}
+                      </div>
+                    `)
+                  ) : ''}
                 <div style="margin: 12px 0; padding: 12px; background:#fff3cd; border:1px solid #ffecb5; border-radius:6px; color:#856404;">
                   <strong>${_rLang==='zh'?'⚠️ 結果太多，已省略明細':'⚠️ Too many results, details omitted'}</strong><br>
                   ${_rLang==='zh'?
@@ -5447,17 +5679,21 @@ function calculate() {
                 </div>
             `;
 
-            // 不用負數處理：如出現「餘料 < 0」，改用警告提示
+            // 材料不足：改用「情景提示引擎」輸出更具體建議 + 短缺清單
             if (negativeWasteBins.length > 0) {
-                const list = negativeWasteBins.map(o => '#' + o.idx).join(', ');
-                html += `
-                  <div style="margin: 12px 0 18px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 6px; color: #856404;">
-                    <strong><i class="fa-solid fa-triangle-exclamation"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
-                    ${_rLang==='zh'?
-                      ('受影響原料：'+list+'。請檢查：材料長度／鋸縫／單位換算。'):
-                      ('Affected bars: '+list+'. Please check material length / kerf / unit conversion.')}
-                  </div>
-                `;
+                if (typeof window.__agShortageHtml === 'function') {
+                  html += window.__agShortageHtml(negativeWasteBins, bins, sawThickness, unit);
+                } else {
+                  const list = negativeWasteBins.map(o => '#' + o.idx).join(', ');
+                  html += `
+                    <div style="margin: 12px 0 18px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 6px; color: #856404;">
+                      <strong><i class="fa-solid fa-triangle-exclamation"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
+                      ${_rLang==='zh'?
+                        ('受影響原料：'+list+'。請檢查：材料長度／鋸縫／單位換算。'):
+                        ('Affected bars: '+list+'. Please check material length / kerf / unit conversion.')}
+                    </div>
+                  `;
+                }
             }
 
             bins.forEach((bin, binIndex) => {
