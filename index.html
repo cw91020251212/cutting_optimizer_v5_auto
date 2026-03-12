@@ -428,7 +428,8 @@ body:not(.sepia-mode) #results-card .card-body{
   width: 34%; height: 240%;
   background: linear-gradient(to right, transparent, rgba(255,255,255,0.85), transparent);
   transform: translateX(-160%) rotate(25deg);
-  animation: agShine 8s infinite ease-in-out;
+  /* 性能優化：避免所有按鈕長期跑 infinite animation（低階機會卡頓） */
+  animation: none;
   pointer-events: none;
   z-index: 3;
 }
@@ -436,6 +437,11 @@ body:not(.sepia-mode) #results-card .card-body{
 .btn:hover:not(.btn-close):not(.tool-btn){
   filter: brightness(1.03) saturate(1.02);
   transform: translateY(-1px);
+}
+
+/* 性能優化：shine 只在 hover 時跑一次；並尊重 reduce motion */
+@media (prefers-reduced-motion: no-preference){
+  .btn:hover:not(.btn-close):not(.tool-btn)::after{ animation: agShine 1.6s 1 ease-in-out; }
 }
 
 .btn:active:not(.btn-close):not(.tool-btn),
@@ -2076,17 +2082,17 @@ html.no-transitions, html.no-transitions * {
 <span id="titleRuler" class="title-ruler" aria-hidden="true"></span>
 </h2>
 
-<div class="top-tools" aria-label="工具列">
-  <button class="btn tool-btn tool-btn-soft" id="fontIncBtn" type="button" title="文字放大" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
-  <button class="btn tool-btn tool-btn-soft" id="fontDecBtn" type="button" title="文字縮細" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
-  <button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" type="button" title="光明/黑暗" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
+<div class="top-tools" aria-label="Toolbar">
+  <button class="btn tool-btn tool-btn-soft" id="fontIncBtn" type="button" title="Increase font size" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="fontDecBtn" type="button" title="Decrease font size" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" type="button" title="Light/Dark" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
   <!-- 案例（固定放喺頂部工具列：唔靠 JS 插入） -->
-  <button class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" type="button" title="案例" aria-label="案例" aria-haspopup="dialog" aria-controls="ag-case-help-overlay" onclick="showCaseHelp()"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" type="button" title="Examples" aria-label="Examples" aria-haspopup="dialog" aria-controls="ag-case-help-overlay" onclick="showCaseHelp()"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
 </div>
 
 <!-- AnyGen: 案例彈窗（兩個案例） -->
-<div id="ag-case-help-overlay" role="dialog" aria-modal="true" aria-label="使用案例">
-  <a id="ag-case-help-backdrop" href="#" aria-label="關閉案例彈窗"></a>
+<div id="ag-case-help-overlay" role="dialog" aria-modal="true" aria-label="Use cases">
+  <a id="ag-case-help-backdrop" href="#" aria-label="Close use cases dialog"></a>
   <div id="ag-case-help-modal">
     <div id="ag-case-help-header">
       <div id="ag-case-help-title">使用案例</div>
@@ -2393,7 +2399,7 @@ html.no-transitions, html.no-transitions * {
 <div class="col-6 col-md-3">
 <label class="form-label" id="languageLabel">語言:</label>
 <select class="form-select form-select-sm" id="language" onchange="updateLanguage()">
-<option value="zh">中文</option>
+<option value="zh">Chinese</option>
 <option value="en" selected>English</option>
 </select>
 </div>
@@ -2746,7 +2752,7 @@ html.no-transitions, html.no-transitions * {
 <div class="modal-body">
 <div class="mb-3">
 <label class="form-label" for="schemeName" id="schemeNameLabel">方案名稱:</label>
-<input class="form-control" id="schemeName" placeholder="輸入方案名稱"/>
+<input class="form-control" id="schemeName" placeholder="Enter scheme name"/>
 </div>
 </div>
 <div class="modal-footer">
@@ -3179,6 +3185,135 @@ html.no-transitions, html.no-transitions * {
             var b5=document.getElementById('qrBtn'); if(b5) b5.title=t.qr;
             var qrUrlLabel=document.getElementById('qrUrlLabel'); if(qrUrlLabel) qrUrlLabel.textContent=t.qrUrl;
             var qrCloseBtn=document.getElementById('qrCloseBtn'); if(qrCloseBtn) qrCloseBtn.textContent=t.close;
+
+            // === Extra i18n sweep: keep EN mode zero Chinese ===
+            // Top toolbar aria
+            var topTools = document.querySelector('.top-tools');
+            if (topTools) topTools.setAttribute('aria-label', (lang==='zh') ? '工具列' : 'Toolbar');
+
+            // Language selector options
+            (function(){
+              var sel=document.getElementById('language');
+              if(!sel) return;
+              Array.from(sel.options||[]).forEach(function(opt){
+                if(opt.value==='zh') opt.textContent = (lang==='zh') ? '中文' : 'Chinese';
+                if(opt.value==='en') opt.textContent = (lang==='zh') ? '英文' : 'English';
+              });
+            })();
+
+            // Unit selector options + modal
+            (function(){
+              var map = {
+                metric: { zh:'公', en:'Metric' },
+                imperial: { zh:'英', en:'Imperial' },
+                imperial_decimal: { zh:'英(D)', en:'Imperial (D)' }
+              };
+              ['unit','globalCutUnit','globalMaterialUnit'].forEach(function(id){
+                var sel=document.getElementById(id);
+                if(!sel) return;
+                Array.from(sel.options||[]).forEach(function(opt){
+                  var m=map[opt.value];
+                  if(m) opt.textContent = m[lang];
+                });
+              });
+              // Unit picker modal title
+              var upTitle=document.getElementById('unitPickerModalLabel');
+              if(upTitle) upTitle.textContent = (lang==='zh') ? '選擇顯示單位' : 'Select display unit';
+              // Unit picker modal buttons
+              var buttons=document.querySelectorAll('#unitPickerModal [data-unit-value]');
+              buttons.forEach(function(btn){
+                var val=btn.getAttribute('data-unit-value');
+                var spans=btn.querySelectorAll('span');
+                var titleSpan=spans[0];
+                var descSpan=spans[1];
+                if(val==='metric'){
+                  if(titleSpan) titleSpan.textContent = (lang==='zh')?'公':'Metric';
+                  if(descSpan) descSpan.textContent  = (lang==='zh')?'Metric':'Metric';
+                }
+                if(val==='imperial'){
+                  if(titleSpan) titleSpan.textContent = (lang==='zh')?'英':'Imperial';
+                  if(descSpan) descSpan.textContent  = (lang==='zh')?'Imperial':'Imperial';
+                }
+                if(val==='imperial_decimal'){
+                  if(titleSpan) titleSpan.textContent = (lang==='zh')?'英(D)':'Imperial (D)';
+                  if(descSpan) descSpan.textContent  = (lang==='zh')?'Imperial decimal display':'Imperial decimal display';
+                }
+              });
+
+              // Buttons that show unit short label
+              var ubtn=document.getElementById('unitPickerBtn');
+              if(ubtn){
+                var v=document.getElementById('unit')?document.getElementById('unit').value:'metric';
+                ubtn.textContent = (lang==='zh') ? (map[v]?map[v].zh:'公') : (map[v]?map[v].en:'Metric');
+              }
+              var g1=document.getElementById('globalCutUnitBtn');
+              if(g1){
+                var v=document.getElementById('globalCutUnit')?document.getElementById('globalCutUnit').value:'metric';
+                g1.textContent = (lang==='zh') ? (map[v]?map[v].zh:'公') : (map[v]?map[v].en:'Metric');
+              }
+              var g2=document.getElementById('globalMaterialUnitBtn');
+              if(g2){
+                var v=document.getElementById('globalMaterialUnit')?document.getElementById('globalMaterialUnit').value:'metric';
+                g2.textContent = (lang==='zh') ? (map[v]?map[v].zh:'公') : (map[v]?map[v].en:'Metric');
+              }
+            })();
+
+            // Help / scheme / print modal buttons & labels
+            (function(){
+              var setText=(id,zh,en)=>{ var el=document.getElementById(id); if(el) el.textContent=(lang==='zh'?zh:en); };
+              setText('helpButton','使用說明','User Guide');
+              setText('printCancelBtn','取消','Cancel');
+              setText('printConfirmBtn','確認列印','Print');
+              setText('schemeNameLabel','方案名稱:','Scheme name:');
+              setText('saveCancelBtn','取消','Cancel');
+              setText('saveConfirmBtn','確認儲存','Save');
+              setText('loadCancelBtn','取消','Cancel');
+              setText('helpCloseBtn','關閉','Close');
+              setText('qrUrlLabel','網址：','URL:');
+              // placeholders
+              var sn=document.getElementById('schemeName');
+              if(sn) sn.setAttribute('placeholder', (lang==='zh')?'輸入方案名稱':'Enter scheme name');
+            })();
+
+            // Auto-replenish modal
+            (function(){
+              var setText=(sel,zh,en)=>{ var el=document.querySelector(sel); if(el) el.textContent=(lang==='zh'?zh:en); };
+              var arTitle=document.getElementById('autoReplenishModalLabel');
+              if(arTitle) arTitle.textContent = (lang==='zh') ? '自動補料：選擇補料長度' : 'Auto top-up: choose bar length';
+              var arHint=document.querySelector('#autoReplenishModal .ag-ar-hint');
+              if(arHint) arHint.textContent = (lang==='zh')
+                ? '提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。'
+                : 'Tip: selecting any length enables Auto top-up; selecting OFF disables it (your last length is remembered).';
+              // OFF button
+              var offBtn=document.querySelector('#autoReplenishModal .ag-ar-off-btn');
+              if(offBtn) offBtn.textContent = (lang==='zh') ? 'OFF（關閉自動補料）' : 'OFF (disable auto top-up)';
+              // Custom section
+              setText('#autoReplenishModal .ag-ar-custom-title','自訂','Custom');
+              var apply=document.getElementById('autoReplenishCustomApply');
+              if(apply) apply.textContent = (lang==='zh')?'套用':'Apply';
+              var hint=document.getElementById('autoReplenishCustomHint');
+              if(hint) hint.textContent = (lang==='zh')?'支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。':'Supports: mm/cm/m, ft, in, 1/8 in. No unit = mm.';
+              var inpt=document.getElementById('autoReplenishCustomLen');
+              if(inpt) inpt.setAttribute('placeholder', (lang==='zh')?'例如：6尺 / 68寸 / 2.5m / 1500mm':'e.g., 6 ft / 68 in / 2.5 m / 1500 mm');
+              // common headers
+              setText('#autoReplenishModal .ag-ar-common-mm','常用（mm）','Common (mm)');
+              setText('#autoReplenishModal .ag-ar-common-ft','常用（英尺）','Common (ft)');
+              // picker button tooltip
+              var arPick=document.getElementById('autoReplenishPickerBtn');
+              if(arPick){
+                arPick.title = (lang==='zh') ? '自動補料' : 'Auto top-up';
+                arPick.setAttribute('aria-label', (lang==='zh') ? '自動補料' : 'Auto top-up');
+              }
+            })();
+
+            // Case help modal aria labels
+            (function(){
+              var ov=document.getElementById('ag-case-help-overlay');
+              if(ov) ov.setAttribute('aria-label', (lang==='zh')?'使用案例':'Use cases');
+              var bd=document.getElementById('ag-case-help-backdrop');
+              if(bd) bd.setAttribute('aria-label', (lang==='zh')?'關閉案例彈窗':'Close use cases dialog');
+            })();
+
 
             // Auto-Replenish（新制按鈕上方描述）
             var arLbl=document.getElementById('autoReplenishBtnTitle'); if(arLbl) arLbl.textContent = (lang==='zh') ? '自動補料' : 'Auto-Replenish';
@@ -4635,6 +4770,7 @@ html.no-transitions, html.no-transitions * {
 
             const workerCode = `
             let __cancelled = false;
+            let __lang = 'zh'; // Worker 內冇 document，所以用 msg.lang 傳入
             function post(type, payload){ try{ self.postMessage({type, ...payload}); }catch(e){} }
 
             function expandCuts(cuts){
@@ -4685,11 +4821,15 @@ html.no-transitions, html.no-transitions * {
                   } else {
                     // 冇任何材料夠長：如果 Auto-Replenish ON，就用 autoLen 補料；否則報錯
                     if(!autoEnabled){
-                      throw new Error('材料長度不足：現有材料都唔夠長去放入切件（含鋸縫請自行預留/設定）。請增加更長材料或開啟自動補料。');
+                      throw new Error((__lang==='zh')
+                        ? '材料長度不足：現有材料都唔夠長去放入切件（含鋸縫請自行預留/設定）。請增加更長材料或開啟自動補料。'
+                        : 'Material too short: current materials are not long enough for at least one cut (including kerf). Please add longer material or enable Auto-Replenish.');
                     }
                     autoAdded=true;
                     binLength = Number(autoLen)||0;
-                    if(!(binLength>0)) throw new Error('自動補料長度未設定或無效，無法補料。');
+                    if(!(binLength>0)) throw new Error((__lang==='zh')
+                      ? '自動補料長度未設定或無效，無法補料。'
+                      : 'Auto-Replenish length is not set or invalid; cannot top up.');
                     // 如用家設定嘅 autoLen 都短過需要，至少要補到夠長（安全兜底）
                     if (binLength + 1e-9 < need) binLength = need;
                     mclass='auto';
@@ -4770,7 +4910,8 @@ html.no-transitions, html.no-transitions * {
               if(msg.type==='cancel'){ __cancelled=true; post('cancelled',{}); return; }
               if(msg.type!=='run') return;
               __cancelled=false;
-              const {cuts, materials, sawThickness, algorithm, autoLen, autoEnabled} = msg;
+              const {cuts, materials, sawThickness, algorithm, autoLen, autoEnabled, lang} = msg;
+              __lang = (lang === 'en' ? 'en' : 'zh');
               post('progress',{pct:5});
               let res;
               try{
@@ -4790,6 +4931,8 @@ html.no-transitions, html.no-transitions * {
             const blob = new Blob([workerCode], {type:'text/javascript'});
             const url = URL.createObjectURL(blob);
             const w = new Worker(url);
+            // 性能/記憶體：worker 用完 URL 可回收
+            try { setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} }, 0); } catch(e) {}
             window.__calcWorker = w;
             return w;
           }
@@ -4803,6 +4946,13 @@ html.no-transitions, html.no-transitions * {
           window.__cancelCalcWorker = function(){
             try { if(window.__calcWorker) window.__calcWorker.postMessage({type:'cancel'}); } catch(e) {}
           };
+
+          // 記憶體保護：離開頁面時終止 worker
+          try {
+            window.addEventListener('beforeunload', function(){
+              try { if(window.__calcWorker){ window.__calcWorker.terminate(); window.__calcWorker = null; } } catch(e) {}
+            }, { passive: true });
+          } catch(e) {}
         })();
 
         // === AnyGen patch: scroll to layout after calculate ===
@@ -4867,7 +5017,19 @@ html.no-transitions, html.no-transitions * {
       const fg = level==='error'?'#842029':(level==='warn'?'#856404':'#0c5460');
       const t = title || (l==='zh'?'提示':'Note');
       const body = (lines||[]).map(x=>'<div style="margin:2px 0;">'+String(x)+'</div>').join('');
-      const html = '<div class="ag-advice" style="margin:12px 0; padding:12px; background:'+bg+'; border:1px solid '+bd+'; border-radius:8px; color:'+fg+';">'
+
+      // 去重：同一個提示（level+title+lines）只顯示一次，避免連按累積多張一樣卡
+      const keyRaw = level + '|' + t + '|' + (lines||[]).join('|');
+      const key = String(keyRaw)
+        .replace(/&/g,'&amp;')
+        .replace(/"/g,'&quot;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;');
+      const exists = Array.from(rd.querySelectorAll('.ag-advice[data-key]'))
+        .some(el => (el.getAttribute('data-key')||'') === key);
+      if (exists) return;
+
+      const html = '<div class="ag-advice" data-key="'+key+'" style="margin:12px 0; padding:12px; background:'+bg+'; border:1px solid '+bd+'; border-radius:8px; color:'+fg+';">'
         + '<div style="font-weight:900; margin-bottom:6px;">'+t+'</div>' + body + '</div>';
       rd.insertAdjacentHTML('afterbegin', html);
     }catch(e){}
@@ -5215,6 +5377,7 @@ function calculate() {
                 try { if (!isFinite(_autoLenForWorker) || _autoLenForWorker<=0) _autoLenForWorker = Math.max(_maxMatLen||0, _maxCutLen||0, 6000); } catch(e) {}
 
                 const w = (typeof window.__runCalcWorker==='function') ? window.__runCalcWorker({
+                  lang: _lang,
                   cuts: cuttingItems,
                   materials: materialItems,
                   sawThickness: Number(sawThickness.value)||0,
@@ -5227,6 +5390,34 @@ function calculate() {
                   throw new Error(_lang==='zh' ? '無法啟動防 hang 計算器' : 'Cannot start anti-freeze worker');
                 }
 
+                // === 計算超時保護：避免長期卡住「計算中…x%」===
+                const __CALC_TIMEOUT_MS = 12000; // 12 秒（可自行調）
+                let __doneOrError = false;
+                const __calcTimeout = setTimeout(function(){
+                  if (__doneOrError) return;
+                  __doneOrError = true;
+                  try { w.terminate(); } catch(e) {}
+                  // 收起進度條
+                  try {
+                    var pb = document.getElementById('progressBar');
+                    var pbi = document.getElementById('progressBarInner');
+                    var pbt = document.getElementById('progressText');
+                    if (pb) pb.style.display = 'none';
+                    if (pbi) { pbi.style.width = '0%'; pbi.setAttribute('aria-valuenow','0'); }
+                    if (pbt) pbt.textContent = '';
+                  } catch(e) {}
+                  // 顯示提示卡
+                  try {
+                    if (typeof window.__agAdvicePanel === 'function') {
+                      window.__agAdvicePanel('warn', (_lang==='zh'?'計算超時':'Timeout'), [
+                        (_lang==='zh'
+                          ? ('計算超過 ' + Math.round(__CALC_TIMEOUT_MS/1000) + ' 秒仍未完成，已自動停止。請按「重置」，然後減少切件數量／調整設定後再試。')
+                          : ('Calculation took over ' + Math.round(__CALC_TIMEOUT_MS/1000) + 's and was stopped. Please reset and reduce workload.'))
+                      ]);
+                    }
+                  } catch(e) {}
+                }, __CALC_TIMEOUT_MS);
+
                 w.onmessage = function(ev){
                   const msg = ev.data || {};
                   try {
@@ -5237,6 +5428,7 @@ function calculate() {
                       if (pbi) { pbi.style.width = pct + '%'; pbi.setAttribute('aria-valuenow', String(pct)); }
                       if (pbt) pbt.textContent = (_lang==='zh') ? ('計算中… ' + pct + '%') : ('Computing… ' + pct + '%');
                     } else if (msg.type === 'done') {
+                      __doneOrError = true; try { clearTimeout(__calcTimeout); } catch(e) {}
                       if (pbi) { pbi.style.width = '100%'; pbi.setAttribute('aria-valuenow','100'); }
                       if (pbt) pbt.textContent = (_lang==='zh') ? '計算完成' : 'Done';
                       const bins = msg.bins || [];
@@ -5260,8 +5452,8 @@ function calculate() {
                               bin.mclass = 'auto';
                             } else {
                               throw new Error(_lang==='zh'
-                                ? ('材料長度不足：原料 #' + (bi+1) + ' 長度=' + (Number(bin.length)||0).toFixed(1) + 'mm，但需要=' + requiredTotal.toFixed(1) + 'mm（含鋸縫）。\n\n請檢查：材料長度／鋸縫／單位換算，或開啟自動補料。')
-                                : ('Material too short: Bar #' + (bi+1) + ' length=' + (Number(bin.length)||0).toFixed(1) + 'mm, required=' + requiredTotal.toFixed(1) + 'mm (incl. kerf).\nCheck length/kerf/unit, or enable Auto-Replenish.'));
+                                ? ('材料長度不足：原料 #' + (bi+1) + ' 長度=' + (Number(bin.length)||0).toFixed(1) + 'mm，但需要=' + requiredTotal.toFixed(1) + 'mm。\n\n解決方法：增加更長材料 或 開啟自動補料。')
+                                : ('Material too short: Bar #' + (bi+1) + ' length=' + (Number(bin.length)||0).toFixed(1) + 'mm, required=' + requiredTotal.toFixed(1) + 'mm.\n\nFix: add longer material or enable Auto-Replenish.'));
                             }
                           }
                         }
@@ -5286,14 +5478,65 @@ function calculate() {
                         }, 800);
                       } catch(e) {}
                     } else if (msg.type === 'error') {
+                      __doneOrError = true; try { clearTimeout(__calcTimeout); } catch(e) {}
                       throw new Error(msg.message || 'Worker error');
                     } else if (msg.type === 'cancelled') {
+                      __doneOrError = true; try { clearTimeout(__calcTimeout); } catch(e) {}
                       if (pbt) pbt.textContent = (_lang==='zh') ? '已取消' : 'Cancelled';
                     }
                   } catch(err) {
                     console.error(err);
-                    alert((_lang==='zh' ? '計算過程出錯：' : 'Calculation error: ') + (err && err.message ? err.message : err));
-                  } finally {
+                    const _msg = (err && err.message ? err.message : err);
+                    __doneOrError = true; try { clearTimeout(__calcTimeout); } catch(e) {}
+
+                    // 重要：一出錯就收起進度條，避免卡住喺「計算中…5%」
+                    try {
+                      var pb = document.getElementById('progressBar');
+                      var pbi = document.getElementById('progressBarInner');
+                      var pbt = document.getElementById('progressText');
+                      if (pb) pb.style.display = 'none';
+                      if (pbi) { pbi.style.width = '0%'; pbi.setAttribute('aria-valuenow','0'); }
+                      if (pbt) pbt.textContent = '';
+                    } catch(e) {}
+
+                    // 為避免「彈 alert + 頁面提示卡」造成重複：所有語言都取消 alert，只留頁面提示卡。
+                    // （你反映英文狀態仍會彈 alert，所以統一關閉）
+                    // if (_lang !== 'zh') {
+                    //   alert((_lang==='zh' ? '計算過程出錯：' : 'Calculation error: ') + _msg);
+                    // }
+
+                    // 頁面提示卡（可上色）：先清走舊「解決方法」卡，確保只顯示一次
+                    try {
+                      const rd = document.getElementById('resultDetails');
+                      if (rd) {
+                        rd.querySelectorAll('.ag-advice').forEach(el => {
+                          const t = (el.querySelector('div')?el.querySelector('div').textContent:'') || '';
+                          // 清走舊卡：避免累積同類提示（包括舊「解決方法」同舊「材料長度不足」）
+                          if (t.trim() === '解決方法' || t.trim() === 'Solution' || t.trim() === '材料長度不足' || t.trim() === 'Material too short') {
+                            el.remove();
+                          }
+                        });
+                      }
+                    } catch(e) {}
+
+                    try {
+                      if (typeof window.__agAdvicePanel === 'function') {
+                        // 只顯示一張提示卡：保留「材料長度不足」，取消上方重複「解決方法」卡
+                        // 同時把提示卡底色改成黃色（warn），並將最後解決方法句子用橙紅色突出
+                        var __raw = String(_msg).replace(/\([^)]*\)/g,'').trim();
+                        var __styled = __raw
+                          // 常見："請增加更長材料或開啟自動補料。"
+                          .replace(/請\s*增加更長材料\s*或\s*開啟自動補料[。\.．]?/g,
+                                   '請 <span style="color:#ff5722; font-weight:900;">增加更長材料</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>。')
+                          // 另一種："增加更長材料 或 開啟自動補料"
+                          .replace(/增加更長材料\s*或\s*開啟自動補料/g,
+                                   '<span style="color:#ff5722; font-weight:900;">增加更長材料</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>');
+                        window.__agAdvicePanel('warn', (_lang==='zh' ? '材料長度不足' : 'Material too short'), [
+                          __styled
+                        ]);
+                      }
+                    } catch(e) {}
+                  } finally { 
                     // （已移除強制補料模式）
                   }
                 };
@@ -5473,7 +5716,7 @@ function calculate() {
                     }
                   });
                 } catch(__e) {
-                  alert(__e && __e.message ? __e.message : __e);
+                  // 避免英文/中文重複彈 alert：統一唔彈，只交畀上層頁面提示卡處理
                   throw __e;
                 }
 
@@ -7305,7 +7548,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
       renderer.setClearColor(0x000000, 0);
       container.appendChild(renderer.domElement);
 
@@ -7356,13 +7599,40 @@ document.addEventListener('DOMContentLoaded', function() {
       backLight.position.set(-15, -10, -10);
       scene.add(backLight);
 
-      function animate(){
-        requestAnimationFrame(animate);
+      // 性能優化：當頁面被切到背景/圖示離開視窗時，暫停 rAF，減低 CPU/GPU
+      var __nutRaf = null;
+      var __nutRunning = true;
+      function __nutFrame(){
+        if (!__nutRunning) return;
+        __nutRaf = requestAnimationFrame(__nutFrame);
+        if (document.hidden || !container.isConnected) return;
         nut.rotation.x += 0.010;
         nut.rotation.y += 0.020;
         renderer.render(scene, camera);
       }
-      animate();
+      function __nutStop(){
+        __nutRunning = false;
+        if (__nutRaf) { cancelAnimationFrame(__nutRaf); __nutRaf = null; }
+      }
+      function __nutStart(){
+        if (__nutRunning) return;
+        __nutRunning = true;
+        __nutFrame();
+      }
+      document.addEventListener('visibilitychange', function(){
+        if (document.hidden) __nutStop();
+        else __nutStart();
+      }, { passive: true });
+      try {
+        if ('IntersectionObserver' in window) {
+          var __nutIO = new IntersectionObserver(function(entries){
+            var ok = !!(entries && entries[0] && entries[0].isIntersecting);
+            if (ok) __nutStart(); else __nutStop();
+          }, { threshold: 0.01 });
+          __nutIO.observe(container);
+        }
+      } catch(e) {}
+      __nutFrame();
 
       var resizeTimer;
       window.addEventListener('resize', function(){
@@ -7404,7 +7674,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(w, h);
-      renderer.setPixelRatio(window.devicePixelRatio || 1);
+      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.32; // 再深少少（再收光）
       renderer.setClearColor(0x000000, 0);
@@ -7546,9 +7816,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // 用 canvas 綁定，避免影響到整個頁面
       var el = renderer.domElement;
-      el.addEventListener('mousedown', function(e){ e.preventDefault(); e.stopPropagation(); handleDown(e.clientX, e.clientY); });
-      window.addEventListener('mousemove', function(e){ handleMove(e.clientX, e.clientY); });
-      window.addEventListener('mouseup', handleUp);
+
+      // 性能優化：只係「拖曳中」先掛 window mousemove/mouseup，避免長期全局監聽
+      var __onMouseMove = function(e){ handleMove(e.clientX, e.clientY); };
+      var __onMouseUp = function(){
+        handleUp();
+        window.removeEventListener('mousemove', __onMouseMove);
+        window.removeEventListener('mouseup', __onMouseUp);
+      };
+
+      el.addEventListener('mousedown', function(e){
+        e.preventDefault(); e.stopPropagation();
+        handleDown(e.clientX, e.clientY);
+        window.addEventListener('mousemove', __onMouseMove);
+        window.addEventListener('mouseup', __onMouseUp);
+      });
 
       el.addEventListener('touchstart', function(e){
         if (!e.touches || !e.touches[0]) return;
@@ -7562,8 +7844,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }, { passive: false });
       el.addEventListener('touchend', function(e){ e.preventDefault(); handleUp(); }, { passive: false });
 
-      function animate(){
-        requestAnimationFrame(animate);
+      // 性能優化：當頁面被切到背景/圖示離開視窗時，暫停 rAF
+      var __rulerRaf = null;
+      var __rulerRunning = true;
+      function __rulerFrame(){
+        if (!__rulerRunning) return;
+        __rulerRaf = requestAnimationFrame(__rulerFrame);
+        if (document.hidden || !container.isConnected) return;
 
         rulerGroup.rotation.y += (targetRotationY - rulerGroup.rotation.y) * 0.1;
         rulerGroup.rotation.x += (targetRotationX - rulerGroup.rotation.x) * 0.1;
@@ -7572,14 +7859,36 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isDragging) {
           // 用時間增量，避免不同裝置 FPS 造成速度抖動
           var now = performance.now();
-          var dt = Math.min(0.05, (now - (animate.__t || now)) / 1000);
-          animate.__t = now;
-          targetRotationY += dt * 0.75; // 約等於 0.0125 rad @60fps，流暢又穩定
+          var dt = Math.min(0.05, (now - (__rulerFrame.__t || now)) / 1000);
+          __rulerFrame.__t = now;
+          targetRotationY += dt * 0.75;
         }
 
         renderer.render(scene, camera);
       }
-      animate();
+      function __rulerStop(){
+        __rulerRunning = false;
+        if (__rulerRaf) { cancelAnimationFrame(__rulerRaf); __rulerRaf = null; }
+      }
+      function __rulerStart(){
+        if (__rulerRunning) return;
+        __rulerRunning = true;
+        __rulerFrame();
+      }
+      document.addEventListener('visibilitychange', function(){
+        if (document.hidden) __rulerStop();
+        else __rulerStart();
+      }, { passive: true });
+      try {
+        if ('IntersectionObserver' in window) {
+          var __rulerIO = new IntersectionObserver(function(entries){
+            var ok = !!(entries && entries[0] && entries[0].isIntersecting);
+            if (ok) __rulerStart(); else __rulerStop();
+          }, { threshold: 0.01 });
+          __rulerIO.observe(container);
+        }
+      } catch(e) {}
+      __rulerFrame();
 
       // Resize
       var resizeTimer;
@@ -8186,25 +8495,25 @@ document.addEventListener('DOMContentLoaded', function() {
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="small text-muted mb-2">提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。</div>
+        <div class="small text-muted mb-2 ag-ar-hint">提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。</div>
         <div class="d-grid gap-2" id="autoReplenishOptions">
-          <button type="button" class="btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
+          <button class="ag-ar-off-btn" type="button" class="btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
 
-          <div class="small text-muted mt-2">自訂</div>
+          <div class="small text-muted mt-2"><span class="ag-ar-custom-title">自訂</span></div>
           <div class="input-group">
-            <input type="text" inputmode="text" class="form-control" id="autoReplenishCustomLen" placeholder="例如：6尺 / 68寸 / 2.5m / 1500mm">
+            <input type="text" inputmode="text" class="form-control" id="autoReplenishCustomLen" placeholder="e.g., 6 ft / 68 in / 2.5 m / 1500 mm">
             <button type="button" class="btn btn-outline-dark" id="autoReplenishCustomApply">套用</button>
           </div>
           <div class="small text-muted" id="autoReplenishCustomHint">支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。</div>
 
-          <div class="small text-muted mt-2">常用（mm）</div>
+          <div class="small text-muted mt-2"><span class="ag-ar-common-mm">常用（mm）</span></div>
           <button type="button" class="btn btn-outline-success" data-ar-len="6000" data-ar-label-zh="6000 mm" data-ar-label-en="6000 mm">6000 mm</button>
           <button type="button" class="btn btn-outline-success" data-ar-len="5000" data-ar-label-zh="5000 mm" data-ar-label-en="5000 mm">5000 mm</button>
           <button type="button" class="btn btn-outline-success" data-ar-len="4000" data-ar-label-zh="4000 mm" data-ar-label-en="4000 mm">4000 mm</button>
           <button type="button" class="btn btn-outline-success" data-ar-len="3000" data-ar-label-zh="3000 mm" data-ar-label-en="3000 mm">3000 mm</button>
           <button type="button" class="btn btn-outline-success" data-ar-len="2000" data-ar-label-zh="2000 mm" data-ar-label-en="2000 mm">2000 mm</button>
 
-          <div class="small text-muted mt-2">常用（英尺）</div>
+          <div class="small text-muted mt-2"><span class="ag-ar-common-ft">常用（英尺）</span></div>
           <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="2438.4" data-ar-label-zh="8 ft" data-ar-label-en="8 ft">8 ft</button>
           <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="1828.8" data-ar-label-zh="6 ft" data-ar-label-en="6 ft">6 ft</button>
           <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="1219.2" data-ar-label-zh="4 ft" data-ar-label-en="4 ft">4 ft</button>
@@ -8219,22 +8528,22 @@ document.addEventListener('DOMContentLoaded', function() {
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="unitPickerModalLabel">選擇顯示單位</h5>
+        <h5 class="modal-title" id="unitPickerModalLabel">Select display unit</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <div class="d-grid gap-2">
           <button type="button" class="btn btn-outline-success" data-unit-value="metric">
             <span style="font-size:1.1rem;font-weight:800;">公</span>
-            <span class="small text-muted">公制（Metric）</span>
+            <span class="small text-muted">Metric</span>
           </button>
           <button type="button" class="btn btn-outline-primary" data-unit-value="imperial">
             <span style="font-size:1.1rem;font-weight:800;">英</span>
-            <span class="small text-muted">英制（Imperial）</span>
+            <span class="small text-muted">Imperial</span>
           </button>
           <button type="button" class="btn btn-outline-primary" id="unitPickDecimal" data-unit-value="imperial_decimal">
             <span style="font-size:1.1rem;font-weight:800;">英(D)</span>
-            <span class="small text-muted">英制小數顯示（Decimal）</span>
+            <span class="small text-muted">Imperial decimal display</span>
           </button>
         </div>
       </div>
@@ -8542,7 +8851,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (g) g.addEventListener('change', applySawUnit);
     var l = document.getElementById('language');
     if (l) l.addEventListener('change', applySawUnit);
-    setInterval(applySawUnit, 500);
+    // 性能優化：取消 500ms 輪詢（避免長時間無謂 reflow / repaint）
+    // 如要同步單位顯示，已經由 unit/globalCutUnit/language 的 change 事件負責。
+
   }
   bind();
 })();
