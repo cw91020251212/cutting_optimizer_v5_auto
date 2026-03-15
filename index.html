@@ -4819,12 +4819,22 @@ html.no-transitions, html.no-transitions * {
                     binLength = Number(mat.length)||0;
                     mclass = mat.mclass||'scrap';
                   } else {
-                    // 冇任何材料夠長：如果 Auto-Replenish ON，就用 autoLen 補料；否則報錯
+                    // 冇材料可以用：分兩種情況
+                    // A) 完全冇材料剩：屬「數量不足」
+                    // B) 仲有材料，但全部都短過需要：屬「長度不足」
+                    const _noMatLeft = (!mats || mats.length === 0);
+
                     if(!autoEnabled){
+                      if (_noMatLeft) {
+                        throw new Error((__lang==='zh')
+                          ? '材料數量不足：現有材料數量唔夠完成排版。請增加材料數量（或開啟自動補料）。'
+                          : 'Insufficient material quantity: not enough bars to complete the layout. Please add more materials (or enable Auto-Replenish).');
+                      }
                       throw new Error((__lang==='zh')
                         ? '材料長度不足：現有材料都唔夠長去放入切件（含鋸縫請自行預留/設定）。請增加更長材料或開啟自動補料。'
                         : 'Material too short: current materials are not long enough for at least one cut (including kerf). Please add longer material or enable Auto-Replenish.');
                     }
+
                     autoAdded=true;
                     binLength = Number(autoLen)||0;
                     if(!(binLength>0)) throw new Error((__lang==='zh')
@@ -5000,6 +5010,37 @@ html.no-transitions, html.no-transitions * {
 (function(){
   function lang(){ return (document.getElementById('language')?document.getElementById('language').value:'zh'); }
   function fmtMm(n){ return (Math.round(Number(n||0)*10)/10) + 'mm'; }
+
+  // 全局：將提示卡內關鍵字用橙紅色突出（所有 warn/error/info 都適用）
+  function highlightKeywords(text){
+    const l = lang();
+    if (text == null) return '';
+    let s = String(text);
+    // 如果已經有 HTML（例如已包咗 <span>），就唔再二次處理，避免重覆包裝
+    if (/<span\b|<div\b|<ul\b|<li\b/i.test(s)) return s;
+
+    const hi = (w)=>'<span style="color:#ff5722; font-weight:900;">'+w+'</span>';
+
+    if (l==='zh') {
+      s = s
+        .replace(/增加更長材料/g, hi('增加更長材料'))
+        .replace(/增加材料數量/g, hi('增加材料數量'))
+        .replace(/開啟自動補料/g, hi('開啟自動補料'))
+        .replace(/自動補料\s*\(Auto-Replenish\)/g, hi('自動補料 (Auto-Replenish)'))
+        .replace(/自動補料/g, hi('自動補料'))
+        .replace(/補料長度/g, hi('補料長度'))
+        .replace(/設為\s*≥/g, hi('設為 ≥'));
+    } else {
+      s = s
+        .replace(/add longer material/ig, hi('add longer material'))
+        .replace(/add more materials/ig, hi('add more materials'))
+        .replace(/enable Auto-Replenish/ig, hi('enable Auto-Replenish'))
+        .replace(/Auto-Replenish/ig, hi('Auto-Replenish'))
+        .replace(/length\s*≥/ig, hi('length ≥'));
+    }
+    return s;
+  }
+
   function bullets(arr){
     const l=lang();
     if(!arr||!arr.length) return '';
@@ -5016,7 +5057,7 @@ html.no-transitions, html.no-transitions * {
       const bd = level==='error'?'#f5c2c7':(level==='warn'?'#ffecb5':'#bee5eb');
       const fg = level==='error'?'#842029':(level==='warn'?'#856404':'#0c5460');
       const t = title || (l==='zh'?'提示':'Note');
-      const body = (lines||[]).map(x=>'<div style="margin:2px 0;">'+String(x)+'</div>').join('');
+      const body = (lines||[]).map(x=>'<div style="margin:2px 0;">'+highlightKeywords(x)+'</div>').join('');
 
       // 去重：同一個提示（level+title+lines）只顯示一次，避免連按累積多張一樣卡
       const keyRaw = level + '|' + t + '|' + (lines||[]).join('|');
@@ -5032,6 +5073,21 @@ html.no-transitions, html.no-transitions * {
       const html = '<div class="ag-advice" data-key="'+key+'" style="margin:12px 0; padding:12px; background:'+bg+'; border:1px solid '+bd+'; border-radius:8px; color:'+fg+';">'
         + '<div style="font-weight:900; margin-bottom:6px;">'+t+'</div>' + body + '</div>';
       rd.insertAdjacentHTML('afterbegin', html);
+
+      // 按「計算」之後如出現警示/錯誤：自動捲到該提示（避免用家睇唔到）
+      try {
+        var ts = Number(window.__ag_scroll_after_calc || 0);
+        var recent = ts && (Date.now() - ts < 5000);
+        if (recent) {
+          // 新插入嘅提示係最頂（afterbegin），用 firstElementChild 作錨點
+          var el2 = rd.firstElementChild;
+          if (el2 && el2.scrollIntoView) {
+            el2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else if (rd.scrollIntoView) {
+            rd.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      } catch(e) {}
     }catch(e){}
   }
   function detectScenario(cuttingItems, materialItems, sawMm){
@@ -5511,8 +5567,10 @@ function calculate() {
                       if (rd) {
                         rd.querySelectorAll('.ag-advice').forEach(el => {
                           const t = (el.querySelector('div')?el.querySelector('div').textContent:'') || '';
-                          // 清走舊卡：避免累積同類提示（包括舊「解決方法」同舊「材料長度不足」）
-                          if (t.trim() === '解決方法' || t.trim() === 'Solution' || t.trim() === '材料長度不足' || t.trim() === 'Material too short') {
+                          // 清走舊卡：避免累積同類提示（包括舊「解決方法」同舊「材料不足」類提示）
+                          if (t.trim() === '解決方法' || t.trim() === 'Solution'
+                              || t.trim() === '材料長度不足' || t.trim() === 'Material too short'
+                              || t.trim() === '材料數量不足' || t.trim() === 'Insufficient material quantity') {
                             el.remove();
                           }
                         });
@@ -5525,13 +5583,31 @@ function calculate() {
                         // 同時把提示卡底色改成黃色（warn），並將最後解決方法句子用橙紅色突出
                         var __raw = String(_msg).replace(/\([^)]*\)/g,'').trim();
                         var __styled = __raw
+                          // 數量不足：突出「增加材料數量 / 開啟自動補料」
+                          .replace(/請\s*增加材料數量[^。\.．]*或\s*開啟自動補料[。\.．]?/g,
+                                   '請 <span style="color:#ff5722; font-weight:900;">增加材料數量</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>。')
+                          .replace(/增加材料數量\s*\([^)]*\)\s*或\s*開啟自動補料/g,
+                                   '<span style="color:#ff5722; font-weight:900;">增加材料數量</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>')
+                          .replace(/增加材料數量\s*或\s*開啟自動補料/g,
+                                   '<span style="color:#ff5722; font-weight:900;">增加材料數量</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>')
+
                           // 常見："請增加更長材料或開啟自動補料。"
                           .replace(/請\s*增加更長材料\s*或\s*開啟自動補料[。\.．]?/g,
                                    '請 <span style="color:#ff5722; font-weight:900;">增加更長材料</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>。')
                           // 另一種："增加更長材料 或 開啟自動補料"
                           .replace(/增加更長材料\s*或\s*開啟自動補料/g,
                                    '<span style="color:#ff5722; font-weight:900;">增加更長材料</span> 或 <span style="color:#ff5722; font-weight:900;">開啟自動補料</span>');
-                        window.__agAdvicePanel('warn', (_lang==='zh' ? '材料長度不足' : 'Material too short'), [
+                        // 依錯誤內容判斷標題：長度不足 vs 數量不足
+                        var __title = (_lang==='zh') ? '提示' : 'Note';
+                        var __m = String(_msg||'');
+                        if (_lang==='zh') {
+                          if (/材料\s*數量不足|數量不足|材料不足：已關閉自動補料/.test(__m)) __title = '材料數量不足';
+                          else if (/材料\s*長度不足|長度不足/.test(__m)) __title = '材料長度不足';
+                        } else {
+                          if (/Insufficient material quantity|not enough (bars|materials)/i.test(__m)) __title = 'Insufficient material quantity';
+                          else if (/Material too short|too short/i.test(__m)) __title = 'Material too short';
+                        }
+                        window.__agAdvicePanel('warn', __title, [
                           __styled
                         ]);
                       }
@@ -6847,8 +6923,8 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
               if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                 throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
-                  ? '材料不足：已關閉自動補料，請先加入足夠材料。'
-                  : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                  ? '材料數量不足：已關閉自動補料，請先加入足夠材料（增加材料數量），或開啟自動補料。'
+                  : 'Insufficient material quantity: Auto-Replenish is OFF. Please add more materials (or enable Auto-Replenish).');
               }
               // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
               binLength = Math.max(__defaultLength, Number(cut.length)||0);
@@ -6900,8 +6976,8 @@ document.addEventListener("DOMContentLoaded", function() {
               } else {
                 if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                   throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
-                    ? '材料不足：已關閉自動補料，請先加入足夠材料。'
-                    : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                    ? '材料數量不足：已關閉自動補料，請先加入足夠材料（增加材料數量），或開啟自動補料。'
+                    : 'Insufficient material quantity: Auto-Replenish is OFF. Please add more materials (or enable Auto-Replenish).');
                 }
                 // Rule B: SizeGrouping 補料長度不足時自動提升到足夠長度
                 binLength = Math.max(__defaultLength, Number(length)||0);
@@ -6950,8 +7026,8 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
               if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                 throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
-                  ? '材料不足：已關閉自動補料，請先加入足夠材料。'
-                  : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                  ? '材料數量不足：已關閉自動補料，請先加入足夠材料（增加材料數量），或開啟自動補料。'
+                  : 'Insufficient material quantity: Auto-Replenish is OFF. Please add more materials (or enable Auto-Replenish).');
               }
               // Rule B: 補料長度不足時自動提升到足夠長度（避免負數餘料）
               binLength = Math.max(__defaultLength, Number(cut.length)||0);
@@ -8968,8 +9044,8 @@ document.addEventListener('DOMContentLoaded', function() {
           if(takeLen===null){
             if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
               throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
-                ? '材料不足：已關閉自動補料，請先加入足夠材料。'
-                : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                ? '材料數量不足：已關閉自動補料，請先加入足夠材料（增加材料數量），或開啟自動補料。'
+                : 'Insufficient material quantity: Auto-Replenish is OFF. Please add more materials (or enable Auto-Replenish).');
             }
             takeLen = defaultLen; bins.push({length: takeLen, cuts:[cut], autoAdded:true});
           }
@@ -8999,8 +9075,8 @@ document.addEventListener('DOMContentLoaded', function() {
               if(takeLen===null){
                 if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
                   throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
-                    ? '材料不足：已關閉自動補料，請先加入足夠材料。'
-                    : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                    ? '材料數量不足：已關閉自動補料，請先加入足夠材料（增加材料數量），或開啟自動補料。'
+                    : 'Insufficient material quantity: Auto-Replenish is OFF. Please add more materials (or enable Auto-Replenish).');
                 }
               }
               var newBin = { length: (takeLen===null? defaultLen: takeLen), cuts: [], autoAdded: (takeLen===null) };
@@ -9018,8 +9094,8 @@ document.addEventListener('DOMContentLoaded', function() {
           if(takeLen===null){
             if (typeof window.isAutoReplenishEnabled === 'function' && !window.isAutoReplenishEnabled()) {
               throw new Error(((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh')
-                ? '材料不足：已關閉自動補料，請先加入足夠材料。'
-                : 'Insufficient material: Auto-Replenish is OFF. Please add enough materials first.');
+                ? '材料數量不足：已關閉自動補料，請先加入足夠材料（增加材料數量），或開啟自動補料。'
+                : 'Insufficient material quantity: Auto-Replenish is OFF. Please add more materials (or enable Auto-Replenish).');
             }
             bins.push({length: defaultLen, cuts:[cut], autoAdded:true});
           }
