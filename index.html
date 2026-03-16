@@ -67,7 +67,7 @@
         right: 0;
         bottom: calc(100% + 6px); /* 標籤上面，距離掣 6px（再高少少） */
         top: auto;
-        width: 120px;          /* 同桌面 autoReplenish 按鈕闊度一致 */
+        width: 180px;          /* 放大『自動補料』後預留闊度 */
         text-align: center;    /* 跟『方案管理』同一理念：清晰、穩定 */
         margin: 0;
         pointer-events: none;
@@ -75,16 +75,30 @@
         /* 跟 .form-label（方案管理）睇齊：字級/粗幼/行高 */
         color: inherit;
         text-shadow: none;
-        font-size: 1.05em;
-        font-weight: 500;
+        font-size: 1.35em;
+        font-weight: 800;
         line-height: normal;
         opacity: 1;
         white-space: nowrap;
       }
       /* 方案管理三粒掣：同一高度（桌面/平板） */
-      .scheme-actions-row .scheme-left .btn,
+      .scheme-actions-row .scheme-left .btn:not(.ag-action-btn){
+        /* 修正：避免 icon + 文字換行令按鈕變高 */
+        min-height:40px;
+        height:auto;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        flex-wrap:nowrap;
+        white-space:nowrap;
+        gap:.35rem;
+        text-align:center;
+        line-height:1.15;
+        padding-top:.35rem;
+        padding-bottom:.35rem;
+      }
       #autoReplenishPickerBtn{
-        /* 允許字體放大後自動換行並增高 */
+        /* 保持右邊 OFF 掣可因字體放大而增高 */
         min-height:40px;
         height:auto;
         display:inline-flex;
@@ -158,7 +172,7 @@
         .scheme-actions-row{
           display:flex;
           flex-direction: row;
-          align-items: center;
+          align-items: stretch; /* 令左右掣同高 */
           justify-content: space-between;
           flex-wrap: nowrap;
           gap: 8px;
@@ -169,43 +183,52 @@
           flex-wrap: nowrap;
         }
         /* 令兩粒方案掣可以縮細，避免推到出界 */
-        .scheme-actions-row .scheme-left .btn{
+        .scheme-actions-row .scheme-left .ag-action-btn{
           flex: 1 1 0;
           min-width: 0;
           padding: .35rem .55rem;
           font-size: .95rem;
           min-height: 38px;
           height: auto !important;
-          white-space: normal;
+          display: inline-flex !important;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: nowrap !important;
+          white-space: nowrap !important;
+          gap: .35rem;
           line-height: 1.15;
         }
         .scheme-actions-row .scheme-left .btn i{ margin-right: .35rem !important; }
 
         .scheme-actions-row .scheme-right{
           flex: 0 0 auto;
-          width: 72px; /* 比切割項目45px闊少少，但仍然係細掣 */
-          align-items: flex-end;
-        }
-        .scheme-actions-row .auto-replenish-title{
-          font-size: .72rem;
-          white-space: nowrap;
+          width: 48px; /* 跟下方『英/公』細掣一致 */
+          position: relative;  /* 俾標籤用 absolute 定位 */
+          align-self: stretch; /* 同左邊掣齊高 */
+          display: flex;
+          align-items: stretch;
+          justify-content: flex-end;
         }
 
-        /* 手機：標籤闊度跟按鈕，唔好出界（同桌面一樣用 bottom 定位） */
+        /* 重要：標籤唔好佔高度，避免推高/推低右邊掣 */
         .scheme-actions-row .scheme-right .auto-replenish-title{
-          width: 72px;
+          position: absolute;
+          right: 0; /* 避免超出卡片右邊而被裁切 */
           bottom: calc(100% + 6px);
-          top: auto;
-          font-size: 1.05em;
-          font-weight: 500;
-          line-height: normal;
+          width: 150px;
+          text-align: right;
+          font-size: .90rem;
+          font-weight: 800;
+          line-height: 1;
+          white-space: nowrap;
           color: inherit;
         }
+
         #autoReplenishPickerBtn{
-          width: 72px;
+          width: 48px;
           min-height: 38px;
-          height: auto !important;
-          padding: .35rem .25rem;
+          height: 100% !important;
+          padding: 0;
           font-size: 1rem;
           font-weight: 900;
           white-space: normal;
@@ -381,6 +404,70 @@
 /* === AnyGen patch: button 3D + modal blur (v2) === */
 
 /* Button 3D style — follow #calculateButton look (highlight + inset depth), not heavy drop-shadows */
+
+/* === Unified action buttons (2026-03-16) ===
+   用同一套處理方法處理三組按鈕：
+   1) 方案管理：儲存方案 / 載入方案
+   2) 切割項目：新增項目 / 清除輸入
+   3) 材料：新增材料 / 清除輸入
+   目標：字體改大/改細時，按鈕可自動升高/降低；左右對稱；避免各區各自覆寫。
+*/
+.ag-action-btn{
+  /* 尺寸/高度：跟內容自動伸縮 */
+  min-height: 38px;
+  height: auto !important;
+
+  /* 排版：icon + 文字同一行優先；必要時整粒掣自動換行加高 */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .35rem;
+  flex-wrap: wrap;
+
+  /* 文字：可換行但唔好逐隻字亂斷 */
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+  text-align: center;
+}
+
+/* 令按鈕喺同一行時左右對稱（兩粒掣同寬） */
+.controls-row .ag-action-btn,
+.scheme-actions-row .scheme-left .ag-action-btn{
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* icon 盡量唔縮；避免 icon 被擠到獨立一行 */
+.ag-action-btn i{ flex: 0 0 auto; }
+
+/* === Make 3 controls same height (2026-03-16) ===
+   目標：
+   - 切割/材料 controls-row：兩粒 action btn + 右邊「英」(unit-select) 同高
+   - 方案管理：左邊兩粒方案掣 + 右邊 OFF 同高
+   做法：用 flex stretch，令同一行元素跟最高嗰粒同步升高/降低。
+*/
+.controls-row{ align-items: stretch !important; }
+.controls-row .ag-action-btn{ height: 100% !important; }
+.controls-row .unit-select,
+.controls-row select.unit-select{
+  height: 100% !important;
+  min-height: 38px !important;
+  line-height: 1.15 !important;
+  padding-top: .35rem !important;
+  padding-bottom: .35rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.scheme-actions-row{ align-items: stretch !important; }
+.scheme-actions-row .scheme-left{ align-items: stretch !important; }
+.scheme-actions-row .scheme-left .ag-action-btn{ height: 100% !important; }
+.scheme-actions-row .scheme-right{ align-self: stretch !important; }
+#autoReplenishPickerBtn{ height: 100% !important; min-height: 38px !important; }
+
 .btn:not(.btn-close):not(.tool-btn),
 button.btn:not(.btn-close):not(.tool-btn){
   position: relative;
@@ -1090,6 +1177,45 @@ body.ag-modal-blur .container-fluid{
             flex-wrap: wrap;
         }
 
+        /* === Results action buttons: make heights consistent ===
+           Issue: #calculateButton had visibly smaller height than #resetButton/#printOptionsButton.
+           Fix: force the 3 main result buttons to share the same min-height + vertical padding,
+           and center icon/text vertically.
+        */
+        #results-card .button-group #calculateButton,
+        #results-card .button-group #resetButton,
+        #results-card .button-group #printOptionsButton {
+            min-height: 48px !important;
+            padding-top: 0.55rem !important;
+            padding-bottom: 0.55rem !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem;
+            line-height: 1.15 !important;
+        }
+
+        /* IMPORTANT:
+           唔好用 !important 強行改 display，否則會蓋過 printOptionsButton 初始 display:none。
+           只對「未被 hide」嘅按鈕提供 inline-flex 置中。
+        */
+        #results-card .button-group #calculateButton,
+        #results-card .button-group #resetButton,
+        #results-card .button-group #printOptionsButton:not([style*="display:none"]) {
+            display: inline-flex;
+        }
+
+        /* 保險：如果 inline style 係 display:none，強制 keep hidden */
+        #results-card .button-group #printOptionsButton[style*="display:none"] {
+            display: none !important;
+        }
+
+        /* keep icon from affecting line-height */
+        #results-card .button-group #calculateButton i,
+        #results-card .button-group #resetButton i,
+        #results-card .button-group #printOptionsButton i {
+            line-height: 1 !important;
+        }
+
         .quantity-needed,
         .schemes-identical {
             color: #ffc107;
@@ -1531,8 +1657,15 @@ body.ag-modal-blur .container-fluid{
         }
 
 #cuttingItems .controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; }
-#cuttingItems .controls-row .btn { flex: 1 1 0; white-space: normal !important; padding: .40rem .75rem; min-height: 38px; height: auto !important; display: flex !important; flex-wrap: wrap; align-items: center !important; justify-content: center !important; line-height: 1.15; text-align:center; }
+#cuttingItems .controls-row .btn:not(.ag-action-btn) { flex: 1 1 0; }
 #cuttingItems .controls-row .unit-select { max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; font-size: 1rem !important; text-align: center !important; padding: 0.2rem 0.1rem !important; box-sizing: border-box !important; }
+
+/* 修正：避免CJK單字亂斷行，令按鈕高度更一致 */
+#cuttingItems .controls-row .btn,
+#materialItems .controls-row .btn{
+  word-break: keep-all;
+  overflow-wrap: anywhere; /* 仍然可在必要時換行 */
+}
 @media (max-width: 390px) {
   #cuttingItems .controls-row { gap: 6px; }
   #cuttingItems .controls-row .unit-select { max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; }
@@ -1633,7 +1766,7 @@ body.ag-modal-blur .container-fluid{
 .scheme-actions-row{ margin-top: 0 !important; }
         @media (max-width: 767.98px) {
             .controls-row { gap: 6px; }
-            .controls-row .btn { font-size: .95rem; padding: .35rem .60rem; white-space: normal !important; flex: 1 1 0; min-width: 90px; min-height: 38px; height: auto !important; display: flex !important; flex-wrap: wrap; align-items: center !important; justify-content: center !important; box-sizing: border-box !important; border-width: 1px !important; line-height: 1.15; text-align:center; }
+            .controls-row .btn:not(.ag-action-btn) { font-size: .95rem; padding: .35rem .60rem; flex: 1 1 0; min-width: 90px; min-height: 38px; height: auto !important; box-sizing: border-box !important; border-width: 1px !important; line-height: 1.15; text-align:center; }
             .controls-row .unit-select { width: auto !important; flex: 0 0 clamp(72px, 18vw, 96px); max-width: 45px !important; min-width: 45px !important; width: 45px !important; height: 38px !important; box-sizing: border-box !important; white-space: nowrap; font-size: 1rem; text-align: center; padding: 0 !important; line-height: 38px !important; -webkit-appearance: none; appearance: none; display: inline-flex; align-items: center; justify-content: center; }
         }
 </style>
@@ -2072,6 +2205,182 @@ html.no-transitions, html.no-transitions * {
   body.sepia-mode .ag-case-steps li{background: rgba(255,253,248,.92);}
 </style>
 
+<style id="ag-final-height-sync-fix">
+/* 最後覆寫：Bootstrap 的 .align-items-center 有 !important，
+   必須用更高 specificity 先可以令同一行元素真正 stretch 同高 */
+
+/* 切割/材料：兩粒掣 + 英(單位) 同高 */
+.controls-row.align-items-center{ align-items: stretch !important; }
+.controls-row.align-items-center > *{ align-self: stretch !important; }
+
+/* 方案管理：儲存/載入 + OFF 同高 */
+.scheme-actions-row.align-items-center{ align-items: stretch !important; }
+.scheme-actions-row.align-items-center > *{ align-self: stretch !important; }
+
+/* 重要：stretch 要生效，子元素 height 必須係 auto（唔可以用 100% 或寫死 px） */
+.scheme-actions-row.align-items-center .scheme-right{ align-items: stretch !important; }
+
+.scheme-actions-row .scheme-right #autoReplenishPickerBtn{
+  height: auto !important;          /* 覆蓋任何 inline height */
+  align-self: stretch !important;
+  display: inline-flex !important;
+}
+
+.controls-row #globalCutUnitBtn,
+.controls-row #globalMaterialUnitBtn{
+  height: auto !important;          /* 覆蓋 inline height:31px */
+  align-self: stretch !important;
+  display: inline-flex !important;
+
+  /* 你要求：公英制掣闊度縮細一半，左邊兩粒掣平均分返剩低闊度 */
+  flex: 0.5 1 0 !important;        /* 右邊佔 0.5 份 */
+  flex-shrink: 1 !important;       /* 覆蓋 flex-shrink-0 */
+  width: auto !important;          /* 覆蓋 inline width:48px */
+  min-width: 0 !important;
+}
+
+/* 左邊兩粒 action 掣平均分 (各 1 份) */
+.controls-row .ag-action-btn{
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+/* 方案管理：上面兩粒掣要同「切割項目」兩粒掣一致：同闊度 + 同排版（右邊細掣唔影響平均分） */
+.scheme-actions-row{ display:flex; padding-right: 12px; }
+
+/* 左邊：兩粒方案掣平均分，佔晒剩低闊度 */
+.scheme-actions-row .scheme-left{
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  display: flex;
+  gap: 8px;
+}
+.scheme-actions-row .scheme-left .ag-action-btn{
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+}
+
+/* 右邊：當做「英/公」嗰粒細掣，固定闊度，唔參與平均分 */
+.scheme-actions-row .scheme-right{
+  flex: 0 0 auto !important;
+  width: 48px !important;          /* 跟下方『英/公』細掣一致 */
+  min-width: 48px !important;
+}
+.scheme-actions-row .scheme-right #autoReplenishPickerBtn{
+  width: 48px !important;
+  min-width: 48px !important;
+  padding: 0 !important;
+}
+
+/* 右上標籤：字放大，但唔再剪字；可超出右側細掣寬度 */
+.scheme-actions-row .scheme-right .auto-replenish-title{
+  width: 150px !important;
+  right: 0; /* 保持喺卡片內，避免被裁切 */
+  text-align: right;
+}
+</style>
+<style id="ag-items-section-spacing">
+/* 統一「切割項目」與「材料」區的上下間距（2026-03-16） */
+.ag-items-section .length-input-group{ margin-bottom: 0 !important; }
+
+/* 「數量/用途/類別」那一行：統一同一個上距 */
+.ag-items-section .row.g-2.mt-2{ margin-top: .75rem !important; }
+
+/* 三粒按鈕那一行：統一上距與下距（貼近下方表格） */
+.ag-items-section .controls-row{ margin-top: .75rem !important; margin-bottom: .25rem !important; }
+
+/* 表格與按鈕之間距離：統一（你目前用負 margin 拉近） */
+.ag-items-section + .table-responsive{ margin-top: -10px !important; }
+.ag-items-section + .table-responsive .table{ margin-top: 0 !important; }
+
+/* 小提示字（米/厘米/毫米、例如：）上下距一致 */
+.ag-items-section .small-hint{ margin-top: .15rem !important; margin-bottom: 0 !important; }
+</style>
+<style id="ag-scheme-button-layout-fix">
+/* 方案管理：最終一致版（跟下方「新增項目 / 清除輸入」同一版式 + 同尺寸策略）
+   目標：
+   - 上面兩粒（儲存/載入）同下面兩粒（新增/清除）一樣：icon 左、字右
+   - 上面兩粒平均分闊度；同一行元素 flex-stretch 同高
+   - 防止中文字放大後變成 icon 上字下（導致高度/觀感唔同）
+*/
+.scheme-actions-row .scheme-left .ag-action-btn{
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  /* 關鍵：同下面一致，優先保持單行（唔拆成兩行） */
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+
+  /* 尺寸感：貼近下方兩粒大掣 */
+  min-height: 38px !important;
+  font-size: .95rem !important;
+  line-height: 1.15 !important;
+  padding: .35rem .60rem !important;
+  text-align: center !important;
+}
+
+.scheme-actions-row .scheme-left .ag-action-btn i{
+  margin-right: .35rem !important;
+  margin-bottom: 0 !important;
+  flex: 0 0 auto;
+}
+</style>
+<style id="ag-action-button-consistency-fix">
+/* 2026-03-16：修正紅圈兩組按鈕排版一致
+   問題：下方 controls-row 的 ag-action-btn 會因 flex-wrap 變成「icon 上、字下」，
+         但上方方案管理被強制單行，導致兩組觀感唔一致。
+   做法：兩組都強制保持「icon 左、字右」單行版式 + 同一套尺寸。
+*/
+.controls-row .ag-action-btn,
+.scheme-actions-row .scheme-left .ag-action-btn{
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .20rem !important; /* 圖標與文字更貼近 */
+
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+
+  min-height: 38px !important;
+  font-size: .95rem !important;
+  line-height: 1.15 !important;
+  padding: .35rem .60rem !important;
+  text-align: center !important;
+}
+
+.controls-row .ag-action-btn i,
+.scheme-actions-row .scheme-left .ag-action-btn i{
+  margin-right: 0 !important;      /* 用 gap 控制距離 */
+  margin-inline-end: 0 !important; /* 覆蓋 Bootstrap 的 me-1 */
+  margin-bottom: 0 !important;
+  flex: 0 0 auto;
+}
+
+/* 如果 icon 有 me-1（Bootstrap margin-end），強制歸零避免留白 */
+.controls-row .ag-action-btn i.me-1,
+.scheme-actions-row .scheme-left .ag-action-btn i.me-1{ margin-inline-end: 0 !important; margin-right: 0 !important; }
+
+/* 同下方 controls-row 對齊：唔好額外縮細整行闊度 */
+.scheme-actions-row{ padding-right: 0 !important; box-sizing: border-box !important; }
+
+/* 2026-03-16：材料類別（橙紅/綠）掣高度同左邊「數量」輸入框一致
+   重點：唔用固定 px，改用 Bootstrap form-control-sm 同款計算式，
+   咁你用 A+ / A- 調大細字時，兩邊會一齊等比縮放，避免忽高忽矮。
+*/
+:root{ --ag-form-sm-h: calc(1.5em + .5rem + 2px); }
+#materialItems .materialQty.form-control-sm,
+#materialItems select.materialClass.form-select-sm{
+  height: var(--ag-form-sm-h) !important;
+  min-height: var(--ag-form-sm-h) !important;
+  padding-top: .25rem !important;
+  padding-bottom: .25rem !important;
+  line-height: 1.5 !important;
+  box-sizing: border-box !important;
+}
+</style>
 </head>
 <body>
 <div class="container-fluid">
@@ -2439,10 +2748,10 @@ html.no-transitions, html.no-transitions * {
 <label class="form-label" id="schemeManagementLabel">方案管理:</label>
 <div class="d-flex align-items-center gap-2 scheme-actions-row" style="overflow: visible; width:100%;">
   <div class="scheme-left">
-    <button class="btn btn-sm save-scheme-btn" id="saveSchemeButton" onclick="saveScheme()">
+    <button class="btn btn-sm save-scheme-btn ag-action-btn" id="saveSchemeButton" onclick="saveScheme()">
       <i class="fas fa-save me-1"></i>儲存方案
     </button>
-    <button class="btn btn-sm load-scheme-btn" id="loadSchemeButton" onclick="loadScheme()">
+    <button class="btn btn-sm load-scheme-btn ag-action-btn" id="loadSchemeButton" onclick="loadScheme()">
       <i class="fas fa-folder-open me-1"></i>載入方案
     </button>
   </div>
@@ -2475,7 +2784,7 @@ html.no-transitions, html.no-transitions * {
     </div>
     <div class="card-body card-body-light">
     
-    <div id="cuttingItems">
+    <div id="cuttingItems" class="ag-items-section">
     <div class="cutting-item">
     <div class="row g-3 align-items-center">
     <div class="col-md-12">
@@ -2509,10 +2818,10 @@ html.no-transitions, html.no-transitions * {
     </div>
     </div>
     <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-    <button class="btn btn-success btn-sm flex-fill" id="addCuttingButton" onclick="addCuttingItem()">
+    <button class="btn btn-success btn-sm flex-fill ag-action-btn" id="addCuttingButton" onclick="addCuttingItem()">
     <i class="fas fa-plus me-1"></i>新增項目
                                     </button>
-    <button class="btn btn-secondary btn-sm flex-fill" id="clearCuttingButton" onclick="clearCuttingInputs()">
+    <button class="btn btn-secondary btn-sm flex-fill ag-action-btn" id="clearCuttingButton" onclick="clearCuttingInputs()">
     <i class="fas fa-times me-1"></i>清除輸入
                                     </button>
     <select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="display:none !important">
@@ -2525,8 +2834,8 @@ html.no-transitions, html.no-transitions * {
     </div>
     </div>
     <!-- 加入 table-responsive 以適應小螢幕 -->
-    <div class="table-responsive">
-    <table class="table table-sm table-hover mt-3" id="cuttingItemsTable">
+    <div class="table-responsive" style="margin-top:-10px;">
+    <table class="table table-sm table-hover mt-0" id="cuttingItemsTable">
     <thead>
     <tr class="table-active">
     <th>長度</th>
@@ -2557,7 +2866,7 @@ html.no-transitions, html.no-transitions * {
     </div>
     <div class="card-body card-body-light">
     
-    <div id="materialItems">
+    <div id="materialItems" class="ag-items-section">
       <div class="material-item">
         <div class="row g-3 align-items-center">
           <div class="col-md-12">
@@ -2595,10 +2904,10 @@ html.no-transitions, html.no-transitions * {
             </div>
 
             <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-              <button class="btn btn-success btn-sm flex-fill" id="addMaterialButton" onclick="addMaterialItem()">
+              <button class="btn btn-success btn-sm flex-fill ag-action-btn" id="addMaterialButton" onclick="addMaterialItem()">
                 <i class="fas fa-plus me-1"></i>新增材料
               </button>
-              <button class="btn btn-secondary btn-sm flex-fill" id="clearMaterialButton" onclick="clearMaterialInputs()">
+              <button class="btn btn-secondary btn-sm flex-fill ag-action-btn" id="clearMaterialButton" onclick="clearMaterialInputs()">
                 <i class="fas fa-times me-1"></i>清除輸入
               </button>
               <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0" id="globalMaterialUnit" style="display:none !important">
@@ -2611,8 +2920,8 @@ html.no-transitions, html.no-transitions * {
         </div>
       </div>
     </div>
-    <div class="table-responsive">
-    <table class="table table-sm table-hover mt-3" id="materialItemsTable">
+    <div class="table-responsive" style="margin-top:-10px;">
+    <table class="table table-sm table-hover mt-0" id="materialItemsTable">
     <thead>
     <tr class="table-active">
     <th>長度</th>
