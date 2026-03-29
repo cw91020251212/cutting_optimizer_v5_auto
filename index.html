@@ -520,7 +520,20 @@
 
 .scheme-actions-row{ align-items: stretch !important; }
 .scheme-actions-row .scheme-left{ align-items: stretch !important; }
-.scheme-actions-row .scheme-left .ag-action-btn{ height: 100% !important; }
+.scheme-actions-row .scheme-left .ag-action-btn{
+  height: 100% !important;
+  display: inline-flex !important;
+  flex-direction: column !important; /* 統一：圖標上、文字下（避免一個橫排一個直排） */
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  white-space: normal !important;
+  flex-wrap: nowrap !important;
+  line-height: 1.12 !important;
+}
+.scheme-actions-row .scheme-left .ag-action-btn i{
+  margin-right: 0 !important; /* 覆蓋 .me-1 */
+}
 .scheme-actions-row .scheme-right{ align-self: stretch !important; }
 #autoReplenishPickerBtn{ height: 100% !important; min-height: 38px !important; }
 
@@ -634,9 +647,16 @@ body.ag-modal-blur .container-fluid{
 /* IMPORTANT: never use negative margin here (it causes the 5 round buttons to stick to the banner) */
 .top-tools{
   margin: 8px 0 14px 0 !important;
-  gap: 8px !important;
   align-items: center !important;
+  display: flex !important;
+  width: 100% !important;
+  justify-content: space-evenly !important; /* 7 粒平均分佈 */
+  gap: 0 !important;
 }
+/* 舊分組（已改回 7 粒同一行）保留空定義，避免其他地方引用報錯 */
+.top-tools-left,
+.top-tools-right,
+.top-tools-center{ display: contents !important; }
 
 /* 5 round function keys: keep them same size */
 .tool-btn{
@@ -661,6 +681,7 @@ body.ag-modal-blur .container-fluid{
   .title-nut{ width: 72px !important; height: 72px !important; }
   #pageTitle .title-ruler{ width: 72px !important; height: 72px !important; }
   .top-tools{ margin: 6px 0 12px 0 !important; gap: 6px !important; }
+  .top-tools-left,.top-tools-right{ gap: 6px !important; }
   .tool-btn{ width: 28px !important; height: 28px !important; }
   /* 手機上同樣放大少少「使用說明」 */
   #newHelpBtn{ width: 32px !important; height: 32px !important; }
@@ -698,8 +719,8 @@ button:not(#languageToggle):active,
 /* 2) 重新做投影：只套用到「主要長方形操作按鈕」，避免影響圓形 tool-btn / 右上浮動語言鍵 */
 :root{
   /* 參考圖：硬邊投影（0 blur）+ 少量內高光 */
-  --ag-btn-drop-hard: 6px 8px 0 rgba(0,0,0,0.22);
-  --ag-btn-drop-press: 2px 3px 0 rgba(0,0,0,0.22);
+  --ag-btn-drop-hard: -3px 4px 0 rgba(0,0,0,0.22);
+  --ag-btn-drop-press: -1px 2px 0 rgba(0,0,0,0.22);
   --ag-btn-inset-hi: inset 1px 1px 0 rgba(255,255,255,0.55);
   --ag-btn-inset-lo: inset -1px -2px 0 rgba(0,0,0,0.12);
 }
@@ -1486,11 +1507,16 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
 
         .top-tools {
             display: flex;
-            justify-content: center;
+            width: 100%;
+            justify-content: space-between;
             gap: 8px;
             margin: -16px 0 16px 0;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            align-items: center;
         }
+        .top-tools-left,
+        .top-tools-right{ display:flex; gap: 8px; align-items:center; }
+        .top-tools-center{ flex: 1 1 auto; display:flex; justify-content:center; }
         .top-tools .tool-btn {
             width: 32px;
             height: 32px;
@@ -1533,6 +1559,31 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
             pointer-events: none;
         }
 
+        /* A+ / A-：同色系（淺粉藍），一睇就知係一對 */
+        .top-tools .tool-btn.tool-btn-font{
+            /* A+ / A-：同一套灰/淺灰色（一眼睇到係一對） */
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 55%, #d1d5db 100%) !important;
+            border: 1px solid rgba(0,0,0,0.18) !important;
+            color: #111827 !important;
+        }
+        .top-tools .tool-btn.tool-btn-font:hover{
+            background: linear-gradient(135deg, #f9fafb 0%, #eef2f7 55%, #dbe1ea 100%) !important;
+            border-color: rgba(0,0,0,0.22) !important;
+        }
+        /* A+ / A-：文字大小鎖死一致 */
+        #fontIncBtn .tool-text,
+        #fontDecBtn .tool-text{
+            font-size: 0.78rem !important;
+            font-weight: 900 !important;
+            letter-spacing: 0 !important;
+            line-height: 1 !important;
+        }
+
+        .top-tools .tool-btn.tool-btn-font:hover{
+            background: linear-gradient(135deg, #f2fbff 0%, #dff4ff 55%, #c7ebff 100%) !important;
+            border-color: rgba(0,0,0,0.22) !important;
+        }
+
         .top-tools .tool-btn.tool-btn-soft {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 55%, #d5d9dd 100%) !important;
             border: 1px solid rgba(0,0,0,0.22) !important;
@@ -1541,6 +1592,22 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
         .top-tools .tool-btn.tool-btn-soft:hover {
             background: linear-gradient(135deg, #ffffff 0%, #eef1f4 55%, #d9dde1 100%) !important;
             border-color: rgba(0,0,0,0.26) !important;
+        }
+
+        /* 顯示調校：獨立顏色（淺青藍），一眼認到係中間主功能 */
+        .top-tools #displayTuneBtn{
+            background: linear-gradient(135deg, #e6fbff 0%, #c9f5ff 55%, #aeeeff 100%) !important;
+            border: 1px solid rgba(0,0,0,0.18) !important;
+            color: #08313f !important;
+        }
+        .top-tools #displayTuneBtn:hover{
+            background: linear-gradient(135deg, #f0feff 0%, #d7f9ff 55%, #bbf1ff 100%) !important;
+            border-color: rgba(0,0,0,0.22) !important;
+        }
+
+        /* QR：保持灰系但稍深少少，右邊更醒目 */
+        .top-tools #qrBtn{
+            background: linear-gradient(135deg, #f2f4f7 0%, #e0e4ea 55%, #cfd5de 100%) !important;
         }
 
         body.light-mode {
@@ -1573,8 +1640,11 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
         .form-control {
             border-width: 1px !important;
             border-color: rgba(0,0,0,.18) !important;
-            background-color: rgba(255,255,255,.92) !important;
-            box-shadow: none !important; /* 減少內陰影 */
+            background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90)) !important;
+            /* 輸入欄：少少立體感（比之前再明顯少少） */
+            box-shadow:
+              inset 0 1px 0 rgba(255,255,255,.75),
+              0 4px 10px rgba(0,0,0,.10) !important;
         }
 
         .form-control:focus {
@@ -1585,8 +1655,10 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
         .form-select {
             border-width: 1px !important;
             border-color: rgba(0,0,0,.18) !important;
-            background-color: rgba(255,255,255,.92) !important;
-            box-shadow: none !important;
+            background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90)) !important;
+            box-shadow:
+              inset 0 1px 0 rgba(255,255,255,.75),
+              0 4px 10px rgba(0,0,0,.10) !important;
         }
 
         .form-select:focus {
@@ -1867,7 +1939,7 @@ body select.unit-select option {
       
     </style>
 <style>
-      .saw-thickness-input{ position: relative; display: block; width: 100%; }
+      
       .saw-thickness-input .form-control{
         width: 100% !important;
         max-width: none !important;
@@ -2760,7 +2832,8 @@ body [role="button"]:not(#languageToggle):not(.tool-btn):not(.btn-close):active{
 
 /* 補回：頂部 7 粒圓形功能鍵（tool-btn）投影 —— 只影響 .tool-btn */
 :root{
-  --ag-tool-drop-hard: -2px 3px 0 rgba(0,0,0,0.22);
+  /* 工具鍵陰影：方向/位移同大按鈕一致（向右下） */
+  --ag-tool-drop-hard: -3px 4px 0 rgba(0,0,0,0.22);
   --ag-tool-drop-press: -1px 2px 0 rgba(0,0,0,0.22);
 }
 
@@ -2823,13 +2896,14 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </h2>
 
 <div class="top-tools" aria-label="Toolbar">
-  <button class="btn tool-btn tool-btn-soft" id="fontIncBtn" type="button" title="Increase font size" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
-  <button class="btn tool-btn tool-btn-soft" id="fontDecBtn" type="button" title="Decrease font size" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
+  <button class="btn tool-btn tool-btn-soft tool-btn-font" id="fontIncBtn" type="button" title="Increase font size" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
+  <button class="btn tool-btn tool-btn-soft tool-btn-font" id="fontDecBtn" type="button" title="Decrease font size" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
   <button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" type="button" title="Light/Dark" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
-  <button class="btn tool-btn tool-btn-soft" id="displayTuneBtn" type="button" title="Display tuning" aria-label="Display tuning"><i class="fa-solid fa-sliders"></i></button>
-  <button class="btn tool-btn tool-btn-soft" id="qrBtn" type="button" title="QR Code" aria-label="QR Code" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&&window.bootstrap&&bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="displayTuneBtn" type="button" title="顯示調校" aria-label="顯示調校"><i class="fa-solid fa-sliders"></i></button>
+  <button class="btn tool-btn tool-btn-soft" id="newHelpBtn" type="button" title="Help" aria-label="Help" onclick="try{ if(window.showHelp) showHelp(); else { var hb=document.getElementById('helpButton'); if(hb) hb.click(); }}catch(e){}"><span class="tool-text">?</span></button>
   <!-- 案例（固定放喺頂部工具列：唔靠 JS 插入） -->
   <button class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" type="button" title="Examples" aria-label="Examples" aria-haspopup="dialog" aria-controls="ag-case-help-overlay" onclick="showCaseHelp()"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="qrBtn" type="button" title="QR Code" aria-label="QR Code" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&&window.bootstrap&&bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
 </div>
 
 <!-- AnyGen: 案例彈窗（兩個案例） -->
@@ -3696,7 +3770,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
           if (modalEl) new bootstrap.Modal(modalEl).show();
         }
       } catch(e) {
-        console.error(e);
       }
     };
 
@@ -6359,7 +6432,6 @@ function calculate() {
                       if (pbt) pbt.textContent = (_lang==='zh') ? '已取消' : 'Cancelled';
                     }
                   } catch(err) {
-                    console.error(err);
                     const _msg = (err && err.message ? err.message : err);
                     __doneOrError = true; try { clearTimeout(__calcTimeout); } catch(e) {}
 
@@ -6655,10 +6727,8 @@ function calculate() {
                     __agScrollTo(anchor || resultsCard);
                 }
 
-                console.log("計算完成:", optimizedResult);
 
                   } catch (error) {
-                    console.error("Calculation error:", error);
                     alert((document.getElementById("language")?document.getElementById("language").value:"zh")==="zh"?"計算過程出錯："+error.message:"Calculation error: "+error.message);
                   } finally {
                     // 清理強制模式，避免影響其他計算
@@ -6670,7 +6740,6 @@ function calculate() {
                 return;
 
             } catch (error) {
-                console.error("Calculation error:", error);
                 alert((document.getElementById("language")?document.getElementById("language").value:"zh")==="zh"?"計算過程出錯："+error.message:"Calculation error: "+error.message);
             }
         }
@@ -7642,7 +7711,6 @@ window.convertInputValues = function(group, targetUnit) {
 
     if (oldUnit === targetUnit) return; 
 
-    console.log(`Converting from ${oldUnit} to ${targetUnit}`);
 
     let totalMM = 0;
     const val0 = parseFloat(inputs[0].value) || 0;
@@ -8232,7 +8300,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
 (function() {
-    console.log('初始化自動滾動功能...');
 
     document.addEventListener('focus', function(event) {
         const target = event.target;
@@ -8240,7 +8307,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const isInput = target.matches('input[type="number"], input[type="text"], textarea, select');
 
         if (isInput) {
-            console.log('輸入欄被點擊:', target.tagName, target.id || target.name);
 
             let card = target.closest('.card');
 
@@ -8248,7 +8314,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 let sectionHeader = card.querySelector('.section-header');
 
                 if (sectionHeader) {
-                    console.log('找到標題區域:', sectionHeader.textContent.trim().substring(0, 20));
 
                     const headerRect = sectionHeader.getBoundingClientRect();
                     const headerTop = headerRect.top;
@@ -8256,25 +8321,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (headerTop > 5 || headerTop < 0) {
                         const scrollAmount = window.pageYOffset + headerTop - 5;
 
-                        console.log('滾動到位置:', scrollAmount, '(距離頂部5px)');
 
                         window.scrollTo({
                             top: scrollAmount,
                             behavior: 'smooth'
                         });
                     } else {
-                        console.log('已經在正確位置，無需滾動');
                     }
                 } else {
-                    console.log('找不到 .section-header');
                 }
             } else {
-                console.log('找不到 .card');
             }
         }
     }, true);
 
-    console.log('✅ 自動滾動功能已啟動（使用 .section-header）');
 })();
 </script>
 <script>
@@ -9080,7 +9140,6 @@ document.addEventListener('DOMContentLoaded', function() {
       if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
 
     } catch(e) {
-      console.warn('Settings load failed:', e);
     } finally {
       document.documentElement.classList.remove('preload-sepia','preload-normal','no-transitions');
       requestAnimationFrame(() => document.documentElement.classList.remove('no-transitions'));
@@ -10316,15 +10375,19 @@ body.sepia-mode #globalMaterialUnit {
 .form-control,
 .form-select,
 textarea {
-  /* 輸入欄位外陰影：改到非常淺色 */
-  box-shadow: 0 1px 2px rgba(0,0,0,.08) !important;
+  /* 輸入欄位：少少立體感（比之前清晰，但唔誇張） */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.70),
+    0 3px 8px rgba(0,0,0,.12) !important;
   transition: box-shadow .15s ease !important;
 }
 .form-control:focus,
 .form-select:focus,
 textarea:focus {
-  /* focus 光暈亦再淡少少 */
-  box-shadow: 0 0 0 .12rem rgba(0,0,0,.05), 0 2px 6px rgba(0,0,0,.10) !important;
+  /* focus：保持輕微光暈 + 少少投影 */
+  box-shadow:
+    0 0 0 .12rem rgba(0,0,0,.06),
+    0 4px 10px rgba(0,0,0,.14) !important;
 }
 
 .btn,
@@ -10444,10 +10507,7 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn:active{
 }
 
 /* 光明版：7個圓形功能鍵（頂部工具列）深色字一律無陰影 */
-body.sepia-mode .top-tools .tool-btn,
-body.sepia-mode .top-tools .tool-btn *{
-  text-shadow: none !important;
-}
+
 
 /* 光明版：覆蓋『白字加陰影』全局規則（避免 btn-success/secondary 仍被加 text-shadow） */
 body.sepia-mode :is(.btn-primary,.btn-success,.btn-danger,.btn-info,.btn-dark,.btn-secondary,
