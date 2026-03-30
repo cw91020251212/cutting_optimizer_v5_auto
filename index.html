@@ -487,7 +487,6 @@
   text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
 }
 
-
 /* 令按鈕喺同一行時左右對稱（兩粒掣同寬） */
 .controls-row .ag-action-btn,
 .scheme-actions-row .scheme-left .ag-action-btn{
@@ -613,11 +612,7 @@ body:not(.sepia-mode) #results-card .card-body{
 #calculateButton::before, #calculateButton::after { animation: shine 8s infinite ease-in-out; }
 
 /* Modal open → blur everything behind */
-body.modal-open .container-fluid,
-body.ag-modal-blur .container-fluid{
-  filter: blur(14px) saturate(.92) contrast(.98);
-  transform: scale(0.99);
-}
+/* (removed) old container blur rule */
 
 .modal-backdrop.show{
   background-color: rgba(0,0,0,0.18);
@@ -628,7 +623,6 @@ body.ag-modal-blur .container-fluid{
 .modal-content{
   box-shadow: 0 20px 70px rgba(0,0,0,.35);
 }
-
 
 /* === AnyGen patch: compact header + tool buttons spacing (2026-02-24) === */
 
@@ -743,7 +737,6 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
   transform: translateY(1px) !important;
 }
 
-
 </style>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
@@ -772,11 +765,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
         .container-fluid {
             transition: filter .18s ease, transform .18s ease;
         }
-
-        body.modal-open .container-fluid {
-            filter: blur(6px) saturate(.95);
-            transform: scale(0.995);
-        }
+/* (removed) legacy modal-open container blur; now handled by agSetContentBlur */
 
         .modal-backdrop.show {
             background-color: rgba(0,0,0,0.35);
@@ -2053,8 +2042,6 @@ body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width
   color: #5f6368 !important; /* 深灰，提升對比 */
 }
 
-
-
 body.light-mode .opt-summary-box,
 body.light-mode .opt-material-box {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
@@ -2069,7 +2056,6 @@ body.sepia-mode .opt-summary-box {
   border-left: 6px solid #8b6f47 !important;
   box-shadow: 0 3px 10px rgba(101, 67, 33, 0.18) !important;
 }
-
 
 @media print {
   .opt-summary-box, .opt-material-box {
@@ -2114,7 +2100,6 @@ html.no-transitions, html.no-transitions * {
   animation: none !important;
 }
 </style>
-
 
 <!-- AnyGen: 案例彈窗樣式（香港用語） -->
 <style id="ag-case-help-style">
@@ -2468,7 +2453,6 @@ html.no-transitions, html.no-transitions * {
   box-sizing: border-box !important;
 }
 
-
 /* === 由「宿舍」移植：顯示調校（只影響 #contentRoot，避免 fixed 浮動鍵同彈窗受 filter 影響） === */
 :root{ --display-filter: brightness(1) contrast(1) saturate(1) sepia(0) hue-rotate(0deg); --paper-tint: 0.65; --paper-strength: 0.65; }
 #contentRoot{ filter: var(--display-filter); transition: filter 180ms ease; }
@@ -2476,6 +2460,31 @@ html.no-transitions, html.no-transitions * {
 /* 顯示調校彈窗（modal） */
 .tune-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 18px; }
 .tune-modal { width: min(520px, 92vw); background: rgba(25,25,25,0.92); border: 1px solid rgba(255,255,255,0.18); border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); overflow: hidden; color: #f2f5f9; }
+
+/* 光明版（sepia-mode）：顯示調校視窗改為淺米黃色底 */
+body.sepia-mode #displayTuneModal .tune-modal{
+  background: #fff3de;
+  border-color: rgba(107,85,51,.25);
+  color: rgba(62,42,16,.92);
+}
+body.sepia-mode #displayTuneModal .tune-header{
+  border-bottom-color: rgba(107,85,51,.20);
+}
+body.sepia-mode #displayTuneModal .tune-val,
+body.sepia-mode #displayTuneModal .tune-hint{
+  color: rgba(62,42,16,.75);
+}
+body.sepia-mode #displayTuneModal .tune-close{
+  border-color: rgba(107,85,51,.28);
+  background: rgba(107,85,51,.10);
+  color: rgba(62,42,16,.92);
+}
+body.sepia-mode #displayTuneModal .tune-advanced-toggle{
+  border-color: rgba(107,85,51,.28);
+  background: rgba(107,85,51,.10);
+  color: rgba(62,42,16,.92);
+}
+body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightness(1.02) saturate(1.02); }
 .tune-header { display:flex; align-items:center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.12); }
 .tune-title { font-weight: 800; font-size: 1.05rem; }
 .tune-close { width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.10); color: #f2f5f9; font-size: 20px; line-height: 1; cursor: pointer; }
@@ -2515,8 +2524,6 @@ html.no-transitions, html.no-transitions * {
 .tune-row input[type="range"]::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 999px; margin-top: -4px; background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e5e7eb 55%, #cbd5e1 100%); border: 1px solid rgba(0,0,0,0.30); box-shadow: 0 4px 10px rgba(0,0,0,0.28); }
 
 @media (max-width: 520px){ .tune-row{ grid-template-columns: 86px 1fr 56px; } }
-
-
 
 <style id="ag-display-tune-dorm-style">
   /* 由宿舍 v24/v25/tuneColorOverrides 摘取：只影響 #displayTuneModal */
@@ -2787,7 +2794,34 @@ html.no-transitions, html.no-transitions * {
 
 <style id="ag-shadow-final-v2">
 /* === AnyGen patch: 按鈕硬邊投影（最終覆寫 v2 / 2026-03-28） ===
-   修正：投影方向改為「左下」；並放到 </head> 前最後一段，確保覆蓋所有較後 style（包括 sepia-mode 內的 !important）。
+   修正：投影方向改為「左下」；並放到 
+<script id="ag-global-blur-helper">
+(function(){
+  if(window.agSetContentBlur) return;
+  let count = 0;
+  function apply(){
+    const root = document.getElementById('contentRoot');
+    if(!root) return;
+    if(count>0){
+      root.style.setProperty('filter', 'var(--display-filter) blur(12px) saturate(.92) contrast(.98)', 'important');
+      root.style.setProperty('transform', 'translateZ(0)', '');
+    }else{
+      root.style.removeProperty('filter');
+      root.style.removeProperty('transform');
+    }
+  }
+  window.agSetContentBlur = function(on){
+    try{
+      count += on ? 1 : -1;
+      if(count < 0) count = 0;
+      window.__agBlurCount = count;
+      apply();
+    }catch(e){}
+  };
+})();
+</script>
+
+</head> 前最後一段，確保覆蓋所有較後 style（包括 sepia-mode 內的 !important）。
    保留：#languageToggle（右上浮動中/英）原本投影。
 */
 :root{
@@ -2983,6 +3017,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   };
 
   // --- open/close (真正關閉：唔靠 :target / hash) ---
+
   function open(){
     if(!overlay) return;
     // 每次打開都回到第一個案例（同事最易跟）
@@ -2990,6 +3025,8 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     overlay.dataset.open='true';
     overlay.style.display='block';
     overlay.removeAttribute('aria-hidden');
+    // 背景模糊
+        if(window.agSetContentBlur) window.agSetContentBlur(true);
     // 防止背景頁面滾動
     try{ document.body.style.overflow='hidden'; }catch(e){}
   }
@@ -2998,6 +3035,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     overlay.dataset.open='false';
     overlay.style.display='none';
     overlay.setAttribute('aria-hidden','true');
+        if(window.agSetContentBlur) window.agSetContentBlur(false);
     try{ document.body.style.overflow=''; }catch(e){}
     // 清走 hash，避免任何 :target/路由殘留
     try{
@@ -3508,7 +3546,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 </div><!-- /contentRoot -->
 
-
 <!-- 顯示調校（由「宿舍」移植） -->
 <div id="displayTuneModal" class="tune-backdrop" aria-hidden="true" onclick="try{ if(event.target===this){window.__closeDisplayTune&&window.__closeDisplayTune();}}catch(e){}">
   <div class="tune-modal" role="dialog" aria-modal="true" aria-label="顯示調校">
@@ -3573,7 +3610,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     </div>
   </div>
 </div>
-
 
 <div aria-hidden="true" aria-labelledby="printOptionsModalLabel" class="modal fade" id="printOptionsModal" tabindex="-1">
 <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -4204,7 +4240,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
               var bd=document.getElementById('ag-case-help-backdrop');
               if(bd) bd.setAttribute('aria-label', (lang==='zh')?'關閉案例彈窗':'Close use cases dialog');
             })();
-
 
             // Auto-Replenish（新制按鈕上方描述）
             var arLbl=document.getElementById('autoReplenishBtnTitle'); if(arLbl) arLbl.textContent = (lang==='zh') ? '自動補料' : 'Auto-Replenish';
@@ -5616,7 +5651,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
             return bins;
         };
 
-
         function updateMaterialUsageStatus(bins) {
             // 統計每種長度實際使用嘅數量（只計非自動補料）
             const usageCount = {};
@@ -6727,7 +6761,6 @@ function calculate() {
                     __agScrollTo(anchor || resultsCard);
                 }
 
-
                   } catch (error) {
                     alert((document.getElementById("language")?document.getElementById("language").value:"zh")==="zh"?"計算過程出錯："+error.message:"Calculation error: "+error.message);
                   } finally {
@@ -7381,10 +7414,12 @@ function calculate() {
             bootstrap.Modal.getInstance(document.getElementById("loadSchemeModal")).hide();
         }
 
-        function deleteScheme(index) {
+        async function deleteScheme(index) {
             const lang = document.getElementById("language").value;
+            const msg = (lang === "zh" ? "確定要刪除此方案嗎？" : "Are you sure you want to delete this scheme?");
 
-            if (confirm(lang === "zh" ? "確定要刪除此方案嗎？" : "Are you sure you want to delete this scheme?")) {
+            const ok = (typeof window.agConfirm === 'function') ? await window.agConfirm(msg) : confirm(msg);
+            if (ok) {
                 let savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
                 savedSchemes.splice(index, 1);
                 localStorage.setItem("aluminumCuttingSchemes", JSON.stringify(savedSchemes));
@@ -7392,11 +7427,12 @@ function calculate() {
             }
         }
 
-        function reset() {
+        async function reset() {
             const lang = document.getElementById("language").value;
             const confirmMsg = lang === "zh" ? "確定要重置所有資料嗎？" : "Are you sure you want to reset all data?";
 
-            if (confirm(confirmMsg)) {
+            const ok = (typeof window.agConfirm === 'function') ? await window.agConfirm(confirmMsg) : confirm(confirmMsg);
+            if (ok) {
                 location.reload();
             }
         }
@@ -7710,7 +7746,6 @@ window.convertInputValues = function(group, targetUnit) {
     const oldUnit = group.dataset.currentUnit || "metric"; 
 
     if (oldUnit === targetUnit) return; 
-
 
     let totalMM = 0;
     const val0 = parseFloat(inputs[0].value) || 0;
@@ -8320,7 +8355,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (headerTop > 5 || headerTop < 0) {
                         const scrollAmount = window.pageYOffset + headerTop - 5;
-
 
                         window.scrollTo({
                             top: scrollAmount,
@@ -9431,13 +9465,18 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 // === AnyGen patch: ensure blur triggers with Bootstrap modal events ===
 (function(){
-  function on(){ document.body.classList.add('ag-modal-blur'); }
-  function off(){ document.body.classList.remove('ag-modal-blur'); }
+  function on(){
+        if(window.agSetContentBlur) window.agSetContentBlur(true);
+  }
+  function off(){
+    try{ if(document.querySelector('.modal.show')) return; }catch(e){}
+        if(window.agSetContentBlur) window.agSetContentBlur(false);
+  }
+  document.addEventListener('show.bs.modal', on);
   document.addEventListener('shown.bs.modal', on);
   document.addEventListener('hidden.bs.modal', off);
 })();
 </script>
-
 
 <!-- Auto-Replenish length picker modal -->
 <div class="modal fade" id="autoReplenishModal" tabindex="-1" aria-labelledby="autoReplenishModalLabel" aria-hidden="true">
@@ -9450,7 +9489,7 @@ document.addEventListener('DOMContentLoaded', function() {
       <div class="modal-body">
         <div class="small text-muted mb-2 ag-ar-hint">提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。</div>
         <div class="d-grid gap-2" id="autoReplenishOptions">
-          <button class="ag-ar-off-btn" type="button" class="btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
+          <button type="button" class="ag-ar-off-btn btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
 
           <div class="small text-muted mt-2"><span class="ag-ar-custom-title">自訂</span></div>
           <div class="input-group">
@@ -9503,10 +9542,6 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
   </div>
 </div>
-
-
-
-
 
 <script>
 // === AnyGen patch: unit picker wiring (multi-target) ===
@@ -9594,61 +9629,65 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
-
 <script>
-// === AnyGen patch: native select blur (mobile system pickers) v2 ===
+// === AnyGen patch: native select blur (mobile system pickers) v3 ===
+// 目的：手機開啟系統 SELECT picker 時，都令背景模糊。
 (function(){
   let lastOpenAt = 0;
-  const on = () => { lastOpenAt = Date.now(); document.body.classList.add('ag-modal-blur'); };
-  const off = () => document.body.classList.remove('ag-modal-blur');
+  let active = false;
 
   function anyBootstrapModalOpen(){
-    return !!document.querySelector('.modal.show');
+    try{ return !!document.querySelector('.modal.show'); }catch(e){ return false; }
   }
-
   function isNativeSelectFocused(){
     const ae = document.activeElement;
-    return ae && ae.tagName === 'SELECT';
+    return !!(ae && ae.tagName === 'SELECT');
   }
 
-  // Safety cleanup
-  // - 一般情況：冇 modal + 冇 select focus → 移除 blur
-  // - 但某些瀏覽器揀完 option 後，select 仍然 keep focus（你講嘅「要再撳一下先清」）
-  //   呢個時候其實 system picker 已經收咗，所以 change 之後要「強制」清 blur。
+  function on(){
+    lastOpenAt = Date.now();
+    if(active) return;
+    active = true;
+    if(window.agSetContentBlur) window.agSetContentBlur(true);
+  }
+
+  function off(force){
+    if(!active) return;
+    if(!force){
+      if(anyBootstrapModalOpen() || isNativeSelectFocused()) return;
+    }
+    active = false;
+    if(window.agSetContentBlur) window.agSetContentBlur(false);
+  }
+
   function cleanupSoon(delay, force){
-    setTimeout(function(){
-      if (force) { off(); return; }
-      if (!anyBootstrapModalOpen() && !isNativeSelectFocused()) off();
-    }, delay);
+    setTimeout(function(){ off(!!force); }, delay);
   }
 
   function bind(el){
-    // When opening system picker (mobile)
-    el.addEventListener('focus', () => { on(); }, { passive: true });
-    el.addEventListener('mousedown', () => { on(); }, { passive: true });
-    el.addEventListener('touchstart', () => { on(); }, { passive: true });
+    el.addEventListener('focus', on, { passive: true });
+    el.addEventListener('mousedown', on, { passive: true });
+    el.addEventListener('touchstart', on, { passive: true });
 
-    // When closing picker
-    // change：代表已完成選擇，強制清 blur（避免要再點一下）
-    el.addEventListener('change', () => cleanupSoon(60, true), { passive: true });
-    // blur：保留作保險（未必一定會發生）
-    el.addEventListener('blur', () => cleanupSoon(60), { passive: true });
+    // change：通常代表 picker 收咗；某些瀏覽器仍 keep focus，所以用 force 清
+    el.addEventListener('change', () => cleanupSoon(80, true), { passive: true });
+    // blur：保險
+    el.addEventListener('blur',   () => cleanupSoon(120, false), { passive: true });
   }
 
-  // Bind current selects
   document.querySelectorAll('select').forEach(bind);
 
-  // Global listeners：有啲瀏覽器「揀返同一個 option」唔會觸發 change。
-  // 但又要避免「一撳落去開 picker 就即刻清 blur」：所以加時間門檻。
   function shouldForceClearNow(){
-    // 開 picker 後頭 350ms 內嘅 click/mouseup/touchend 通常係「開啟動作」本身，唔應該清 blur。
+    // 避免「開啟動作」本身（頭 350ms）就清 blur
     return (Date.now() - lastOpenAt) > 350;
   }
 
-  document.addEventListener('touchend', () => { if(shouldForceClearNow()) cleanupSoon(160, true); }, { passive: true });
-  document.addEventListener('mouseup',  () => { if(shouldForceClearNow()) cleanupSoon(160, true); }, { passive: true });
-  document.addEventListener('click',    () => { if(shouldForceClearNow()) cleanupSoon(160, true); }, { passive: true });
-  window.addEventListener('focus',      () => { if(shouldForceClearNow()) cleanupSoon(160, true); });
+  ['mouseup','touchend','pointerup','click'].forEach((evt)=>{
+    window.addEventListener(evt, ()=>{
+      if(!shouldForceClearNow()) return;
+      off(false);
+    }, { passive: true });
+  });
 
   // In case UI adds selects dynamically
   const mo = new MutationObserver((ms)=>{
@@ -9663,9 +9702,6 @@ document.addEventListener('DOMContentLoaded', function() {
   mo.observe(document.body, { childList: true, subtree: true });
 })();
 </script>
-
-
-
 
 <script>
 (function(){
@@ -9814,7 +9850,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 #cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.25rem; padding-bottom: 1.5rem; }
 
-
 #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1rem; }
 #cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 0.75rem; }
 #cuttingItems .controls-row { margin-top: 0.75rem; margin-bottom: 1.25rem; }
@@ -9827,7 +9862,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </style>
 <style>
 #cutting-items-card .card-body, #materials-card .card-body { padding-top: 2rem !important; padding-bottom: 2.5rem !important; }
-
 
 #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.5rem !important; }
 #cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 1.25rem !important; }
@@ -9847,8 +9881,6 @@ document.addEventListener('DOMContentLoaded', function() {
 #materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
 
 #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
-
-
 
 #cuttingItems .controls-row { margin-bottom: 0.5rem !important; }
 
@@ -10253,8 +10285,6 @@ body.sepia-mode .btn-danger {
     box-shadow: 0 3px 8px rgba(255, 85, 0, 0.30) !important;
 }
 
-
-
 body.sepia-mode .btn {
     background: 
         linear-gradient(45deg, #f0e6d2 25%, transparent 25%),
@@ -10435,44 +10465,7 @@ button.btn,
   line-height: 1 !important;
 }
 
-/* 取消所有彈窗/遮罩造成的背景模糊（保留遮罩變暗，但完全唔 blur） */
-
-/* 1) Bootstrap modal/backdrop */
-.modal-backdrop,
-.modal-backdrop.show{
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-  filter: none !important;
-}
-
-/* 2) body 被加 modal-open / ag-modal-blur 時，原本會 blur 背景：全部取消 */
-body.modal-open .container-fluid,
-body.modal-open .container,
-body.modal-open .card,
-body.ag-modal-blur .container-fluid,
-body.ag-modal-blur .container,
-body.ag-modal-blur .card{
-  -webkit-filter: none !important;
-  filter: none !important;
-  transform: none !important;
-}
-
-/* 3) 有啲遮罩會用 backdrop-filter 落喺 ::backdrop 或自製 overlay，全部禁用 */
-*, *::before, *::after, ::backdrop{
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-
-/* 4) 針對常見 blur utility class（Tailwind / 自訂） */
-
-
-/* 5) style inline 直接寫 blur()：都清走 */
-[style*="blur("]{
-  -webkit-filter: none !important;
-  filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
+/* 彈窗背景模糊：改用 JS inline filter（見 ag-global-blur-helper） */
 
 body.sepia-mode #resetButton {
   box-shadow: 0 4px 12px rgba(0,0,0,.26) !important;
@@ -10507,7 +10500,6 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn:active{
 }
 
 /* 光明版：7個圓形功能鍵（頂部工具列）深色字一律無陰影 */
-
 
 /* 光明版：覆蓋『白字加陰影』全局規則（避免 btn-success/secondary 仍被加 text-shadow） */
 body.sepia-mode :is(.btn-primary,.btn-success,.btn-danger,.btn-info,.btn-dark,.btn-secondary,
@@ -10619,8 +10611,6 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
 
 </script>
 
-
-
 <script>
 // === 浮動中/英 + 顯示調校（鋁材版，已移除浮動 QR）===
 (function(){
@@ -10658,9 +10648,18 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
     if (settings.warmth==null) settings.warmth=0;
     if (settings.paperTint==null) settings.paperTint=0.65;
     if (settings.paperStrength==null) settings.paperStrength=0.65;
-    if (settings.tuneAdvanced==null) settings.tuneAdvanced=false;
+
+    // 需求：『顯示進階滑桿』每次都保持關上（不記憶狀態）
+    settings.tuneAdvanced=false;
   }
-  function writeTune(){ try{ localStorage.setItem(KEY, JSON.stringify(settings)); }catch(e){} }
+  function writeTune(){
+    // 不把 tuneAdvanced 寫入 localStorage
+    try{
+      var s = Object.assign({}, settings);
+      delete s.tuneAdvanced;
+      localStorage.setItem(KEY, JSON.stringify(s));
+    }catch(e){}
+  }
   function applyTune(){
     var b=Number(settings.brightness||1);
     var c=Number(settings.contrast||1);
@@ -10756,13 +10755,18 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
   }
 
   function openTune(){
+    // 每次開啟都重新讀取一次；同時『進階滑桿』固定為關上（不記憶）
+    readTune();
+
     var modal=document.getElementById('displayTuneModal');
     if(!modal) return;
     syncTuneTexts();
     setSliderValues();
-    setAdvanced(!!settings.tuneAdvanced, false);
+    setAdvanced(false, false);
     modal.style.display='flex';
     modal.setAttribute('aria-hidden','false');
+    // 自製彈窗：手動加背景模糊
+        if(window.agSetContentBlur) window.agSetContentBlur(true);
     document.addEventListener('keydown', onEsc);
   }
   function closeTune(){
@@ -10770,6 +10774,7 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
     if(!modal) return;
     modal.style.display='none';
     modal.setAttribute('aria-hidden','true');
+        if(window.agSetContentBlur) window.agSetContentBlur(false);
     document.removeEventListener('keydown', onEsc);
   }
   function onEsc(e){ if(e.key==='Escape') closeTune(); }
@@ -10849,7 +10854,6 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
 })();
 </script>
 
-
 <style id="ag-shadow-final-v3">
 /* === AnyGen patch: 按鈕硬邊投影（全檔最終覆寫 v3 / 2026-03-28） ===
    原因：此檔案在 <body> 內仍有多段 <style>（含 !important）會覆蓋 <head> 的設定。
@@ -10882,6 +10886,40 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
 </style>
 
 <!-- AnyGen patch: 只為4粒按鈕鎖定硬邊投影（避免再被其他CSS蓋走） -->
+<style id="ag-btn-radius-final">
+/* === AnyGen patch: buttons radius slightly rounder ===
+   需求：所有按鈕圓角再圓少少，但唔好太圓。
+   做法：集中用一個變數，並對常見按鈕 class/元件做最終覆寫。
+*/
+:root{ --ag-btn-radius: 14px; }
+
+/* Bootstrap buttons + 站內主要按鈕 */
+button.btn,
+.btn,
+.ag-action-btn,
+#calculateButton,
+#resetButton,
+.save-scheme-btn,
+.load-scheme-btn,
+.help-btn,
+.unit-select,
+.tool-btn{
+  border-radius: var(--ag-btn-radius) !important;
+}
+
+/* 小型按鈕保持唔好過份圓：比主按鈕略細 */
+.btn-sm,
+button.btn-sm{
+  border-radius: 12px !important;
+}
+
+/* 圓形功能鍵（頂部工具列 / 浮動語言鍵）維持圓形，不受上面影響 */
+.top-tools .tool-btn,
+#languageToggle.language-toggle{
+  border-radius: 999px !important;
+}
+</style>
+
 <style id="ag-four-btn-shadow-final">
   /* 重要：sepia-mode 內有較高 specificity + !important 會蓋走投影
      所以呢度用更高 specificity（帶埋 #cuttingItems/#materialItems）強制四粒掣有硬邊投影。
@@ -10974,5 +11012,111 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
   }catch(e){}
 })();
 </script>
+
+<!-- AnyGen patch: Custom alert/confirm (for background blur) -->
+<div class="modal fade" id="agAlertModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="agAlertTitle">提示</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="agAlertBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="agAlertOk">確定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="agConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="agConfirmTitle">確認</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="agConfirmBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-ag-confirm="0" id="agConfirmCancel">取消</button>
+        <button type="button" class="btn btn-primary" data-ag-confirm="1" id="agConfirmOk">確定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Custom alert/confirm: 用 Bootstrap modal 代替瀏覽器原生彈窗，先可以做到背景 blur
+(function(){
+  const langSel = () => document.getElementById('language');
+  const getLang = () => (langSel() && langSel().value) ? langSel().value : 'zh';
+  const isZh = () => getLang() === 'zh';
+
+  const alertModalEl = document.getElementById('agAlertModal');
+  const confirmModalEl = document.getElementById('agConfirmModal');
+  if(!alertModalEl || !confirmModalEl || !window.bootstrap || !bootstrap.Modal) return;
+
+  const alertTitle = document.getElementById('agAlertTitle');
+  const alertBody = document.getElementById('agAlertBody');
+  const alertOk = document.getElementById('agAlertOk');
+
+  const confirmTitle = document.getElementById('agConfirmTitle');
+  const confirmBody = document.getElementById('agConfirmBody');
+  const confirmOk = document.getElementById('agConfirmOk');
+  const confirmCancel = document.getElementById('agConfirmCancel');
+
+  function syncI18n(){
+    if(alertTitle) alertTitle.textContent = isZh() ? '提示' : 'Notice';
+    if(confirmTitle) confirmTitle.textContent = isZh() ? '確認' : 'Confirm';
+    if(alertOk) alertOk.textContent = isZh() ? '確定' : 'OK';
+    if(confirmOk) confirmOk.textContent = isZh() ? '確定' : 'OK';
+    if(confirmCancel) confirmCancel.textContent = isZh() ? '取消' : 'Cancel';
+  }
+
+  window.agAlert = function(msg){
+    syncI18n();
+    if(alertBody) alertBody.textContent = String(msg ?? '');
+    const inst = bootstrap.Modal.getInstance(alertModalEl) || new bootstrap.Modal(alertModalEl);
+    inst.show();
+  };
+
+  window.agConfirm = function(msg){
+    syncI18n();
+    if(confirmBody) confirmBody.textContent = String(msg ?? '');
+    const inst = bootstrap.Modal.getInstance(confirmModalEl) || new bootstrap.Modal(confirmModalEl);
+
+    return new Promise((resolve)=>{
+      let resolved = false;
+      const cleanup = () => {
+        confirmOk?.removeEventListener('click', onOk);
+        confirmCancel?.removeEventListener('click', onCancel);
+        confirmModalEl.removeEventListener('hidden.bs.modal', onHidden);
+      };
+      const done = (v) => {
+        if(resolved) return;
+        resolved = true;
+        cleanup();
+        resolve(!!v);
+      };
+      const onOk = () => { try{ inst.hide(); }catch(e){} done(true); };
+      const onCancel = () => { try{ inst.hide(); }catch(e){} done(false); };
+      const onHidden = () => { done(false); };
+
+      confirmOk?.addEventListener('click', onOk);
+      confirmCancel?.addEventListener('click', onCancel);
+      confirmModalEl.addEventListener('hidden.bs.modal', onHidden);
+
+      inst.show();
+    });
+  };
+
+  // 全站 alert 改用自家 modal（原生 alert 會變成「嵌入式頁面顯示」，無法 blur 背景）
+  try{
+    if(!window.__ag_native_alert) window.__ag_native_alert = window.alert;
+    window.alert = function(msg){ window.agAlert(msg); };
+  }catch(e){}
+})();
+</script>
+
 </body>
 </html>
