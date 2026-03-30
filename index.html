@@ -535,80 +535,9 @@
 }
 .scheme-actions-row .scheme-right{ align-self: stretch !important; }
 #autoReplenishPickerBtn{ height: 100% !important; min-height: 38px !important; }
+  /* (removed) legacy .btn 3D block: superseded by 2026-03-28 patch */
 
-.btn:not(.btn-close):not(.tool-btn),
-button.btn:not(.btn-close):not(.tool-btn){
-  position: relative;
-  overflow: hidden;
-  transform: translateY(0);
-  transition: transform .08s ease-out, filter .12s ease-out;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.25) inset,
-    0 -2px 0 rgba(0,0,0,0.18) inset,
-    0 6px 14px rgba(0,0,0,0.18);
-}
-
-/* === AnyGen patch: results grey background unify === */
-/* 只針對灰色模式（非啡色/sepia），避免覆蓋 sepia-mode 原本嘅卡片底色 */
-body:not(.sepia-mode) #results-card,
-body:not(.sepia-mode) #results-card .card-body{
-  /* 同大背景灰一致 */
-  background-color: #6b7280 !important;
-  background-image: none !important;
-}
-
-.btn:not(.btn-close):not(.tool-btn)::before{
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 52%;
-  background: linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0.08));
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* subtle "shine" sweep */
-@keyframes agShine {
-  0%, 70% { transform: translateX(-160%) rotate(25deg); opacity: 0; }
-  78% { opacity: .55; }
-  90% { transform: translateX(220%) rotate(25deg); opacity: 0; }
-  100% { opacity: 0; }
-}
-
-.btn:not(.btn-close):not(.tool-btn)::after{
-  content: "";
-  position: absolute;
-  top: -60%; left: -120%;
-  width: 34%; height: 240%;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.85), transparent);
-  transform: translateX(-160%) rotate(25deg);
-  /* 性能優化：避免所有按鈕長期跑 infinite animation（低階機會卡頓） */
-  animation: none;
-  pointer-events: none;
-  z-index: 3;
-}
-
-.btn:hover:not(.btn-close):not(.tool-btn){
-  filter: brightness(1.03) saturate(1.02);
-  transform: translateY(-1px);
-}
-
-/* 性能優化：shine 只在 hover 時跑一次；並尊重 reduce motion */
-@media (prefers-reduced-motion: no-preference){
-  .btn:hover:not(.btn-close):not(.tool-btn)::after{ animation: agShine 1.6s 1 ease-in-out; }
-}
-
-.btn:active:not(.btn-close):not(.tool-btn),
-.btn.active:not(.btn-close):not(.tool-btn){
-  box-shadow:
-    0 1px 0 rgba(0,0,0,0.35) inset,
-    0 -1px 0 rgba(255,255,255,0.16) inset,
-    0 2px 8px rgba(0,0,0,0.26);
-  transform: translateY(1px);
-}
-
-/* Keep existing #calculateButton special effects */
+  /* Keep existing #calculateButton special effects */
 #calculateButton::before, #calculateButton::after { animation: shine 8s infinite ease-in-out; }
 
 /* Modal open → blur everything behind */
@@ -742,10 +671,84 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
   transform: translateY(1px) !important;
 }
 
+/* 3) 補回反光/漸變/shine（之前精簡時移走咗舊段）
+   - 只套用到長方形按鈕（排除 tool-btn / languageToggle / btn-close）
+   - 反光用 ::before；shine sweep 用 ::after（hover 時跑一次）
+*/
+button:not(#languageToggle):not(.tool-btn):not(.btn-close),
+.ag-action-btn,
+.btn:not(.btn-close):not(.tool-btn):not(#languageToggle){
+  position: relative;
+  overflow: hidden;
+  transform: translateY(0);
+  transition: transform .08s ease-out, filter .12s ease-out;
+}
+
+button:not(#languageToggle):not(.tool-btn):not(.btn-close):not(.ag-ar-len-warning)::before,
+.ag-action-btn:not(.ag-ar-len-warning)::before,
+.btn:not(.btn-close):not(.tool-btn):not(#languageToggle):not(.ag-ar-len-warning)::before{
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 52%;
+  background: linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0.08));
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes agShine {
+  0%, 70% { transform: translateX(-160%) rotate(25deg); opacity: 0; }
+  78% { opacity: .55; }
+  90% { transform: translateX(220%) rotate(25deg); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+button:not(#languageToggle):not(.tool-btn):not(.btn-close):not(.ag-ar-len-warning)::after,
+.ag-action-btn:not(.ag-ar-len-warning)::after,
+.btn:not(.btn-close):not(.tool-btn):not(#languageToggle):not(.ag-ar-len-warning)::after{
+  content: "";
+  position: absolute;
+  top: -60%; left: -120%;
+  width: 34%; height: 240%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.85), transparent);
+  transform: translateX(-160%) rotate(25deg);
+  animation: none;
+  pointer-events: none;
+  z-index: 3;
+}
+
+button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
+.ag-action-btn:hover,
+.btn:not(.btn-close):not(.tool-btn):not(#languageToggle):hover{
+  filter: brightness(1.03) saturate(1.02);
+  transform: translateY(-1px);
+}
+
+@media (prefers-reduced-motion: no-preference){
+  button:not(#languageToggle):not(.tool-btn):not(.btn-close):not(.ag-ar-len-warning):hover::after,
+  .ag-action-btn:not(.ag-ar-len-warning):hover::after,
+  .btn:not(.btn-close):not(.tool-btn):not(#languageToggle):not(.ag-ar-len-warning):hover::after{ animation: agShine 1.6s 1 ease-in-out; }
+}
+
 </style>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <title>鋁材切割排版 (橫向優化版) - v9</title>
+<!-- Critical button radius: prevent startup flash (FOUC) before Bootstrap loads -->
+<style id="critical-btn-radius">
+  :root{ --bs-border-radius: 14px; }
+  /* all rectangular buttons (exclude round tool buttons & floating language toggle) */
+  button:not(.tool-btn):not(.btn-close):not(#languageToggle),
+  .btn:not(.tool-btn):not(.btn-close):not(#languageToggle),
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  [role="button"]:not(.tool-btn):not(#languageToggle){
+    border-radius: 14px !important;
+  }
+</style>
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
@@ -760,6 +763,13 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
             padding: 8px;
         }
 
+        /* 黑暗模式（非 sepia-mode）：切割結果卡片內容底色要跟大背景灰一致 */
+        body:not(.sepia-mode) #results-card,
+        body:not(.sepia-mode) #results-card .card-body{
+            background-color: #6b7280 !important;
+            background-image: none !important;
+        }
+
         .container-fluid {
             max-width: 1800px;  /* 增加最大寬度，更好利用大螢幕 */
             margin: auto;
@@ -771,14 +781,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
             transition: filter .18s ease, transform .18s ease;
         }
 /* (removed) legacy modal-open container blur; now handled by agSetContentBlur */
-
-        .modal-backdrop.show {
-            background-color: rgba(0,0,0,0.35);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            opacity: 1;
-        }
-
+        /* (removed) duplicate .modal-backdrop.show (blur 10px): unified above */
         #helpModal .modal-content {
             border: 1px solid rgba(255,255,255,0.15);
             border-radius: 14px;
