@@ -717,7 +717,12 @@ button:not(#languageToggle):active,
   --ag-btn-drop-press: -1px 2px 0 rgba(0,0,0,0.22);
   --ag-btn-inset-hi: inset 1px 1px 0 rgba(255,255,255,0.55);
   --ag-btn-inset-lo: inset -1px -2px 0 rgba(0,0,0,0.12);
+
+  /* 視覺分隔線／輪廓線：深色但唔用純黑 */
+  --ag-outline: #5a3d2e;           /* 深啡 */
+  --ag-outline-strong: #3f2a20;    /* 更深（必要時） */
 }
+
 
 /* 主要操作掣（儲存/載入、切割項目、材料等）
    - 直接覆蓋所有長方形/一般按鈕
@@ -1371,7 +1376,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):active,
                 display: none;
             }
             .card {
-                border: 1px solid #000;
+                border: 1px solid var(--ag-outline);
                 box-shadow: none;
                 background-color: #fff;
                 color: #000;
@@ -2045,7 +2050,7 @@ body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width
 body.light-mode .opt-summary-box,
 body.light-mode .opt-material-box {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
-  border-color: #adb5bd !important;
+  border-color: var(--ag-outline) !important;
 }
 body.light-mode .opt-summary-box {
   border-color: #4caf50 !important;
@@ -2060,7 +2065,7 @@ body.sepia-mode .opt-summary-box {
 @media print {
   .opt-summary-box, .opt-material-box {
     box-shadow: none !important;
-    border: 1px solid #000 !important;
+    border: 1px solid var(--ag-outline) !important;
     border-radius: 0 !important;
   }
 }
@@ -2397,6 +2402,18 @@ html.no-transitions, html.no-transitions * {
   margin-bottom: 0 !important;
   flex: 0 0 auto;
 }
+</style>
+<style id="ag-scheme-height-unify-20260330">
+/* 方案管理：三粒掣底部對齊（以右邊「自動補料」掣底部為準） */
+.scheme-actions-row{ align-items: flex-end !important; }
+.scheme-actions-row .scheme-left{ align-items: flex-end !important; }
+.scheme-actions-row .scheme-left .ag-action-btn{
+  height: auto !important;
+  min-height: 44px !important; /* 跟下方 action btn 視覺一致 */
+  padding: .45rem .70rem !important;
+}
+.scheme-actions-row .scheme-right{ align-self: flex-end !important; }
+#autoReplenishPickerBtn{ height: auto !important; }
 </style>
 <style id="ag-action-button-consistency-fix">
 /* 2026-03-16：修正下方 controls-row 兩粒按鈕一致
@@ -6943,12 +6960,12 @@ function calculate() {
                 const wastePercentage = ((wasteSafe / bin.length) * 100).toFixed(1);
 
                 html += `
-                    <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9;">
+                    <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9; border: 1px solid var(--ag-outline);">
                         <div style="font-weight: bold; margin-bottom: 8px; color: #333;">
                             ${_rLang==='zh'?'原料':'Bar'} #${binIndex + 1} - ${formatLengthForDisplay(bin.length, unit)}
                             ${bin.autoAdded ? ' <span style="color: #f57c00; font-size: 0.9em;">['+(_rLang==='zh'?'自動添加':'Auto Added')+']</span>' : ''}
                         </div>
-                        <div style="display: flex; height: 50px; border: 1px solid #000; border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: white;">
+                        <div style="display: flex; height: 50px; border: 1px solid var(--ag-outline); border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: white;">
                 `;
 
                 bin.cuts.forEach((cut, cutIndex) => {
@@ -6958,7 +6975,7 @@ function calculate() {
                     const label = lengthLabelMap[roundedLength];
 
                     html += `
-                        <div style="width: ${percentage.toFixed(1)}%; background: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid #000;" 
+                        <div style="width: ${percentage.toFixed(1)}%; background: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);" 
                              title="${formatLengthForDisplay(cut.length, unit)}">
                             ${label}
                         </div>
@@ -6968,7 +6985,7 @@ function calculate() {
                 if (wasteSafe > 0) {
                     const wastePercentageVisual = (wasteSafe / bin.length) * 100;
                     html += `
-                        <div style="width: ${wastePercentageVisual.toFixed(1)}%; background: repeating-linear-gradient(45deg, #ffcccc 0px, #ffcccc 5px, #ff9999 5px, #ff9999 10px); display: flex; align-items: center; justify-content: center; color: #a00; font-weight: bold; font-size: 11px; padding: 0 4px;">
+                        <div style="width: ${wastePercentageVisual.toFixed(1)}%; background: repeating-linear-gradient(45deg, #ffcccc 0px, #ffcccc 5px, #ff9999 5px, #ff9999 10px); display: flex; align-items: center; justify-content: center; color: #a00; font-weight: bold; font-size: 11px; border-left: 1px solid var(--ag-outline); padding: 0 4px;">
                             ${_rLang==='zh'?'餘料':'Waste'}
                         </div>
                     `;
@@ -7000,7 +7017,7 @@ function calculate() {
             });
 
             let legendHtml = `
-                <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid #000; border-radius: 6px; width: 100%; box-sizing: border-box;">
+                <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid var(--ag-outline); border-radius: 6px; width: 100%; box-sizing: border-box;">
                     <h5 style="margin: 0 0 12px 0; color: #000; font-size: 16px;">${_rLang==='zh'?'📋 切割件尺寸圖例':'📋 Cut Size Legend'}</h5>
 
                     <div style="display:grid; grid-template-columns: 20px 44px 110px 1fr; gap: 10px 12px; align-items:center;">
@@ -7013,7 +7030,7 @@ function calculate() {
             uniqueLengths.forEach(length => {
                 const qty = lengthCountMap[length] || 0;
                 legendHtml += `
-                      <div style="width: 20px; height: 20px; background: ${lengthColorMap[length]}; border: 1px solid #000; border-radius: 3px;"></div>
+                      <div style="width: 20px; height: 20px; background: ${lengthColorMap[length]}; border: 1px solid var(--ag-outline); border-radius: 3px;"></div>
                       <div><strong style="color: #000;">${lengthLabelMap[length]}</strong></div>
                       <div style="color:#000;">${formatLengthForDisplay(length, unit)}</div>
                       <div style="color:#000;">${qty} ${_rLang==='zh'?'件':'pcs'}</div>
