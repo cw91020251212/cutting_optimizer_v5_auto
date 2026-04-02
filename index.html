@@ -6,11 +6,22 @@
   /* Prevent startup flash: match background to preload theme before the rest of CSS/JS loads */
   html.preload-normal body { background-color: #f3f5f7 !important; }
 
+  /* === 光明版（sepia-mode）背景配色（2026-04-02）===
+     你提嘅 3 個方向我都整理咗做「可即刻換」嘅方案：
+     1) 啡 → 灰：   linear-gradient(180deg, #f3f1ee 0%, #c8bfb4 45%, #7a7f86 100%)
+     2) 灰啡底：   linear-gradient(180deg, #f4f2ef 0%, #d9d2c8 50%, #9a9aa0 100%)
+     3) 淺啡→啡→灰（預設）：下方 --ag-sepia-bg-main
+  */
+  :root{
+    --ag-sepia-bg-fallback: #ece9e2;
+    --ag-sepia-bg-main: linear-gradient(180deg, #f6f2ea 0%, #d3c2ad 38%, #9b8573 62%, #6c7076 100%);
+  }
+
   /* 重要：sepia-mode（你所講「光明版」）開機時，除咗 body 底色，
      連卡片底色都要先行預載，否則會先見到灰底再跳去淺黃。 */
   html.preload-sepia  body {
-    background-color: #f4ecd8 !important; /* fallback */
-    background: linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%) !important; /* 兩色主調＋底部更深 */
+    background-color: var(--ag-sepia-bg-fallback) !important;
+    background: var(--ag-sepia-bg-main) !important;
   }
   html.preload-sepia  .card { background-color: #faf6ed !important; }
   html.preload-sepia  .card-body,
@@ -2087,10 +2098,10 @@ html.preload-normal body {
 }
 html.preload-sepia,
 html.preload-sepia body {
-  background-color: #f5e6cc !important; /* fallback */
+  background-color: var(--ag-sepia-bg-fallback) !important;
   background-image:
-    /* 主漸變：上淺下深 */
-    linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%),
+    /* 主漸變：上淺下深（可一鍵換色） */
+    var(--ag-sepia-bg-main),
     /* 第二色調：淡淡青綠陰影，令背景有層次 */
     radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
     /* 微細紋理：紙張/金屬「拉絲感」(直/橫細紋) */
@@ -10199,11 +10210,11 @@ body.sepia-mode * {
 }
 
 body.sepia-mode {
-    background-color: #f4ecd8 !important; /* fallback */
-    background: linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%) fixed !important; /* 兩色主調＋底部更深 */
+    background-color: var(--ag-sepia-bg-fallback) !important;
+    background: var(--ag-sepia-bg-main) fixed !important;
     background-image:
-      /* 主漸變：上淺下深 */
-      linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%),
+      /* 主漸變：上淺下深（可一鍵換色） */
+      var(--ag-sepia-bg-main),
       /* 第二色調：淡淡青綠陰影 */
       radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
       /* 微細紋理：紙張/金屬質感（細紋） */
