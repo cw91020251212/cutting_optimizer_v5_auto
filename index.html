@@ -8,7 +8,10 @@
 
   /* 重要：sepia-mode（你所講「光明版」）開機時，除咗 body 底色，
      連卡片底色都要先行預載，否則會先見到灰底再跳去淺黃。 */
-  html.preload-sepia  body { background-color: #f4ecd8 !important; }
+  html.preload-sepia  body {
+    background-color: #f4ecd8 !important; /* fallback */
+    background: linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%) !important; /* 兩色主調＋底部更深 */
+  }
   html.preload-sepia  .card { background-color: #faf6ed !important; }
   html.preload-sepia  .card-body,
   html.preload-sepia  .card-body-light { background-color: #f5ead5 !important; }
@@ -110,15 +113,12 @@
         line-height:1.15;
         padding-top:.35rem;
         padding-bottom:.35rem;
-      }
 
-      /* 自動補料按鈕：桌面闊，字大少少（3D 沿用 .btn 全局） */
-      #autoReplenishPickerBtn{
+        /* 自動補料按鈕：桌面闊，字大少少（3D 沿用 .btn 全局） */
         width:120px;
         font-size:1.05rem;
         font-weight:900;
         padding: .35rem 10px;
-        white-space: normal;
         word-break: break-word;
       }
 
@@ -277,9 +277,7 @@
       
       
 
-      @media (max-width: 420px) {
-        #autoReplenishDesc { display: none !important; }
-      }
+      /* (cleanup) removed: #autoReplenishDesc not present */
 
       #algorithmSelector.equal-height,
       #sawThickness.equal-height { height: 40px !important; }
@@ -753,11 +751,14 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
         body {
-            background-color: #6b7280; /* 改灰色底（原：#2c3e50 深藍） */
+            background-color: #6b7280; /* fallback */
             background-image:
+              /* 暗板灰：上淺下深漸變（增加層次） */
+              linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%),
+              /* 原本格仔紋理 */
               linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
               linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px);
-            background-size: 24px 24px;
+            background-size: 100% 100%, 24px 24px, 24px 24px;
             background-attachment: fixed;
             color: #1f2d2a;
             padding: 8px;
@@ -775,9 +776,6 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
             margin: auto;
             padding-left: 6px !important;
             padding-right: 6px !important;
-        }
-
-        .container-fluid {
             transition: filter .18s ease, transform .18s ease;
         }
 /* (removed) legacy modal-open container blur; now handled by agSetContentBlur */
@@ -896,7 +894,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
         .form-control {
             background-color: #fff;
             color: #212529;
-            border: 2px solid #495057;
+            border: 1px solid #495057;
         }
 
         .form-control::placeholder {
@@ -1033,7 +1031,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
             align-items: center;
             justify-content: center;
             gap: 16px;
-            border: 2px solid #ffc107;
+            border: 1px solid #ffc107;
         }
 
         #titleText {
@@ -1892,7 +1890,7 @@ body select.unit-select option {
                     inset -2px -2px 0 rgba(0, 0, 0, .4), 
                     0 2px 3px rgba(0, 0, 0, .4) !important;
         position: relative !important;
-        border: 2px solid #495057 !important;
+        border: 1px solid #495057 !important;
     }
     #unit {
         width: 60px !important;
@@ -2035,11 +2033,11 @@ body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width
   h2#pageTitle { grid-template-columns: 70px 1fr 70px !important; min-height: 56px !important; padding: 4px 10px !important; }
   h2#pageTitle .title-nut { width: 70px !important; height: 70px !important; }
   h2#pageTitle #titleText { font-size: 1.6rem !important; }
-  h2#pageTitle #buildStamp { font-size: .70rem !important; }
+  /* (cleanup) removed: #buildStamp not present */
 }
 
 .opt-summary-box {
-  border: 2px solid #388e3c !important;
+  border: 1px solid #388e3c !important;
   border-left: 6px solid #4caf50 !important;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.18) !important;
   border-radius: 12px !important;
@@ -2060,7 +2058,7 @@ body.light-mode .opt-summary-box {
 }
 
 body.sepia-mode .opt-summary-box {
-  border: 2px solid #8b6f47 !important;
+  border: 1px solid #8b6f47 !important;
   border-left: 6px solid #8b6f47 !important;
   box-shadow: 0 3px 10px rgba(101, 67, 33, 0.18) !important;
 }
@@ -2076,30 +2074,44 @@ body.sepia-mode .opt-summary-box {
 <style>
 html.preload-normal,
 html.preload-normal body {
-  background-color: #6b7280 !important; /* 改灰色底（原：#2c3e50 深藍） */
+  background-color: #6b7280 !important; /* fallback */
   background-image:
+    /* 暗板灰：上淺下深漸變（避免單調） */
+    linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%),
+    /* 原本格仔紋理 */
     linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
     linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
-  background-size: 24px 24px !important;
+  background-size: 100% 100%, 24px 24px, 24px 24px !important;
   background-attachment: fixed !important;
   color: #1f2d2a !important;
 }
 html.preload-sepia,
 html.preload-sepia body {
-  background-color: #f5e6cc !important;
+  background-color: #f5e6cc !important; /* fallback */
   background-image:
-    linear-gradient(135deg, rgba(139,111,71,0.08) 0, rgba(139,111,71,0.08) 1px, transparent 1px, transparent 12px),
-    linear-gradient(45deg, rgba(0,0,0,0.06) 0, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 12px) !important;
-  background-size: 24px 24px !important;
+    /* 主漸變：上淺下深 */
+    linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%),
+    /* 第二色調：淡淡青綠陰影，令背景有層次 */
+    radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
+    /* 微細紋理：紙張/金屬「拉絲感」(直/橫細紋) */
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.065) 0px, rgba(255,255,255,0.065) 1px, rgba(0,0,0,0.040) 2px, rgba(255,255,255,0.000) 4px),
+    repeating-linear-gradient(0deg,  rgba(255,255,255,0.040) 0px, rgba(255,255,255,0.040) 1px, rgba(0,0,0,0.022) 2px, rgba(255,255,255,0.000) 6px),
+    /* 原有格仔：保留，但降低存在感 */
+    linear-gradient(135deg, rgba(139,111,71,0.060) 0, rgba(139,111,71,0.060) 1px, transparent 1px, transparent 12px),
+    linear-gradient(45deg, rgba(0,0,0,0.045) 0, rgba(0,0,0,0.045) 1px, transparent 1px, transparent 12px) !important;
+  background-size: 100% 100%, auto, 7px 7px, 9px 9px, 24px 24px, 24px 24px !important;
   background-attachment: fixed !important;
   color: #3e2a10 !important;
 }
 body:not(.sepia-mode) {
-  background-color: #6b7280 !important; /* 改灰色底（原：#2c3e50 深藍） */
+  background-color: #6b7280 !important; /* fallback */
   background-image:
+    /* 暗板灰：上淺下深漸變 */
+    linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%),
+    /* 原本格仔紋理 */
     linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
     linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
-  background-size: 24px 24px !important;
+  background-size: 100% 100%, 24px 24px, 24px 24px !important;
   background-attachment: fixed !important;
   color: #1f2d2a !important;
 }
@@ -9905,11 +9917,6 @@ document.addEventListener('DOMContentLoaded', function() {
 #cuttingItems .controls-row { margin-bottom: 0.5rem !important; }
 
 @media (max-width: 767.98px) {
-  #cutting-items-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
-  #cutting-items-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
-  #materials-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
-  #materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
-  #cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
 }
 
         #calculateButton {
@@ -10173,7 +10180,7 @@ body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
 body:not(.sepia-mode) #resetButton,
 body:not(.sepia-mode) .btn-danger {
     background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
-    border: 2px solid #ff5500 !important;
+    border: 1px solid #ff5500 !important;
     color: #ffffff !important;
     box-shadow: 0 2px 6px rgba(255, 85, 0, 0.30) !important;
     text-shadow: none !important;
@@ -10192,13 +10199,24 @@ body.sepia-mode * {
 }
 
 body.sepia-mode {
-    background: #f4ecd8 !important;
+    background-color: #f4ecd8 !important; /* fallback */
+    background: linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%) fixed !important; /* 兩色主調＋底部更深 */
+    background-image:
+      /* 主漸變：上淺下深 */
+      linear-gradient(180deg, #fbf6ea 0%, #f3e3c7 42%, #c08a52 78%, #5a3d24 100%),
+      /* 第二色調：淡淡青綠陰影 */
+      radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
+      /* 微細紋理：紙張/金屬質感（細紋） */
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.065) 0px, rgba(255,255,255,0.065) 1px, rgba(0,0,0,0.040) 2px, rgba(255,255,255,0.000) 4px),
+      repeating-linear-gradient(0deg,  rgba(255,255,255,0.040) 0px, rgba(255,255,255,0.040) 1px, rgba(0,0,0,0.022) 2px, rgba(255,255,255,0.000) 6px) !important;
+    background-size: 100% 100%, auto, 7px 7px, 9px 9px !important;
+    background-attachment: fixed !important;
     color: #4a3a2a !important;
 }
 
 body.sepia-mode .card {
     background: #faf6ed !important;
-    border: 2px solid #c9a876 !important;
+    border: 1px solid #c9a876 !important;
     box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2) !important;
 }
 
@@ -10267,64 +10285,85 @@ body.sepia-mode .bg-secondary {
     background: #f0e6d2 !important;
 }
 
-body.sepia-mode .btn-primary,
+/* 光明版：按鈕分層配色（避免所有掣一樣色） */
+body.sepia-mode .btn-primary {
+    /* 主操作：偏青綠（同背景第二色調呼應） */
+    background: linear-gradient(135deg, #2f6f63 0%, #22524b 100%) !important;
+    border: 1px solid #1b3f3a !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+}
+
 body.sepia-mode .btn-success {
-    background: 
-        repeating-linear-gradient(
-            45deg,
-            #8b6f47,
-            #8b6f47 10px,
-            #7a5f37 10px,
-            #7a5f37 20px
-        ) !important;
-    border: 2px solid #6b5533 !important;
-    color: #1f2d2a !important;
-    box-shadow: 0 3px 8px rgba(107, 85, 51, 0.3) !important;
+    /* 成功/新增：偏綠 */
+    background: linear-gradient(135deg, #3f7a3a 0%, #2f5f2b 100%) !important;
+    border: 1px solid #284e25 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
 }
 
 body.sepia-mode .btn-secondary,
 body.sepia-mode .btn-outline-secondary {
-    background: linear-gradient(135deg, #c9a876 0%, #a88a5e 100%) !important;
-    border: 2px solid #8b7355 !important;
-    color: #3a2a1a !important;
-    box-shadow: 0 2px 6px rgba(139, 115, 85, 0.2) !important;
+    /* 次要/取消：暖灰啡 */
+    background: linear-gradient(135deg, #b79a72 0%, #8f7756 100%) !important;
+    border: 1px solid #6f5a42 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.40) !important;
 }
 
 body.sepia-mode .btn-warning {
-    background: linear-gradient(135deg, #d4a574 0%, #b88a54 100%) !important;
-    border: 2px solid #9d7545 !important;
-    color: #3a2a1a !important;
-    box-shadow: 0 2px 6px rgba(157, 117, 69, 0.22) !important;
+    /* 編輯/提示：琥珀金 */
+    background: linear-gradient(135deg, #e0b15a 0%, #b97b2f 100%) !important;
+    border: 1px solid #8d5c20 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.40) !important;
 }
 
 body.sepia-mode #resetButton,
 body.sepia-mode .btn-danger {
+    /* 危險/清除：紅橙（最突出） */
     background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
-    border: 2px solid #ff5500 !important;
-    color: #1f2d2a !important;
-    box-shadow: 0 3px 8px rgba(255, 85, 0, 0.30) !important;
+    border: 1px solid #ff5500 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
 }
 
-body.sepia-mode .btn {
-    background: 
-        linear-gradient(45deg, #f0e6d2 25%, transparent 25%),
-        linear-gradient(-45deg, #f0e6d2 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #f0e6d2 75%),
-        linear-gradient(-45deg, transparent 75%, #f0e6d2 75%),
+/* 重要：光明模式入面如果掣底色偏深，一律強制白字（包括 icon/span），避免『深色底 + 深色字』睇唔到 */
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark),
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark) *{
+  color: #ffffff !important;
+}
+
+/* 光明版：只係「冇語意 class」嗰類普通掣先用素色底
+   （否則會蓋過 btn-primary/success/... 令全部一樣色） */
+body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark):not([class*="btn-outline"]) {
+    background:
+        linear-gradient(45deg, rgba(255,255,255,0.22) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.22) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
         #ead9bf !important;
     background-size: 20px 20px !important;
     background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
     border: 1px solid #b8956a !important;
     color: #4a3a2a !important;
-    text-shadow: none !important; /* 光明版：深色字一律唔要陰影 */
+    text-shadow: none !important;
 }
 
-/* 光明版（sepia）：深色文字一律唔做陰影（包括按鈕內 icon / span） */
-body.sepia-mode .btn *,
+/* 光明版（sepia）：深色文字一律唔做陰影
+   注意：白字按鈕（btn-primary/success/...）需要陰影提升可讀性，唔應該被取消。
+*/
+body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark) *,
 body.sepia-mode label,
 body.sepia-mode .form-label,
 body.sepia-mode .small-hint{
   text-shadow: none !important;
+}
+
+/* 白色字按鈕：統一保留細陰影（最幼，但有效果） */
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark),
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark) *{
+  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
 }
 
 /* 光明版：切割項目 / 材料 兩組 action 按鈕：移除高光/shine，改用純投影（參考其它按鈕投影） */
@@ -10353,12 +10392,12 @@ body.sepia-mode .top-tools .tool-btn *{
   text-shadow: none !important;
 }
 
-body.sepia-mode .btn:hover {
-    background: 
-        linear-gradient(45deg, #e8dcc4 25%, transparent 25%),
-        linear-gradient(-45deg, #e8dcc4 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, #e8dcc4 75%),
-        linear-gradient(-45deg, transparent 75%, #e8dcc4 75%),
+body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark):not([class*="btn-outline"]):hover {
+    background:
+        linear-gradient(45deg, rgba(255,255,255,0.26) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.26) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.22) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.22) 75%),
         #dcc9a5 !important;
     background-size: 20px 20px !important;
     background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
@@ -10366,19 +10405,19 @@ body.sepia-mode .btn:hover {
 
 body.sepia-mode .btn-outline-warning {
     background: linear-gradient(to bottom, #d4a574, #c9956a) !important;
-    border: 2px solid #a0826d !important;
+    border: 1px solid #a0826d !important;
     color: #3a2a1a !important;
 }
 
 body.sepia-mode .btn-outline-danger {
     background: linear-gradient(to bottom, #b8714a, #a0522d) !important;
-    border: 2px solid #8b4513 !important;
+    border: 1px solid #8b4513 !important;
     color: #1f2d2a !important;
 }
 
 body.sepia-mode .modal-content {
     background: #faf6ed !important;
-    border: 2px solid #c9a876 !important;
+    border: 1px solid #c9a876 !important;
     color: #4a3a2a !important;
 }
 
@@ -10422,19 +10461,69 @@ body.sepia-mode #globalMaterialUnit {
   padding-right: 0 !important;
 }
 
+/* 光明版：公制/英制按鈕（unit-select）要清晰分色：公制=綠、英制=藍 */
+body.sepia-mode .unit-select.metric-active,
+body.sepia-mode select.unit-select.metric-active{
+  background: linear-gradient(135deg, #2fb344 0%, #1f7a34 100%) !important;
+  border-color: #19652b !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+}
+
+body.sepia-mode .unit-select.imperial-active,
+body.sepia-mode select.unit-select.imperial-active{
+  /* 英制：藍色要夠「藍」同綠色拉開距離（隔遠都分到） */
+  /* 改淺少少 + 偏天藍，隔遠更易同綠色分辨 */
+  background: linear-gradient(135deg, #6fd3ff 0%, #2f7bff 100%) !important;
+  border-color: #1f5fd6 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+  /* 加少少內光邊，提升對比（唔影響暗色模式） */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.35),
+    0 1px 0 rgba(0,0,0,.08) !important;
+}
+
+/* 重要：光明版入面「公/英」其實係用按鈕顯示（唔係 <select> 本身），
+   而 JS 會用 btn-success / btn-primary 去標記狀態。
+   但光明版全局 btn-primary 會被調成偏青綠，令英制睇落去好似綠色。
+   所以要針對呢幾粒 unit picker 按鈕強制改返做清晰藍色。 */
+body.sepia-mode #unitPickerBtn.btn-primary,
+body.sepia-mode #globalCutUnitBtn.btn-primary,
+body.sepia-mode #globalMaterialUnitBtn.btn-primary{
+  background: linear-gradient(135deg, #6fd3ff 0%, #2f7bff 100%) !important;
+  border: 1px solid #1f5fd6 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.35),
+    0 1px 0 rgba(0,0,0,.08) !important;
+}
+
+body.sepia-mode #unitPickerBtn.btn-success,
+body.sepia-mode #globalCutUnitBtn.btn-success,
+body.sepia-mode #globalMaterialUnitBtn.btn-success{
+  background: linear-gradient(135deg, #2fb344 0%, #1f7a34 100%) !important;
+  border: 1px solid #19652b !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
+}
+
 .form-control,
 .form-select,
 textarea {
-  /* 輸入欄位：少少立體感（比之前清晰，但唔誇張） */
+  /* 輸入欄位：加返最幼輪廓線 + 少少立體感（比之前清晰，但唔誇張） */
+  border: 1px solid var(--ag-outline, #b8956a) !important;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.70),
     0 3px 8px rgba(0,0,0,.12) !important;
-  transition: box-shadow .15s ease !important;
+  transition: box-shadow .15s ease, border-color .15s ease !important;
 }
 .form-control:focus,
 .form-select:focus,
 textarea:focus {
-  /* focus：保持輕微光暈 + 少少投影 */
+  /* focus：保持輕微光暈 + 少少投影 + 保留輪廓線 */
+  border-color: var(--ag-outline, #8f7756) !important;
   box-shadow:
     0 0 0 .12rem rgba(0,0,0,.06),
     0 4px 10px rgba(0,0,0,.14) !important;
@@ -10958,6 +11047,18 @@ button.btn-sm{
   #addMaterialButton,
   #clearMaterialButton{
     box-shadow: var(--ag-btn-inset-hi), var(--ag-btn-inset-lo), var(--ag-btn-drop-hard) !important;
+
+    /* 重要：呢幾粒掣底色偏深，強制白字（避免被其他規則蓋走） */
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.50) !important;
+  }
+
+  body.sepia-mode #cuttingItems .controls-row #addCuttingButton *,
+  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton *,
+  body.sepia-mode #materialItems .controls-row #addMaterialButton *,
+  body.sepia-mode #materialItems .controls-row #clearMaterialButton *{
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.50) !important;
   }
 
   body.sepia-mode #cuttingItems .controls-row #addCuttingButton:active,
