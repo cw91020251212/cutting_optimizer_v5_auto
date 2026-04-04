@@ -7204,6 +7204,105 @@ function calculate() {
             }
         }
 
+        // === AnyGen experiment: parts gradient rendering (多風格可切換) ===
+        (function(){
+          if(window.__agGradHelpersInited) return;
+          window.__agGradHelpersInited = true;
+
+          function hexToRgb(hex){
+            try{
+              let h = String(hex||'').trim();
+              if(h[0]==='#') h=h.slice(1);
+              if(h.length===3) h=h.split('').map(c=>c+c).join('');
+              if(h.length!==6) return null;
+              const n = parseInt(h, 16);
+              return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 };
+            }catch(e){ return null; }
+          }
+          function rgbToHex(r,g,b){
+            const to=(v)=>('0'+Math.max(0,Math.min(255,Math.round(v))).toString(16)).slice(-2);
+            return '#'+to(r)+to(g)+to(b);
+          }
+          // factor: -1..+1  (負=變暗, 正=變亮)
+          function shade(hex, factor){
+            const c = hexToRgb(hex);
+            if(!c) return hex;
+            const f = Math.max(-1, Math.min(1, Number(factor)||0));
+            const t = (f>=0)?255:0;
+            const p = Math.abs(f);
+            return rgbToHex(
+              c.r + (t - c.r)*p,
+              c.g + (t - c.g)*p,
+              c.b + (t - c.b)*p
+            );
+          }
+
+          // 風格 0：原本 3-stop 立體
+          function gradStandard(hex){
+            const hi = shade(hex, 0.22);
+            const mid = shade(hex, 0.05);
+            const lo = shade(hex, -0.18);
+            return `linear-gradient(135deg, ${hi} 0%, ${mid} 48%, ${lo} 100%)`;
+          }
+          // 風格 1：金屬感（高光帶 + 冷一點）
+          function gradMetal(hex){
+            // 用多 stops 做「反光條」效果
+            const a = shade(hex, 0.28);
+            const b = shade(hex, 0.10);
+            const c = shade(hex, 0.34); // 亮帶
+            const d = shade(hex, 0.02);
+            const e = shade(hex, -0.22);
+            return `linear-gradient(135deg, ${a} 0%, ${b} 18%, ${c} 38%, ${d} 60%, ${e} 100%)`;
+          }
+          // 風格 2：柔和感（低對比、霧面）
+          function gradSoft(hex){
+            const hi = shade(hex, 0.12);
+            const mid = shade(hex, 0.02);
+            const lo = shade(hex, -0.08);
+            return `linear-gradient(135deg, ${hi} 0%, ${mid} 55%, ${lo} 100%)`;
+          }
+
+          function modeLabel(mode, lang){
+            const zh = (mode==='flat')?'純色':(mode==='standard')?'立體':(mode==='metal')?'金屬':(mode==='soft')?'柔和':'立體';
+            const en = (mode==='flat')?'Flat':(mode==='standard')?'Depth':(mode==='metal')?'Metal':(mode==='soft')?'Soft':'Depth';
+            return (lang==='zh')?zh:en;
+          }
+
+          // 狀態
+          window.__agGradientMode = window.__agGradientMode || 'standard'; // standard | metal | soft | flat
+
+          window.__agPartFill = function(baseHex){
+            try{
+              const m = window.__agGradientMode || 'standard';
+              if(m === 'flat') return baseHex;
+              if(m === 'metal') return gradMetal(baseHex);
+              if(m === 'soft') return gradSoft(baseHex);
+              return gradStandard(baseHex);
+            }catch(e){ return baseHex; }
+          };
+
+          window.__setGradientMode = function(mode){
+            try{ window.__agGradientMode = mode; }catch(e){}
+            try{
+              if(window.__agLastRender && typeof window.__agLastRender.render === 'function') window.__agLastRender.render();
+            }catch(e){}
+          };
+
+          window.__cycleGradientMode = function(){
+            try{
+              const order = ['standard','metal','soft','flat'];
+              const cur = window.__agGradientMode || 'standard';
+              const idx = Math.max(0, order.indexOf(cur));
+              window.__agGradientMode = order[(idx+1) % order.length];
+            }catch(e){}
+            try{ if(window.__agLastRender && typeof window.__agLastRender.render === 'function') window.__agLastRender.render(); }catch(e){}
+          };
+
+          window.__getGradientModeLabel = function(lang){
+            try{ return modeLabel(window.__agGradientMode||'standard', lang||'zh'); }catch(e){ return '立體'; }
+          };
+        })();
+
         function renderCuttingResults(bins, sawThickness) {
             const unit = document.getElementById("unit").value;
 
@@ -7325,9 +7424,23 @@ function calculate() {
               util:    _rLang==='zh'?'利用率':'Utilization',
               waste:   _rLang==='zh'?'總餘料':'Total Waste'
             };
+            // 記錄最近一次渲染，方便切換漸變色即時重繪
+            try{
+              window.__agLastRender = {
+                bins: bins,
+                sawThickness: sawThickness,
+                render: function(){ try{ renderCuttingResults(window.__agLastRender.bins, window.__agLastRender.sawThickness); }catch(e){} }
+              };
+            }catch(e){}
+
             let html = `
                 <div class="opt-summary-box" style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
-                    <h4 style="margin: 0 0 10px 0; color: #1b5e20;">${_t.summary}</h4>
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 10px 0;">
+                      <h4 style="margin: 0; color: #1b5e20;">${_t.summary}</h4>
+                      <button type="button" class="btn btn-sm btn-outline-success" onclick="try{window.__cycleGradientMode&&window.__cycleGradientMode();}catch(e){}" style="font-weight:800;">
+                        ${_rLang==='zh'?'漸變風格：':'Gradient: '}<span id="agGradModeLabel">${(window.__getGradientModeLabel?window.__getGradientModeLabel(_rLang):(_rLang==='zh'?'立體':'Depth'))}</span>
+                      </button>
+                    </div>
                     <div style="display: flex; justify-content: space-around; font-size: 14px;">
                         <div>
                             <strong>${_t.bars}</strong><br>
@@ -7385,7 +7498,7 @@ function calculate() {
                     const label = lengthLabelMap[roundedLength];
 
                     html += `
-                        <div style="width: ${percentage.toFixed(1)}%; background: ${color}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);" 
+                        <div style="width: ${percentage.toFixed(1)}%; background: ${ (window.__agPartFill ? window.__agPartFill(color) : color) }; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);" 
                              title="${formatLengthForDisplay(cut.length, unit)}">
                             ${label}
                         </div>
@@ -7417,6 +7530,12 @@ function calculate() {
 
             resultDetails.innerHTML = html;
 
+            // 更新漸變風格 label（按掣後會重繪，呢度確保每次 render 都同步顯示）
+            try {
+              var lab = document.getElementById('agGradModeLabel');
+              if (lab && window.__getGradientModeLabel) lab.textContent = window.__getGradientModeLabel(_rLang);
+            } catch(e) {}
+
             // 統計每個尺寸出現件數（每一刀 = 一件）
             const lengthCountMap = {};
             bins.forEach(bin => {
@@ -7440,7 +7559,7 @@ function calculate() {
             uniqueLengths.forEach(length => {
                 const qty = lengthCountMap[length] || 0;
                 legendHtml += `
-                      <div style="width: 20px; height: 20px; background: ${lengthColorMap[length]}; border: 1px solid var(--ag-outline); border-radius: 3px;"></div>
+                      <div style="width: 20px; height: 20px; background: ${ (window.__agPartFill ? window.__agPartFill(lengthColorMap[length]) : lengthColorMap[length]) }; border: 1px solid var(--ag-outline); border-radius: 3px;"></div>
                       <div><strong style="color: #000;">${lengthLabelMap[length]}</strong></div>
                       <div style="color:#000;">${formatLengthForDisplay(length, unit)}</div>
                       <div style="color:#000;">${qty} ${_rLang==='zh'?'件':'pcs'}</div>
