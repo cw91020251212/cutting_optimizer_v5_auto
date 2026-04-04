@@ -56,7 +56,7 @@
         overflow: visible !important;
         width: 100%;
         justify-content: space-between;
-        align-items: center; /* 令同一行啲掣垂直對齊 */
+        align-items: center; /* 文字以按鈕中心對齊 */ /* 令同一行啲掣垂直對齊 */
         flex-wrap: nowrap;
       }
       .scheme-actions-row .scheme-left{
@@ -81,7 +81,7 @@
         right: 0;
         bottom: calc(100% + 6px); /* 標籤上面，距離掣 6px（再高少少） */
         top: auto;
-        width: 180px;          /* 放大『自動補料』後預留闊度 */
+        width: 120px;          /* 跟按鈕同闊，確保置中唔偏右 */
         text-align: center;    /* 跟『方案管理』同一理念：清晰、穩定 */
         margin: 0;
         pointer-events: none;
@@ -90,10 +90,23 @@
         color: inherit;
         text-shadow: none;
         font-size: 1.35em;
-        font-weight: 800;
-        line-height: normal;
+        font-weight: inherit;
+        line-height: 1.05;
         opacity: 1;
-        white-space: nowrap;
+
+        /* 改成兩行（避免字體放大出界） */
+        white-space: normal;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      /* 自動補料：主標題（可兩行） */
+      #autoReplenishTitleMain{ display:block; }
+      /* 自動補料：警示文字改為下一行，避免再向右撐出界 */
+      .scheme-actions-row .scheme-right .auto-replenish-title .ag-ar-warn-text{
+        margin-left: 0;
+        display: block;
+        margin-top: 2px;
       }
       /* 方案管理三粒掣：同一高度（桌面/平板） */
       .scheme-actions-row .scheme-left .btn:not(.ag-action-btn){
@@ -112,8 +125,8 @@
         padding-bottom:.35rem;
       }
       #autoReplenishPickerBtn{
-        /* 保持右邊 OFF 掣可因字體放大而增高 */
-        min-height:40px;
+        /* 觸控友善：字體放大後都易撳到 */
+        min-height:48px;          /* 提升點擊面積 */
         height:auto;
         display:inline-flex;
         align-items:center;
@@ -122,15 +135,42 @@
         white-space:normal;
         text-align:center;
         line-height:1.15;
-        padding-top:.35rem;
-        padding-bottom:.35rem;
+        padding-top:.45rem;
+        padding-bottom:.45rem;
 
-        /* 自動補料按鈕：桌面闊，字大少少（3D 沿用 .btn 全局） */
-        width:120px;
+        /* 自動補料按鈕：桌面闊度加大少少 */
+        width:132px;
         font-size:1.05rem;
         font-weight:900;
-        padding: .35rem 10px;
+        padding: .45rem 14px;
         word-break: break-word;
+      }
+
+      /* 自動補料開關掣：呼吸燈（更易留意狀態） */
+      @keyframes agArBreathOn{
+        0%   { box-shadow: 0 0 0 0 rgba(25,135,84,.00), 0 0 0 0 rgba(25,135,84,.00); }
+        50%  { box-shadow: 0 0 0 .32rem rgba(25,135,84,.20), 0 0 0 .58rem rgba(25,135,84,.10); }
+        100% { box-shadow: 0 0 0 0 rgba(25,135,84,.00), 0 0 0 0 rgba(25,135,84,.00); }
+      }
+      @keyframes agArBreathOff{
+        0%   { box-shadow: 0 0 0 0 rgba(108,117,125,.00), 0 0 0 0 rgba(108,117,125,.00); }
+        50%  { box-shadow: 0 0 0 .26rem rgba(108,117,125,.18), 0 0 0 .46rem rgba(108,117,125,.09); }
+        100% { box-shadow: 0 0 0 0 rgba(108,117,125,.00), 0 0 0 0 rgba(108,117,125,.00); }
+      }
+      @keyframes agArBreathWarn{
+        0%   { box-shadow: 0 0 0 0 rgba(201,111,92,.00), 0 0 0 0 rgba(201,111,92,.00); }
+        50%  { box-shadow: 0 0 0 .34rem rgba(201,111,92,.22), 0 0 0 .62rem rgba(201,111,92,.12); }
+        100% { box-shadow: 0 0 0 0 rgba(201,111,92,.00), 0 0 0 0 rgba(201,111,92,.00); }
+      }
+      /* 只喺 ON 狀態先呼吸；OFF 保持靜止 */
+      #autoReplenishPickerBtn.ag-ar-breathe-on{  animation: agArBreathOn  1.6s ease-in-out infinite; }
+      #autoReplenishPickerBtn.ag-ar-breathe-off{ animation: none !important; }
+
+      /* 警示（長度不足）：只要 ON 且 warning 就用警示呼吸 */
+      #autoReplenishPickerBtn.ag-ar-len-warning.ag-ar-breathe-on{ animation: agArBreathWarn 1.4s ease-in-out infinite; }
+
+      @media (prefers-reduced-motion: reduce){
+        #autoReplenishPickerBtn.ag-ar-breathe-on{ animation: none !important; }
       }
 
       /* 自動補料長度不足警示（len < 最長切件） */
@@ -146,11 +186,11 @@
       #autoReplenishBtnTitle.ag-ar-len-warning{
         /* 標題字：深色返少少（但唔好太搶） */
         color: #c96f5c !important;
-        font-weight: 900 !important;
+        font-weight: inherit !important;
       }
 
       /* 標題旁細字（平放） */
-      #autoReplenishBtnTitle{ white-space: nowrap; }
+      #autoReplenishBtnTitle{ white-space: normal; }
       .ag-ar-warn-text{
         display:inline-block;
         margin-left: 6px;
@@ -232,18 +272,21 @@
           position: absolute;
           right: 0; /* 避免超出卡片右邊而被裁切 */
           bottom: calc(100% + 6px);
-          width: 150px;
-          text-align: right;
+          width: 48px; /* 跟細按鈕同闊，確保置中唔偏右 */
+          text-align: center;
           font-size: .90rem;
-          font-weight: 800;
-          line-height: 1;
-          white-space: nowrap;
+          font-weight: inherit;
+          line-height: 1.05;
+          white-space: normal;
           color: inherit;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
         }
 
         #autoReplenishPickerBtn{
-          width: 48px;
-          min-height: 38px;
+          width: 56px;            /* 加大少少，易撳 */
+          min-height: 44px;       /* 觸控最少建議高度 */
           height: 100% !important;
           padding: 0;
           font-size: 1rem;
@@ -430,6 +473,93 @@
       }
 
     
+/* === Scheme Hub (方案向導) — 參考左圖：同色預設，選擇/hover 先高亮 === */
+:root{
+  --ag-hub-accent: #2aa7a3;
+  --ag-hub-accent-dark: #1e7f7b;
+  --ag-hub-card-bg: #ffffff;
+  --ag-hub-card-text: #111827;
+  --ag-hub-card-subtext: #374151;
+  --ag-hub-card-shadow: 0 10px 18px rgba(0,0,0,.10);
+  --ag-hub-card-shadow-idle: 0 6px 14px rgba(0,0,0,.08);
+}
+body.sepia-mode{
+  /* 光明版：略暖但保持同一套視覺語言 */
+  --ag-hub-accent: #2a8c86;
+  --ag-hub-accent-dark: #1f6f6a;
+  --ag-hub-card-bg: rgba(255,255,255,.92);
+}
+
+#schemeHubActions.scheme-hub-actions{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.scheme-hub-action{
+  width:100%;
+  cursor:pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+  border: 2px solid color-mix(in srgb, var(--ag-hub-accent) 72%, transparent);
+  background: var(--ag-hub-card-bg);
+  border-radius: 16px;
+  padding: 14px 14px;
+  text-align:left;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  box-shadow: var(--ag-hub-card-shadow-idle);
+  transition: transform .06s ease, box-shadow .12s ease, background .12s ease, border-color .12s ease;
+}
+.scheme-hub-action .sha-icon{
+  width:56px;
+  height:56px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ag-hub-accent) 14%, transparent);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color: var(--ag-hub-accent-dark);
+  font-size: 28px;
+  flex: 0 0 auto;
+}
+.scheme-hub-action .sha-text{ min-width:0; }
+.scheme-hub-action .sha-title{
+  display:block;
+  font-weight: 900;
+  font-size: 1.35rem;
+  color: var(--ag-hub-card-text);
+  line-height: 1.1;
+}
+.scheme-hub-action .sha-sub{
+  display:block;
+  margin-top: 4px;
+  font-weight: 600;
+  font-size: .92rem;
+  color: var(--ag-hub-card-subtext);
+  opacity: .95;
+}
+.scheme-hub-action:hover{
+  background: color-mix(in srgb, var(--ag-hub-accent) 6%, var(--ag-hub-card-bg));
+  border-color: var(--ag-hub-accent);
+  box-shadow: var(--ag-hub-card-shadow);
+}
+.scheme-hub-action:active{
+  transform: translateY(1px);
+  box-shadow: var(--ag-hub-card-shadow-idle);
+}
+.scheme-hub-action:focus-visible{
+  outline: 3px solid color-mix(in srgb, var(--ag-hub-accent) 40%, transparent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 576px){
+  .scheme-hub-action{ padding: 12px 12px; border-radius: 14px; }
+  .scheme-hub-action .sha-icon{ width:50px; height:50px; border-radius: 12px; font-size: 24px; }
+  .scheme-hub-action .sha-title{ font-size: 1.22rem; }
+  .scheme-hub-action .sha-sub{ font-size: .88rem; }
+}
+
 /* === AnyGen patch: button 3D + modal blur (v2) === */
 
 /* Button 3D style — follow #calculateButton look (highlight + inset depth), not heavy drop-shadows */
@@ -464,7 +594,10 @@
 /* 白色字：加少少陰影（2026-03-26）
    - 主要針對 Bootstrap 深色按鈕/徽章
    - 同時覆蓋 inline style 寫死白色嘅情況
+   - 光明/黑暗兩個模式都用同一套（唔好太重）
 */
+body{ --ag-white-text-shadow: 0 1px 3px rgba(0,0,0,.22); }
+
 .text-white,
 /* 白色字：統一加少量陰影（避免再被舊規則覆蓋，但確保可讀性） */
 :where(
@@ -493,7 +626,7 @@
   [style*="color:white"],
   [style*="color: white"]
 ){
-  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
+  text-shadow: var(--ag-white-text-shadow) !important;
 }
 
 /* 令按鈕喺同一行時左右對稱（兩粒掣同寬） */
@@ -553,9 +686,16 @@
 /* (removed) old container blur rule */
 
 .modal-backdrop.show{
-  background-color: rgba(0,0,0,0.18);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  /* 再強化：任何 Bootstrap modal 彈出時，背景要接近睇唔到 */
+  background-color: rgba(0,0,0,0.62);
+  backdrop-filter: blur(34px);
+  -webkit-backdrop-filter: blur(34px);
+}
+
+/* 保險：就算 backdrop-filter（部份瀏覽器/情況）效果弱，仍強制把內容區 blur 到睇唔清 */
+body.modal-open #contentRoot{
+  filter: var(--display-filter) blur(38px) saturate(.70) contrast(.95) brightness(.75) !important;
+  transform: translateZ(0);
 }
 
 .modal-content{
@@ -1118,6 +1258,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
             color: #fff;
             font-weight: 700;
             font-size: 1.3rem;
+            /* 跟舊版做法：藍→青漸變 */
             background: linear-gradient(45deg, #3a7bd5, #00d2ff);
             position: relative;
             overflow: hidden;
@@ -1130,6 +1271,7 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
             top: 0;
             bottom: 0;
             width: 8px;
+            /* 跟舊版做法：淺綠直向漸變條 */
             background: linear-gradient(180deg, #b9f6ca, #69f0ae);
             border-radius: 8px 0 0 8px;
         }
@@ -1297,6 +1439,22 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
             margin-top: 15px;
             display: none;
         }
+
+/* 顏色圖例：標題文字必須全白（光明/黑暗/護眼都一致） */
+#colorLegend h4{
+  margin: 0 0 10px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #fff !important;
+  /* 跟舊版標題條：藍→青漸變 */
+  background: linear-gradient(45deg, #3a7bd5, #00d2ff) !important;
+  box-shadow: -4px 6px 0 0 rgba(0,0,0,0.18);
+}
+#colorLegend h4 *,
+#colorLegend #colorLegendTitle,
+#colorLegend #colorLegendTitle *{
+  color:#fff !important;
+}
 
         
 
@@ -1981,6 +2139,21 @@ body select.unit-select option {
     border-radius: 12px !important;
     overflow: hidden !important;
     border: 1px solid rgba(0,0,0,0.125);
+}
+
+/* 修正：手機上「切割項目」同「材料」係同一 row 堆疊時，
+   會同時食到「卡片 margin-bottom」+ Bootstrap `g-3` 的垂直 gutter，
+   造成兩張卡之間距離加倍。
+   做法：呢個 row 取消垂直 gutter（只留左右 gutter），
+   由卡片本身的 margin-bottom 統一控制間距。
+*/
+.ag-main-cards-row{ --bs-gutter-y: 0px; }
+.ag-main-cards-row > *{ margin-top: 0 !important; }
+
+/* 光明版：材料不足（Auto-Replenish）提示框要有清晰輪廓線 */
+body.sepia-mode #agAutoReplenishWarning.ag-ar-warning{
+  border: 2px solid rgba(107,85,51,0.45) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.55) inset !important;
 }
 #cutting-items-card, #materials-card, #settings-card {
     margin-top: 0 !important;
@@ -2846,7 +3019,7 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
     const root = document.getElementById('contentRoot');
     if(!root) return;
     if(count>0){
-      root.style.setProperty('filter', 'var(--display-filter) blur(12px) saturate(.92) contrast(.98)', 'important');
+      root.style.setProperty('filter', 'var(--display-filter) blur(38px) saturate(.70) contrast(.95) brightness(.75)', 'important');
       root.style.setProperty('transform', 'translateZ(0)', '');
     }else{
       root.style.removeProperty('filter');
@@ -2980,7 +3153,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   <button class="btn tool-btn tool-btn-soft" id="newHelpBtn" type="button" title="Help" aria-label="Help" onclick="try{ if(window.showHelp) showHelp(); else { var hb=document.getElementById('helpButton'); if(hb) hb.click(); }}catch(e){}"><span class="tool-text">?</span></button>
   <!-- 案例（固定放喺頂部工具列：唔靠 JS 插入） -->
   <button class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" type="button" title="Examples" aria-label="Examples" aria-haspopup="dialog" aria-controls="ag-case-help-overlay" onclick="showCaseHelp()"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
-  <button class="btn tool-btn tool-btn-soft" id="qrBtn" type="button" title="QR Code" aria-label="QR Code" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&&window.bootstrap&&bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
+  <button class="btn tool-btn tool-btn-soft" id="qrBtn" type="button" title="QR Code" aria-label="QR Code" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&amp;&amp;window.bootstrap&amp;&amp;bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
 </div>
 
 <!-- AnyGen: 案例彈窗（兩個案例） -->
@@ -3345,14 +3518,14 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     <button class="btn btn-sm save-scheme-btn ag-action-btn" id="saveSchemeButton" onclick="saveScheme()">
       <i class="fas fa-save me-1"></i>儲存方案
     </button>
-    <button class="btn btn-sm load-scheme-btn ag-action-btn" id="loadSchemeButton" onclick="loadScheme()">
-      <i class="fas fa-folder-open me-1"></i>載入方案
+    <button class="btn btn-sm load-scheme-btn ag-action-btn" id="loadSchemeButton" onclick="openSchemeHub()">
+      <i class="fas fa-folder-open me-1"></i>方案
     </button>
   </div>
 
   <!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
   <div class="scheme-right" id="autoReplenishWrap">
-    <div class="auto-replenish-title" id="autoReplenishBtnTitle">自動補料 <span id="autoReplenishWarnText" class="ag-ar-warn-text" aria-live="polite" style="display:none;">（長度不足）</span></div>
+    <div class="auto-replenish-title" id="autoReplenishBtnTitle"><span id="autoReplenishTitleMain">自動<br>補料</span><span id="autoReplenishWarnText" class="ag-ar-warn-text" aria-live="polite" style="display:none;">（長度不足）</span></div>
     <button class="btn btn-success btn-sm" id="autoReplenishPickerBtn" type="button"
             data-bs-toggle="modal" data-bs-target="#autoReplenishModal"
             title="自動補料" aria-label="自動補料">OFF</button>
@@ -3367,7 +3540,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 
 <!-- 將切割項目與材料卡片放在同一行，各佔一半寬度，以充分利用橫向空間 -->
-<div class="row g-3">
+<div class="row g-3 ag-main-cards-row">
   <div class="col-md-6">
     <div class="card" id="cutting-items-card"><div class="section-header">
     <div class="section-title">
@@ -3591,11 +3764,11 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div><!-- /contentRoot -->
 
 <!-- 顯示調校（由「宿舍」移植） -->
-<div id="displayTuneModal" class="tune-backdrop" aria-hidden="true" onclick="try{ if(event.target===this){window.__closeDisplayTune&&window.__closeDisplayTune();}}catch(e){}">
+<div id="displayTuneModal" class="tune-backdrop" aria-hidden="true" onclick="try{ if(event.target===this){window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}}catch(e){}">
   <div class="tune-modal" role="dialog" aria-modal="true" aria-label="顯示調校">
     <div class="tune-header">
       <div class="tune-title" id="tuneTitle">顯示調校</div>
-      <button type="button" id="tuneClose" class="tune-close" aria-label="關閉" onclick="try{window.__closeDisplayTune&&window.__closeDisplayTune();}catch(e){}">×</button>
+      <button type="button" id="tuneClose" class="tune-close" aria-label="關閉" onclick="try{window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}catch(e){}">×</button>
     </div>
     <div class="tune-body">
       <!-- 預設：平時最常用，放最頂（唔使捲到最底） -->
@@ -3742,19 +3915,102 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
 </div>
 <div class="modal-body">
-<div style="margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #ddd">
-<h6>📁 從檔案上載方案</h6>
-<input accept=".json" id="schemeFileInput" style="margin-top:10px" type="file"/>
-<button class="btn btn-primary" id="uploadSchemeBtn" onclick="uploadSchemeFile()" style="margin-top:10px;background-color:#0056b3;color:#fff;font-weight:700;font-size:15px;padding:8px 18px;border:none;border-radius:4px" type="button">📤
-                            上載</button>
-</div>
-<div>
-<h6>📋 已儲存的方案</h6>
-<div id="savedSchemesList"></div>
-</div>
+  <!-- 方案B：向導式主入口 -->
+  <div id="schemeHub">
+    <div class="mb-2" style="font-size:13px;color:#6b7280" id="schemeHubHint">第一次用？先揀你想做咩，入去先再見到細節。</div>
+
+    <div class="scheme-hub-actions" id="schemeHubActions">
+      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('load')" id="schemeHubBtnLoad">
+        <span class="sha-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span>
+        <span class="sha-text">
+          <span class="sha-title" id="schemeHubBtnLoadTitle">載入已儲存方案</span>
+          <span class="sha-sub" id="schemeHubBtnLoadSub">用返之前保存嘅資料</span>
+        </span>
+      </button>
+
+      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('import')" id="schemeHubBtnImport">
+        <span class="sha-icon" aria-hidden="true"><i class="fas fa-file-import"></i></span>
+        <span class="sha-text">
+          <span class="sha-title" id="schemeHubBtnImportTitle">匯入檔案</span>
+          <span class="sha-sub" id="schemeHubBtnImportSub">從 JSON 檔加入一個新方案</span>
+        </span>
+      </button>
+
+      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('export')" id="schemeHubBtnExport">
+        <span class="sha-icon" aria-hidden="true"><i class="fas fa-share-alt"></i></span>
+        <span class="sha-text">
+          <span class="sha-title" id="schemeHubBtnExportTitle">匯出／分享</span>
+          <span class="sha-sub" id="schemeHubBtnExportSub">將而家方案變成檔案或 QR</span>
+        </span>
+      </button>
+
+      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('manage')" id="schemeHubBtnManage">
+        <span class="sha-icon" aria-hidden="true"><i class="fas fa-toolbox"></i></span>
+        <span class="sha-text">
+          <span class="sha-title" id="schemeHubBtnManageTitle">備份／還原</span>
+          <span class="sha-sub" id="schemeHubBtnManageSub">管理多個備份版本</span>
+        </span>
+      </button>
+    </div>
+
+    <hr class="my-3"/>
+
+    <!-- 子畫面：載入 -->
+    <div id="schemeHubPanelLoad" class="scheme-hub-panel" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="m-0"><span aria-hidden="true">📂</span> <span id="schemeHubPanelLoadTitle">載入方案</span></h6>
+      </div>
+      <div id="savedSchemesList"></div>
+    </div>
+
+    <!-- 子畫面：匯入 -->
+    <div id="schemeHubPanelImport" class="scheme-hub-panel" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="m-0"><span aria-hidden="true">📥</span> <span id="schemeHubPanelImportTitle">從檔案匯入方案</span></h6>
+      </div>
+      <input accept=".json" id="schemeFileInput" type="file" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"/>
+      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <button type="button" class="btn btn-outline-secondary" id="schemeFilePickBtn" style="font-weight:800;" onclick="document.getElementById('schemeFileInput').click()">Choose file</button>
+        <span id="schemeFilePickLabel" class="small text-muted">No file chosen</span>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <button class="btn btn-primary" id="uploadSchemeBtn" onclick="uploadSchemeFile()" type="button" style="font-weight:800;">Upload</button>
+        <div style="font-size:12px;color:#6b7280" id="importHint">After uploading, it will be added to “Saved schemes”. You can load it immediately.</div>
+      </div>
+    </div>
+
+    <!-- 子畫面：匯出/分享 -->
+    <div id="schemeHubPanelExport" class="scheme-hub-panel" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="m-0"><span aria-hidden="true">📤</span> <span id="schemeHubPanelExportTitle">匯出／分享</span></h6>
+      </div>
+
+      <div class="p-2 border rounded mb-3" style="background:rgba(0,0,0,.02)">
+        <div class="fw-bold mb-2" id="exportCurrentTitle">Current scheme (the one on screen now)</div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+          <button class="btn btn-success" id="exportCurrentSchemeBtn" onclick="exportCurrentScheme()" type="button" style="font-weight:900;"><span aria-hidden="true">📤</span> <span id="exportCurrentBtnText">Export current scheme</span></button>
+          <div class="small text-muted" id="exportCurrentHint">No need to save / load first.</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="fw-bold mb-2" id="savedSchemesExportTitle">Saved schemes</div>
+        <div class="small text-muted mb-2" id="savedSchemesExportHint">Pick one from the list to export.</div>
+        <div id="savedSchemesExportList"></div>
+      </div>
+    </div>
+
+    <!-- 子畫面：管理 -->
+    <div id="schemeHubPanelManage" class="scheme-hub-panel" style="display:none;">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="m-0"><span aria-hidden="true">🧰</span> <span id="schemeHubPanelManageTitle">管理已儲存方案</span></h6>
+      </div>
+      <div id="savedSchemesManageList"></div>
+    </div>
+  </div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-secondary" data-bs-dismiss="modal" id="loadCancelBtn" type="button">取消</button>
+<button class="btn btn-secondary" id="loadCancelBtn" type="button" onclick="handleSchemeCancel(event)" aria-label="Back"><i class="fas fa-reply" aria-hidden="true"></i></button>
 </div>
 </div>
 </div>
@@ -3903,6 +4159,96 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
             sawThicknessLabel: {
                 zh: "鋸片厚度:",
                 en: "Saw Thickness:"
+            },
+
+            // === Scheme hub (方案B) ===
+            schemeHubHint: {
+                zh: "第一次用？先揀你想做咩，入去先再見到細節。",
+                en: "First time here? Pick what you want to do—details will show inside."
+            },
+            schemeHubBtnLoadTitle: {
+                zh: "載入已儲存方案",
+                en: "Load saved scheme"
+            },
+            schemeHubBtnLoadSub: {
+                zh: "用返之前保存嘅資料",
+                en: "Use previously saved data"
+            },
+            schemeHubBtnImportTitle: {
+                zh: "匯入檔案",
+                en: "Import file"
+            },
+            schemeHubBtnImportSub: {
+                zh: "從 JSON 檔加入一個新方案",
+                en: "Add a new scheme from a JSON file"
+            },
+            schemeHubBtnExportTitle: {
+                zh: "匯出／分享",
+                en: "Export / Share"
+            },
+            schemeHubBtnExportSub: {
+                zh: "將而家方案變成檔案或 QR",
+                en: "Turn current scheme into a file or QR"
+            },
+            schemeHubBtnManageTitle: {
+                zh: "備份／還原",
+                en: "Backup / Restore"
+            },
+            schemeHubBtnManageSub: {
+                zh: "管理多個備份版本",
+                en: "Manage multiple backup versions"
+            },
+            schemeHubPanelLoadTitle: {
+                zh: "載入方案",
+                en: "Load scheme"
+            },
+            schemeHubPanelImportTitle: {
+                zh: "從檔案匯入方案",
+                en: "Import scheme from file"
+            },
+            schemeHubPanelExportTitle: {
+                zh: "匯出／分享",
+                en: "Export / Share"
+            },
+            schemeHubPanelManageTitle: {
+                zh: "管理已儲存方案",
+                en: "Manage saved schemes"
+            },
+            schemeFilePickBtn: {
+                zh: "選擇檔案",
+                en: "Choose file"
+            },
+            schemeFilePickLabel: {
+                zh: "未選擇檔案",
+                en: "No file chosen"
+            },
+            uploadSchemeBtn: {
+                zh: "匯入",
+                en: "Upload"
+            },
+            importHint: {
+                zh: "匯入後會加入到「已儲存方案」，你可以選擇即刻載入。",
+                en: "After uploading, it will be added to “Saved schemes”. You can load it immediately."
+            },
+            exportCurrentTitle: {
+                zh: "目前方案（你而家畫面上嗰份）",
+                en: "Current scheme (the one on screen now)"
+            },
+            exportCurrentBtnText: {
+                zh: "匯出目前方案",
+                en: "Export current scheme"
+            },
+            exportCurrentHint: {
+                zh: "唔需要先儲存/先載入。",
+                en: "No need to save / load first."
+            },
+            savedSchemesExportTitle: {
+                zh: "已儲存方案",
+                en: "Saved schemes"
+            },
+            savedSchemesExportHint: {
+                zh: "喺列表直接揀一個匯出。",
+                en: "Pick one from the list to export."
             },
 
             schemeManagementLabel: {
@@ -4157,6 +4503,38 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
             var qrUrlLabel=document.getElementById('qrUrlLabel'); if(qrUrlLabel) qrUrlLabel.textContent=t.qrUrl;
             var qrCloseBtn=document.getElementById('qrCloseBtn'); if(qrCloseBtn) qrCloseBtn.textContent=t.close;
 
+            // Scheme hub "Back" buttons (removed in scheme hub panels)
+
+            // Scheme hub 4 options (force-refresh;避免任何漏網)
+            (function(){
+              const forceIds = [
+                'schemeHubHint',
+                'schemeHubBtnLoadTitle','schemeHubBtnLoadSub',
+                'schemeHubBtnImportTitle','schemeHubBtnImportSub',
+                'schemeHubBtnExportTitle','schemeHubBtnExportSub',
+                'schemeHubBtnManageTitle','schemeHubBtnManageSub',
+                'schemeHubPanelLoadTitle','schemeHubPanelImportTitle','schemeHubPanelExportTitle','schemeHubPanelManageTitle',
+                // panels content
+                'schemeFilePickBtn','schemeFilePickLabel','uploadSchemeBtn','importHint',
+                'exportCurrentTitle','exportCurrentBtnText','exportCurrentHint',
+                'savedSchemesExportTitle','savedSchemesExportHint'
+              ];
+              forceIds.forEach(function(id){
+                try{
+                  const el = document.getElementById(id);
+                  if (!el) return;
+
+                  // schemeFilePickLabel：如果已經選咗檔，就唔覆蓋檔名
+                  if (id === 'schemeFilePickLabel') {
+                    const fi = document.getElementById('schemeFileInput');
+                    if (fi && fi.files && fi.files.length > 0) return;
+                  }
+
+                  if (elements[id] && elements[id][lang]) el.innerHTML = elements[id][lang];
+                }catch(e){}
+              });
+            })();
+
             // === Extra i18n sweep: keep EN mode zero Chinese ===
             // Top toolbar aria
             var topTools = document.querySelector('.top-tools');
@@ -4238,7 +4616,9 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
               setText('schemeNameLabel','方案名稱:','Scheme name:');
               setText('saveCancelBtn','取消','Cancel');
               setText('saveConfirmBtn','確認儲存','Save');
-              setText('loadCancelBtn','取消','Cancel');
+              // loadCancelBtn is icon-only; do not set text
+              var _lc = document.getElementById('loadCancelBtn');
+              if(_lc) _lc.setAttribute('aria-label', (lang==='zh')?'返回':'Back');
               setText('helpCloseBtn','關閉','Close');
               setText('qrUrlLabel','網址：','URL:');
               // placeholders
@@ -4285,8 +4665,9 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
               if(bd) bd.setAttribute('aria-label', (lang==='zh')?'關閉案例彈窗':'Close use cases dialog');
             })();
 
-            // Auto-Replenish（新制按鈕上方描述）
-            var arLbl=document.getElementById('autoReplenishBtnTitle'); if(arLbl) arLbl.textContent = (lang==='zh') ? '自動補料' : 'Auto-Replenish';
+            // Auto-Replenish（新制按鈕上方描述）：改為兩行，避免字體放大出界
+            var arMain=document.getElementById('autoReplenishTitleMain');
+            if(arMain) arMain.innerHTML = (lang==='zh') ? '自動<br>補料' : 'Auto<br>Replenish';
             // 保持原有(英文)開關文字描述：唔跟語言變成中文
             var arA11y=document.getElementById('autoReplenishA11yLabel'); if(arA11y) arA11y.textContent = 'Auto-Replenish';
             if (typeof window.updateAutoReplenishUI === 'function') window.updateAutoReplenishUI();
@@ -4316,7 +4697,9 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
             var _scB = document.getElementById('saveCancelBtn');           if(_scB) _scB.textContent = _xl==='zh'?'取消':'Cancel';
             var _sCo = document.getElementById('saveConfirmBtn');          if(_sCo) _sCo.textContent = _xl==='zh'?'確認儲存':'Confirm Save';
             // Load scheme modal cancel
-            var _lcB = document.getElementById('loadCancelBtn');           if(_lcB) _lcB.textContent = _xl==='zh'?'取消':'Cancel';
+            // loadCancelBtn is icon-only; keep it as icon, just update aria-label
+            var _lcB = document.getElementById('loadCancelBtn');
+            if(_lcB) _lcB.setAttribute('aria-label', _xl==='zh'?'返回':'Back');
             // Help modal close
             var _hcB = document.getElementById('helpCloseBtn');            if(_hcB) _hcB.textContent = _xl==='zh'?'關閉':'Close';
             // Help button in main UI
@@ -7160,6 +7543,167 @@ function calculate() {
             loadScheme();
         }
 
+        // ====== 方案B：向導式（Scheme Hub） ======
+        function openSchemeHub(defaultPanel){
+            try { loadScheme(true); } catch(e) {}
+            try { schemeHubBack(); } catch(e) {}
+            if (defaultPanel) {
+                try { schemeHubShow(defaultPanel); } catch(e) {}
+            }
+
+            // custom file picker label
+            try{
+              const fi = document.getElementById('schemeFileInput');
+              const lb = document.getElementById('schemeFilePickLabel');
+              if (fi && !fi.__agBound) {
+                fi.__agBound = true;
+                fi.addEventListener('change', function(){
+                  try{
+                    const lang = document.getElementById('language')?.value || 'zh';
+                    if (!lb) return;
+                    if (fi.files && fi.files.length > 0) lb.textContent = fi.files[0].name;
+                    else lb.textContent = (lang === 'zh') ? '未選擇檔案' : 'No file chosen';
+                  }catch(e){}
+                });
+              }
+            }catch(e){}
+
+            const el = document.getElementById('loadSchemeModal');
+            if (el) {
+                const modal = bootstrap.Modal.getOrCreateInstance(el, { focus: false });
+                modal.show();
+            }
+        }
+
+        function schemeHubBack(){
+            const hub = document.getElementById('schemeHub');
+            if (!hub) return;
+            const panels = hub.querySelectorAll('.scheme-hub-panel');
+            panels.forEach(p => p.style.display = 'none');
+            const actions = document.getElementById('schemeHubActions');
+            if (actions) actions.style.display = '';
+            const hint = document.getElementById('schemeHubHint');
+            if (hint) hint.style.display = '';
+        }
+
+        // 「取消」鍵：只返回上一層；喺最頂層先關閉 modal
+        function handleSchemeCancel(ev){
+          try{ if(ev){ ev.preventDefault(); ev.stopPropagation(); } }catch(e){}
+          try{
+            const actions = document.getElementById('schemeHubActions');
+            const inSubPanel = actions && actions.style.display === 'none';
+            if(inSubPanel){
+              schemeHubBack();
+              return;
+            }
+
+            const modalEl = document.getElementById('loadSchemeModal');
+            if(window.bootstrap && bootstrap.Modal && modalEl){
+              const inst = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl, { focus: false });
+              inst.hide();
+            }
+          }catch(e){}
+        }
+
+        function schemeHubShow(which){
+            try { loadScheme(true); } catch(e) {}
+            const map = {
+                load: 'schemeHubPanelLoad',
+                import: 'schemeHubPanelImport',
+                export: 'schemeHubPanelExport',
+                manage: 'schemeHubPanelManage'
+            };
+            const targetId = map[which] || map.load;
+
+            const actions = document.getElementById('schemeHubActions');
+            if (actions) actions.style.display = 'none';
+            const hint = document.getElementById('schemeHubHint');
+            if (hint) hint.style.display = 'none';
+
+            const hub = document.getElementById('schemeHub');
+            if (!hub) return;
+            const panels = hub.querySelectorAll('.scheme-hub-panel');
+            panels.forEach(p => p.style.display = 'none');
+            const panel = document.getElementById(targetId);
+            if (panel) panel.style.display = '';
+        }
+
+        function renderSavedSchemesList(containerId, mode){
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const savedSchemes = JSON.parse(localStorage.getItem('aluminumCuttingSchemes') || '[]');
+            const lang = document.getElementById('language')?.value || 'zh';
+
+            if (savedSchemes.length === 0) {
+                el.innerHTML = `<p class="text-muted mb-0">${lang === 'zh' ? '未有已儲存方案。你可以先「儲存目前方案」或「匯入 JSON」。' : 'No saved schemes yet. Save current or import JSON.'}</p>`;
+                return;
+            }
+
+            const btn = (cls, text, onclick, title) => {
+                const t = title ? ` title="${title}"` : '';
+                return `<button class="btn btn-sm ${cls}" onclick="${onclick}" type="button"${t}>${text}</button>`;
+            };
+
+            function displaySchemeName(rawName, index){
+                const fallback = (lang==='zh') ? ('方案 #' + (index+1)) : ('Scheme #' + (index+1));
+                const n = (rawName == null || rawName === '') ? fallback : String(rawName);
+                if (lang === 'en') {
+                  // 常見中文預設名 → 英文（避免英語模式仍出中文）
+                  if (n === '目前方案') return 'Current scheme';
+                  const m = n.match(/^方案\s*#\s*(\d+)$/);
+                  if (m) return 'Scheme #' + m[1];
+                }
+                return n;
+            }
+
+            el.innerHTML = savedSchemes.map((scheme, index) => {
+                const name = escapeHTML(displaySchemeName(scheme.name, index));
+
+                // 三種模式：load / export / manage
+                let actions = '';
+                if (mode === 'export') {
+                    actions = btn('btn-success', (lang==='zh'?'匯出':'Export'), `exportScheme(${index})`);
+                } else if (mode === 'load') {
+                    actions = [
+                        btn('btn-primary me-1', (lang==='zh'?'載入':'Load'), `loadSchemeData(${index})`),
+                        btn('btn-outline-success me-1', (lang==='zh'?'匯出':'Export'), `exportScheme(${index})`),
+                        btn('btn-outline-danger', (lang==='zh'?'刪除':'Delete'), `deleteScheme(${index})`)
+                    ].join('');
+                } else { // manage
+                    actions = [
+                        btn('btn-outline-primary me-1', (lang==='zh'?'載入':'Load'), `loadSchemeData(${index})`),
+                        btn('btn-outline-success me-1', (lang==='zh'?'匯出':'Export'), `exportScheme(${index})`),
+                        btn('btn-outline-danger', (lang==='zh'?'刪除':'Delete'), `deleteScheme(${index})`)
+                    ].join('');
+                }
+
+                return `
+                  <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded" style="gap:10px;">
+                    <div style="min-width:0;">
+                      <div class="fw-bold" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</div>
+                      <div class="small text-muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHTML(scheme.date || '')}</div>
+                    </div>
+                    <div class="d-flex flex-wrap justify-content-end" style="gap:6px;flex:0 0 auto;">${actions}</div>
+                  </div>
+                `;
+            }).join('');
+        }
+
+        // 覆寫：loadScheme 只負責刷新列表（唔再強制彈出 modal）
+        function loadScheme(refreshAll){
+            // 保持兼容：原本好多地方會 call loadScheme() 期待更新列表
+            try { renderSavedSchemesList('savedSchemesList', 'load'); } catch(e) {}
+
+            // 如果向導 modal 已經存在，就順手同步晒其他列表
+            if (refreshAll === undefined || refreshAll === null) {
+                refreshAll = !!document.getElementById('savedSchemesExportList') || !!document.getElementById('savedSchemesManageList');
+            }
+            if (refreshAll) {
+                try { renderSavedSchemesList('savedSchemesExportList', 'export'); } catch(e) {}
+                try { renderSavedSchemesList('savedSchemesManageList', 'manage'); } catch(e) {}
+            }
+        }
+
         function uploadSchemeFile() {
             const fileInput = document.getElementById("schemeFileInput");
             const lang = document.getElementById("language").value;
@@ -7172,7 +7716,7 @@ function calculate() {
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            reader.onload = function (e) {
+            reader.onload = async function (e) {
                 try {
                     const schemeData = JSON.parse(e.target.result);
 
@@ -7182,43 +7726,20 @@ function calculate() {
                         localStorage.setItem("aluminumCuttingSchemes", JSON.stringify(savedSchemes));
 
                         fileInput.value = "";
-                        loadScheme();
+                        loadScheme(true);
 
                         const newIndex = savedSchemes.length - 1;
 
-                        const modalEl = document.getElementById("loadSchemeModal");
-                        if (modalEl) {
-                            const modal = bootstrap.Modal.getInstance(modalEl);
-                            if (modal) modal.hide();
-                            setTimeout(function() {
-                                const resultsCard = document.getElementById('results-card');
-                                if (resultsCard) {
-                                    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }
-                            }, 500);
+                        // 匯入成功後：問用戶要唔要即刻載入（方案B：清晰意圖）
+                        const ask = (lang === 'zh') ? '匯入成功！要唔要即刻載入呢個方案？' : 'Imported! Load this scheme now?';
+                        const ok = (typeof window.agConfirm === 'function') ? await window.agConfirm(ask) : confirm(ask);
+                        if (ok) {
+                            loadSchemeData(newIndex);
+                            // loadSchemeData 會自行關閉 modal
+                        } else {
+                            // 留喺 modal，轉去「管理」方便用戶再揀
+                            try { schemeHubShow('manage'); } catch(e) {}
                         }
-
-                        loadSchemeData(newIndex);
-
-                        setTimeout(() => {
-                            if (typeof calculate === 'function') {
-                                calculate();
-                            }
-                            const canvas = document.getElementById("cuttingCanvas");
-                            if (canvas) {
-                                canvas.scrollIntoView({behavior: 'smooth', block: 'start'});
-                            }
-                            const buttons = document.getElementsByTagName('button');
-                            for (let i = 0; i < buttons.length; i++) {
-                                const txt = buttons[i].textContent || buttons[i].innerText;
-                                if (txt.includes('切割結果') || txt.includes('Result') || txt.includes('Results')) {
-                                    if (!txt.includes('列印') && !txt.includes('Print')) {
-                                        buttons[i].click();
-                                        break; 
-                                    }
-                                }
-                            }
-                        }, 300);
 
                     } else {
                         alert(lang === "zh" ? "檔案格式不正確" : "Invalid file format");
@@ -7231,38 +7752,23 @@ function calculate() {
             reader.readAsText(file);
         }
 
-        function loadScheme() {
-            const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
-            const schemesList = document.getElementById("savedSchemesList");
-            const lang = document.getElementById("language").value;
-
-            if (savedSchemes.length === 0) {
-                schemesList.innerHTML = `<p>${lang === "zh" ? "沒有已儲存的方案" : "No saved schemes found"}</p>`;
-            } else {
-                schemesList.innerHTML = savedSchemes.map((scheme, index) => `
-                    <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                        <span style="color:#212529">${escapeHTML(scheme.name)}</span>
-                        <div>
-                            <button class="btn btn-sm btn-primary me-2" onclick="loadSchemeData(${index})">
-                                ${lang === "zh" ? "載入" : "Load"}
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteScheme(${index})">
-                                ${lang === "zh" ? "刪除" : "Delete"}
-                            </button>
-                        </div>
-                    </div>
-                `).join("");
-            }
-
-            const _lsEl = document.getElementById("loadSchemeModal");
-            if (_lsEl) {
-                // iOS/部分瀏覽器：file input 取消後可能被 Bootstrap focus trap 卡住
-                const _lsModal = bootstrap.Modal.getOrCreateInstance(_lsEl, { focus: false });
-                _lsModal.show();
-            }
-        }
+        // （已由方案B接管）舊版 loadScheme() 已停用，保留註解避免重複定義
+        /* function loadScheme() { } */
 
         function loadSchemeData(index) {
+            try {
+                window.__currentSchemeIndex = index;
+                const lang = document.getElementById("language").value;
+                const hint = document.getElementById('exportHint');
+                if (hint) {
+                    const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
+                    const scheme = savedSchemes[index];
+                    hint.textContent = (lang === 'zh')
+                      ? ('已載入：' + (scheme && scheme.name ? scheme.name : ('#' + (index+1))) + '（可按匯出）')
+                      : ('Loaded: ' + (scheme && scheme.name ? scheme.name : ('#' + (index+1))) + ' (export available)');
+                }
+            } catch(e) {}
+
             // 載入方案後：預設先唔自動計算/唔直出結果，因為用戶通常會先微調再按「計算」
             window.__suppressAutoRecalc = true;
             try { window.__ag_scroll_after_calc = 0; } catch(e) {}
@@ -7456,6 +7962,113 @@ function calculate() {
             }, 50);
 
             bootstrap.Modal.getInstance(document.getElementById("loadSchemeModal")).hide();
+        }
+
+        function exportScheme(index) {
+            try { window.__currentSchemeIndex = index; } catch(e) {}
+            const lang = document.getElementById("language").value;
+            // try to update hint in load scheme modal
+            try {
+                const hint = document.getElementById('exportHint');
+                if (hint) {
+                    const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
+                    const scheme = savedSchemes[index];
+                    hint.textContent = (lang === 'zh')
+                      ? ('已選：' + (scheme && scheme.name ? scheme.name : ('#' + (index+1))) + '（按匯出）')
+                      : ('Selected: ' + (scheme && scheme.name ? scheme.name : ('#' + (index+1))) + ' (tap Export)');
+                }
+            } catch(e) {}
+            
+            try {
+                const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
+                const scheme = savedSchemes[index];
+                if (!scheme) return;
+
+                const json = JSON.stringify(scheme, null, 2);
+                const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+
+                const safeName = String(scheme.name || "scheme")
+                    .replace(/[\\/:*?\"<>|\n\r\t]+/g, "_")
+                    .replace(/\s+/g, " ")
+                    .trim();
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = safeName + ".json";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+
+                setTimeout(() => URL.revokeObjectURL(url), 500);
+            } catch (e) {
+                alert((lang === "zh" ? "匯出失敗：" : "Export failed: ") + (e && e.message ? e.message : e));
+            }
+        }
+
+        function exportCurrentScheme() {
+            const lang = document.getElementById("language")?.value || 'zh';
+
+            try {
+                // 直接由目前畫面狀態組合方案（唔需要先儲存/先載入）
+                const cuttingItems = [];
+                document.querySelectorAll("#cuttingItemsTable tbody tr").forEach(row => {
+                    cuttingItems.push({
+                        length: row.dataset.length || "0",
+                        quantity: row.dataset.quantity || "1",
+                        purpose: row.dataset.purpose || "",
+                        display: row.dataset.display || "",
+                        inputUnit: row.dataset.inputUnit || "metric"
+                    });
+                });
+
+                const materials = [];
+                document.querySelectorAll("#materialItemsTable tbody tr").forEach(row => {
+                    materials.push({
+                        length: row.dataset.length || "0",
+                        quantity: row.dataset.quantity || "1",
+                        display: row.dataset.display || "",
+                        inputUnit: row.dataset.inputUnit || "metric",
+                        mclass: row.dataset.mclass || "scrap"
+                    });
+                });
+
+                const cuttingInputUnit = document.querySelector("#cuttingItems .unit-select")?.value || "metric";
+                const materialInputUnit = document.querySelector("#materialItems .unit-select")?.value || "metric";
+
+                const schemeData = {
+                    name: (lang === 'zh' ? '目前方案' : 'Current Scheme'),
+                    date: new Date().toLocaleString(),
+                    language: document.getElementById("language")?.value || 'zh',
+                    unit: document.getElementById("unit")?.value || 'metric',
+                    sawThickness: document.getElementById("sawThickness")?.value || '3.2',
+                    algorithm: document.getElementById("algorithmSelector")?.value || 'BFD',
+                    cuttingInputUnit,
+                    materialInputUnit,
+                    cuttingItems,
+                    materials
+                };
+
+                const json = JSON.stringify(schemeData, null, 2);
+                const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+
+                const safeName = String(schemeData.name || "scheme")
+                    .replace(/[\\/:*?\"<>|\n\r\t]+/g, "_")
+                    .replace(/\s+/g, " ")
+                    .trim();
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = safeName + ".json";
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 500);
+
+            } catch (e) {
+                alert((lang === "zh" ? "匯出失敗：" : "Export failed: ") + (e && e.message ? e.message : e));
+            }
         }
 
         async function deleteScheme(index) {
@@ -8071,7 +8684,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         if(Object.keys(missingMaterials).length > 0) {
           const lang = (document.getElementById('language')?document.getElementById('language').value:'zh');
-          let missingHtml = `<div id="agAutoReplenishWarning" style="margin: 15px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 5px; color: #856404;">
+          let missingHtml = `<div id="agAutoReplenishWarning" class="ag-ar-warning" style="margin: 15px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 8px; color: #856404;">
             <strong><i class="fa-solid fa-triangle-exclamation"></i> ${lang==='zh'?'材料不足，自動補料 (Auto-Replenish):':'Insufficient material, Auto-Replenish:'}</strong>
             <ul style="margin: 8px 0 0 20px; padding-left: 0;">`;
 
@@ -8638,6 +9251,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!__nutRunning) return;
         __nutRaf = requestAnimationFrame(__nutFrame);
         if (document.hidden || !container.isConnected) return;
+
+        // 效能優化：降到約 30fps（減少 GPU/CPU 壓力）
+        var now = performance.now();
+        var last = __nutFrame.__t || 0;
+        if (last && (now - last) < 33) return; // ~30fps
+        __nutFrame.__t = now;
+
         nut.rotation.x += 0.010;
         nut.rotation.y += 0.020;
         renderer.render(scene, camera);
@@ -8680,10 +9300,14 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
+    function __scheduleNut(){
+      // 效能優化：延遲少少先起 WebGL，畀版面先 render 出嚟
+      try { setTimeout(initTitleNut, 220); } catch(e) { initTitleNut(); }
+    }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTitleNut);
+      document.addEventListener('DOMContentLoaded', __scheduleNut);
     } else {
-      initTitleNut();
+      __scheduleNut();
     }
   })();
   </script>
@@ -8884,13 +9508,18 @@ document.addEventListener('DOMContentLoaded', function() {
         __rulerRaf = requestAnimationFrame(__rulerFrame);
         if (document.hidden || !container.isConnected) return;
 
+        // 效能優化：降到約 30fps（減少 GPU/CPU 壓力）
+        var now = performance.now();
+        var last = __rulerFrame.__last || 0;
+        if (last && (now - last) < 33) return; // ~30fps
+        __rulerFrame.__last = now;
+
         rulerGroup.rotation.y += (targetRotationY - rulerGroup.rotation.y) * 0.1;
         rulerGroup.rotation.x += (targetRotationX - rulerGroup.rotation.x) * 0.1;
         targetRotationX = Math.max(-3.14, Math.min(3.14, targetRotationX));
 
         if (!isDragging) {
           // 用時間增量，避免不同裝置 FPS 造成速度抖動
-          var now = performance.now();
           var dt = Math.min(0.05, (now - (__rulerFrame.__t || now)) / 1000);
           __rulerFrame.__t = now;
           targetRotationY += dt * 0.75;
@@ -8937,10 +9566,14 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
 
+    function __scheduleRuler(){
+      // 效能優化：延遲少少先起 WebGL，畀版面先 render 出嚟
+      try { setTimeout(initTitleRuler, 260); } catch(e) { initTitleRuler(); }
+    }
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initTitleRuler);
+      document.addEventListener('DOMContentLoaded', __scheduleRuler);
     } else {
-      initTitleRuler();
+      __scheduleRuler();
     }
   })();
   </script>
@@ -9032,6 +9665,10 @@ document.addEventListener('DOMContentLoaded', function() {
       // ON：綠色；OFF：灰色（同下方 unit 按鈕風格一致）
       btn.classList.toggle('btn-success', on);
       btn.classList.toggle('btn-secondary', !on);
+
+      // 呼吸燈：只喺 ON 狀態先閃動；OFF 靜止
+      btn.classList.toggle('ag-ar-breathe-on', on);
+      btn.classList.toggle('ag-ar-breathe-off', !on);
     }
     if (hint) hint.textContent = (lang === 'zh') ? '（揀長度=開；揀OFF=閂）' : '(Pick length=ON; pick OFF=OFF)';
 
@@ -9805,19 +10442,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   function updateLoadModalTexts(){
+    // 方案B（Scheme Hub）已由 updateLanguage() / elements 處理，
+    // 呢段 legacy 修補會誤改標題，所以直接跳過。
+    if (document.getElementById('schemeHub')) return;
+
     var lang = getLang();
     var label = document.getElementById('loadSchemeModalLabel');
     if (label) label.textContent = (lang === 'zh') ? '載入方案' : 'Load Scheme';
-    var body = document.querySelector('#loadSchemeModal .modal-body');
-    if (body) {
-      var h6s = body.querySelectorAll('h6');
-      if (h6s[0]) h6s[0].textContent = (lang === 'zh') ? '📁 從檔案上載方案' : '📁 Upload scheme from file';
-      if (h6s[1]) h6s[1].textContent = (lang === 'zh') ? '📋 已儲存的方案' : '📋 Saved schemes';
-      var uploadBtn = document.getElementById('uploadSchemeBtn') || body.querySelector('button.btn.btn-primary');
-      if (uploadBtn) uploadBtn.innerHTML = (lang === 'zh') ? '📤 上載' : '📤 Upload';
-    }
-    var footerCancel = document.querySelector('#loadSchemeModal .modal-footer .btn.btn-secondary');
-    if (footerCancel) footerCancel.textContent = (lang === 'zh') ? '取消' : 'Cancel';
+
+    // footer cancel (if any)
+    var footerCancel = document.getElementById('loadCancelBtn');
+    if (footerCancel) footerCancel.setAttribute('aria-label', (lang === 'zh') ? '返回' : 'Back');
   }
   function updateHelpModalFooter(){
     var lang = getLang();
@@ -10223,11 +10858,17 @@ body{
   transform-origin: 50% 60%;
 }
 
-/* 呼吸：圖示 + 文字各自一個動畫（大有細） */
+/* 呼吸（效能優化 v5）：
+   - 開機唔再無限循環（避免手機長期 repaint）
+   - 改為「只有 hover 才播」（手機基本唔會 hover，即等於默認無動畫）
+*/
 #calculateButton.ag-calc-btn .ag-calc-label{
-  animation: none !important; /* 文字取消呼吸 */
+  animation: none !important;
 }
 #calculateButton.ag-calc-btn .ag-calc-icon{
+  animation: none !important;
+}
+#calculateButton.ag-calc-btn:hover .ag-calc-icon{
   animation: agCalcIconBreathe 1.65s ease-in-out infinite;
 }
 
@@ -10237,8 +10878,9 @@ body{
 }
 
 @keyframes agCalcIconBreathe{
-  0%,100%{ transform: scale(1); filter: drop-shadow(var(--ag-calc-icon-shadow)); }
-  50%{ transform: scale(1.18); filter: drop-shadow(0 6px 14px rgba(0,0,0,0.55)); }
+  /* 效能優化：動畫期間唔再改 filter（filter 會令部分裝置重繪/卡頓） */
+  0%,100%{ transform: scale(1); }
+  50%{ transform: scale(1.18); }
 }
 
 @media (prefers-reduced-motion: reduce){
@@ -10452,7 +11094,7 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn::after{
 }
 
 /* v21: 光明版同樣要按鈕漸變由左至右（只調整高光方向，不改底色） */
-body.sepia-mode .btn:not(.btn-close):not(.tool-btn)::before{
+body.sepia-mode .btn:not(.btn-close):not(.tool-btn):not(.ag-ar-len-warning)::before{
   background: linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0.08)) !important;
 }
 body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
@@ -10490,6 +11132,25 @@ body.sepia-mode .btn-outline-danger {
     border: 1px solid #8b4513 !important;
     color: #1f2d2a !important;
 }
+
+/* 表格「垃圾桶」掣：改淺粉紅（避免太深色） */
+.action-buttons .btn-outline-danger{
+  background: linear-gradient(to bottom, #f8c9d9, #e7a7bd) !important;
+  border: 1px solid #c98aa2 !important;
+  color: #4a1f2d !important;
+}
+.action-buttons .btn-outline-danger i{ color: #4a1f2d !important; }
+.action-buttons .btn-outline-danger:hover{
+  filter: brightness(1.03) saturate(1.05);
+}
+
+/* 光明模式下避免被其它 btn-outline-danger 規則蓋過 */
+body.sepia-mode .action-buttons .btn-outline-danger{
+  background: linear-gradient(to bottom, #f8c9d9, #e7a7bd) !important;
+  border: 1px solid #c98aa2 !important;
+  color: #4a1f2d !important;
+}
+body.sepia-mode .action-buttons .btn-outline-danger i{ color: #4a1f2d !important; }
 
 body.sepia-mode .modal-content {
     background: #faf6ed !important;
@@ -10603,6 +11264,48 @@ textarea:focus {
   box-shadow:
     0 0 0 .12rem rgba(0,0,0,.06),
     0 4px 10px rgba(0,0,0,.14) !important;
+}
+
+/* === Fix (2026-04-03): 強制所有輸入欄保持淺色底 ===
+   目標：同舊版（021）一樣，無論瀏覽器深色模式 / 自動配色 / 擴充套件點搞，
+   input 都要保持淺色底 + 淺色框線。
+
+   關鍵：
+   - 同時寫死 background-color + background-image（只寫 background 有時會畀插件蓋過）
+   - 加 color-scheme: light（避免 UA 以深色控件渲染）
+   - 補埋 webkit autofill（Chrome 自動填充會變黃/變深）
+*/
+body:not(.sepia-mode){
+  color-scheme: light;
+}
+body:not(.sepia-mode) :is(
+  .form-control,
+  .form-select,
+  textarea,
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="url"],
+  input[type="password"]
+){
+  background-color: #ffffff !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90)) !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border-color: rgba(0,0,0,.18) !important; /* 跟舊檔 light-mode 接近 */
+}
+body:not(.sepia-mode) :is(.form-control,.form-select,textarea)::placeholder{
+  color: rgba(17,24,39,.45) !important;
+  -webkit-text-fill-color: rgba(17,24,39,.45) !important;
+}
+body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill,
+body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill:hover,
+body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill:focus{
+  -webkit-text-fill-color: #111827 !important;
+  transition: background-color 999999s ease-out 0s;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
 }
 
 .btn,
