@@ -2705,9 +2705,9 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
 .tune-title { font-weight: 800; font-size: 1.05rem; }
 .tune-close { width: 34px; height: 34px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.10); color: #f2f5f9; font-size: 20px; line-height: 1; cursor: pointer; }
 .tune-body { padding: 12px 14px 14px; }
-.tune-row { display:grid; grid-template-columns: 96px 1fr 62px; gap: 10px; align-items:center; margin: 10px 0; }
+.tune-row { display:grid; grid-template-columns: 96px 130px 62px; gap: 10px; align-items:center; margin: 10px 0; }
 .tune-row label { font-weight: 700; }
-.tune-row input[type="range"] { width: 100%; }
+.tune-row input[type="range"] { width: 130px; justify-self: start; }
 .tune-val { text-align:right; font-variant-numeric: tabular-nums; color: rgba(255,255,255,0.85); }
 .tune-hint { margin-top: 8px; font-size: 0.9rem; color: rgba(255,255,255,0.72); }
 .tune-actions { display:flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
@@ -2734,12 +2734,12 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
 .tune-presets .tune-preset.preset-warmer{ background: linear-gradient(135deg, #ffd26a 0%, #ffb04a 45%, #ff7a2f 100%) !important; color: #1b1b1b !important; text-shadow: 0 1px 2px rgba(255,255,255,0.22); border-color: rgba(0,0,0,0.22); }
 
 /* range 推桿（漸變 track） */
-.tune-row input[type="range"]{ -webkit-appearance: none; appearance: none; height: 28px; background: transparent; margin: 0; }
+.tune-row input[type="range"]{ -webkit-appearance: none; appearance: none; height: 16px; background: transparent; margin: 0; }
 .tune-row input[type="range"]:focus{ outline: none; }
-.tune-row input[type="range"]::-webkit-slider-runnable-track{ height: 10px; border-radius: 999px; background: linear-gradient(90deg, #111827 0%, #e5e7eb 100%); border: 1px solid rgba(0,0,0,0.28); box-shadow: inset 0 1px 0 rgba(255,255,255,0.18); }
-.tune-row input[type="range"]::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 999px; margin-top: -4px; background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e5e7eb 55%, #cbd5e1 100%); border: 1px solid rgba(0,0,0,0.30); box-shadow: 0 4px 10px rgba(0,0,0,0.28); }
+.tune-row input[type="range"]::-webkit-slider-runnable-track{ height: 4px; border-radius: 999px; background: linear-gradient(90deg, #111827 0%, #e5e7eb 100%); border: 1px solid rgba(0,0,0,0.22); box-shadow: inset 0 1px 0 rgba(255,255,255,0.14); }
+.tune-row input[type="range"]::-webkit-slider-thumb{ -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 999px; margin-top: -4px; background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e5e7eb 55%, #cbd5e1 100%); border: 1px solid rgba(0,0,0,0.28); box-shadow: 0 2px 6px rgba(0,0,0,0.22); }
 
-@media (max-width: 520px){ .tune-row{ grid-template-columns: 86px 1fr 56px; } }
+@media (max-width: 520px){ .tune-row{ grid-template-columns: 86px 110px 56px; } .tune-row input[type="range"]{ width: 110px; } }
 
 <style id="ag-display-tune-dorm-style">
   /* 由宿舍 v24/v25/tuneColorOverrides 摘取：只影響 #displayTuneModal */
@@ -6326,6 +6326,19 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
             // 標記：本次計算需要自動捲到結果（交由 renderCuttingResults 最終完成後觸發）
             try { window.__ag_scroll_after_calc = Date.now(); } catch(e) {}
 
+            // 狀態欄：開始計算
+            try {
+              const _l = (document.getElementById('language')?document.getElementById('language').value:'zh');
+              if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                window.agInfoBar.setDoing(
+                  _l==='zh' ? '開始計算…（如結果很大可能需少少時間）' : 'Calculating… (large results may take a moment)'
+                );
+                // 開始計算時清走舊錯誤/欠缺提示
+                try { window.agInfoBar.clearError && window.agInfoBar.clearError(); } catch(e) {}
+                try { window.agInfoBar.clearMissing && window.agInfoBar.clearMissing(); } catch(e) {}
+              }
+            } catch(e) {}
+
             // === 防「撳咗冇反應」：先即刻顯示進度，再下一個 tick 先開始重型計算 ===
             try {
               var pb = document.getElementById('progressBar');
@@ -6481,6 +6494,20 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   window.__agAdviceAlert = function(title, msgLines, tips){
     const l=lang();
     const msg = (Array.isArray(msgLines)?msgLines.join('\n'):String(msgLines||'')) + bullets(tips||[]);
+
+    // 狀態欄同步（用戶可以即時知道發生咩事；點擊可睇全文）
+    try {
+      if (window.agInfoBar) {
+        // 優先：如果有 setErrorCurrentLang 就用佢（會跟語言），否則退回 setError
+        if (typeof window.agInfoBar.setErrorCurrentLang === 'function') {
+          window.agInfoBar.setErrorCurrentLang(msg);
+        } else if (typeof window.agInfoBar.setError === 'function') {
+          // 無法分語言就兩邊都塞同一句
+          window.agInfoBar.setError(msg, msg);
+        }
+      }
+    } catch(e) {}
+
     try{ alert(msg); }catch(e){}
     // 同時喺結果區頂部放一份（方便翻查）
     showPanel('warn', title || (l==='zh'?'建議':'Suggestions'), (msgLines||[]).concat((tips||[]).map(t=>(l==='zh'?'建議：':'Tip: ')+t)));
@@ -7342,6 +7369,26 @@ function calculate() {
             resultDetails.style.display = "block";
 
             const totalBins = bins.length;
+
+            // 狀態欄：計算完成摘要（跟宿舍版做法：完成後即刻提示結果）
+            try {
+              const _l = (document.getElementById('language')?document.getElementById('language').value:'zh');
+              if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                const totalUsedLength = bins.reduce((sum, bin) => sum + (bin.cuts||[]).reduce((s,c)=>s+(Number(c.length)||0),0), 0);
+                const totalMaterialLength = bins.reduce((sum, bin) => sum + (Number(bin.length)||0), 0);
+                const utilizationRate = (totalMaterialLength>0) ? ((totalUsedLength/totalMaterialLength)*100).toFixed(1) : '0.0';
+                const msgZh = `計算完成：需要 ${totalBins} 支；利用率 ${utilizationRate}%（點擊可睇全文）`;
+                const msgEn = `Done: ${totalBins} bars; utilization ${utilizationRate}% (tap for details)`;
+
+                // 只喺「用戶剛按計算」之後 5 秒內更新，避免自動重算/其他渲染不停洗版
+                const ts = Number(window.__ag_scroll_after_calc || 0);
+                if (ts && (Date.now() - ts < 5000)) {
+                  window.agInfoBar.setDoing(msgZh, msgEn);
+                  try { window.agInfoBar.clearError && window.agInfoBar.clearError(); } catch(e) {}
+                  try { window.agInfoBar.clearMissing && window.agInfoBar.clearMissing(); } catch(e) {}
+                }
+              }
+            } catch(e) {}
 
             // 大量結果：只顯示摘要（避免 per-bin HTML / legend 令 browser hang）
             if (totalBins > __MAX_BINS_RENDER || __totalCuts > __MAX_CUTS_RENDER) {
@@ -12159,6 +12206,237 @@ button.btn-sm{
 })();
 </script>
 
+<!-- AnyGen: 底部資訊欄（參考 index_宿舍：結構/字體/顏色） -->
+<style id="ag-bottom-infobar-style">
+  :root{ --ag-infobar-h: 46px; }
+
+  /* 參考宿舍：半透明黑底 + 小 blur + 黃色字（常駐，冇隱藏掣） */
+  #ag-info-bar{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    background: rgba(32, 32, 32, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+  }
+
+  /* 內容唔畀 bar 遮 */
+  body{ padding-bottom: calc(var(--ag-infobar-h) + env(safe-area-inset-bottom)); }
+
+  #ag-info-message{
+    display:flex;
+    align-items:center;
+    min-width: 0;
+    width: 100%;
+    font-size: 0.95rem; /* 跟宿舍 */
+    color: yellow !important;
+    gap: 8px;
+  }
+
+  #ag-info-message span,
+  #ag-statusText{ color: yellow !important; }
+
+  #ag-statusIcon{ margin-right: 2px; font-size: 1.05rem; line-height: 1; flex: 0 0 auto; }
+
+  /* 單行：太長就可以橫向拉；同時保留省略（未拉之前） */
+  #ag-statusText{
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    text-shadow: 0 1px 0 rgba(0,0,0,.65);
+    padding-bottom: 2px; /* 比少少位俾 scrollbar */
+  }
+  /* 狀態文字如果可橫向滑動：將 scrollbar 改到好幼，唔礙眼 */
+  #ag-statusText{ scrollbar-width: thin; scrollbar-color: rgba(255,255,0,.22) transparent; }
+  #ag-statusText::-webkit-scrollbar{ height: 2px; }
+  #ag-statusText::-webkit-scrollbar-thumb{ background: rgba(255,255,0,.22); border-radius: 999px; }
+
+  /* 點擊提示：用家知可以撳/拉 */
+  #ag-info-bar{ cursor: pointer; }
+
+  /* 彈出全文（輕量 overlay） */
+  #ag-info-overlay{ position: fixed; inset: 0; z-index: 10000; display:none; }
+  #ag-info-overlay[data-open="true"]{ display:block; }
+  #ag-info-backdrop{ position:absolute; inset:0; background: rgba(32,32,32,.78); }
+  #ag-info-modal{
+    position:absolute;
+    left: 50%;
+    bottom: calc(var(--ag-infobar-h) + 18px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(820px, calc(100vw - 24px));
+    background: rgba(18,22,28,.92);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 16px;
+    padding: 14px 14px;
+    color: #fff;
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  }
+  #ag-info-modal h3{ margin: 0 0 8px 0; font-size: 14px; font-weight: 900; }
+  #ag-info-full{ margin:0; font-size: 14px; line-height: 1.35; color: rgba(255,255,255,.92); white-space: pre-wrap; word-break: break-word; }
+  #ag-info-closeHint{ margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.70); }
+
+  @media (max-width: 980px){
+    :root{ --ag-infobar-h: 50px; }
+  }
+</style>
+
+<div id="ag-info-bar" role="status" aria-live="polite" aria-label="Status" data-kind="doing">
+  <div id="ag-info-message" class="status-message">
+    <span id="ag-statusIcon" class="status-icon" aria-hidden="true">ℹ️</span>
+    <span id="ag-statusText"></span>
+  </div>
+</div>
+
+<div id="ag-info-overlay" aria-hidden="true">
+  <a id="ag-info-backdrop" href="#" aria-label="Close"></a>
+  <div id="ag-info-modal" role="dialog" aria-modal="true" aria-label="Message">
+    <h3 id="ag-info-modal-title">訊息</h3>
+    <p id="ag-info-full"></p>
+    <div id="ag-info-closeHint">（點擊背景關閉）</div>
+  </div>
+</div>
+
+<script id="ag-bottom-infobar-script">
+(function(){
+  const bar = document.getElementById('ag-info-bar');
+  const textEl = document.getElementById('ag-statusText');
+  const iconEl = document.getElementById('ag-statusIcon');
+  const overlay = document.getElementById('ag-info-overlay');
+  const backdrop = document.getElementById('ag-info-backdrop');
+  const fullEl = document.getElementById('ag-info-full');
+  const modalTitle = document.getElementById('ag-info-modal-title');
+  const closeHint = document.getElementById('ag-info-closeHint');
+  if(!bar || !textEl) return;
+
+  const state = {
+    doing:   { zh:'', en:'' },
+    missing: { zh:'', en:'' },
+    error:   { zh:'', en:'' }
+  };
+
+  function getLang(){
+    try{ return (document.getElementById('language')?.value || 'zh') === 'en' ? 'en' : 'zh'; }
+    catch(e){ return 'zh'; }
+  }
+
+  function pickKind(lang){
+    const err = (state.error[lang]||'').trim();
+    const mis = (state.missing[lang]||'').trim();
+    const doi = (state.doing[lang]||'').trim();
+    if(err) return { kind:'error', msg: err };
+    if(mis) return { kind:'missing', msg: mis };
+    if(doi) return { kind:'doing', msg: doi };
+    // 常駐：冇內容都顯示空白提示位
+    return { kind:'doing', msg: (lang==='zh'?'（冇訊息）':'(No message)') };
+  }
+
+  function setIcon(kind){
+    if(!iconEl) return;
+    if(kind==='error') iconEl.textContent = '⚠️';
+    else if(kind==='missing') iconEl.textContent = '📝';
+    else iconEl.textContent = 'ℹ️';
+  }
+
+  function render(){
+    const lang = getLang();
+    const p = pickKind(lang);
+    bar.dataset.kind = p.kind;
+    textEl.textContent = p.msg;
+    setIcon(p.kind);
+
+    // overlay 文案
+    if(modalTitle) modalTitle.textContent = (lang==='zh') ? (p.kind==='error'?'錯誤':(p.kind==='missing'?'欠缺':'提示')) : (p.kind==='error'?'Error':(p.kind==='missing'?'Missing':'Tip'));
+    if(closeHint) closeHint.textContent = (lang==='zh') ? '（點擊背景關閉）' : '(Tap outside to close)';
+  }
+
+  function setBi(target, zh, en){
+    if(typeof zh === 'string') target.zh = zh;
+    if(typeof en === 'string') target.en = en;
+  }
+
+  function currentMessage(){
+    const lang = getLang();
+    const p = pickKind(lang);
+    return p.msg || '';
+  }
+
+  function openOverlay(){
+    try{
+      if(!overlay || !fullEl) return;
+      const msg = currentMessage();
+      fullEl.textContent = msg;
+      overlay.dataset.open = 'true';
+      overlay.setAttribute('aria-hidden','false');
+    }catch(e){}
+  }
+  function closeOverlay(){
+    try{
+      if(!overlay) return;
+      overlay.dataset.open = 'false';
+      overlay.setAttribute('aria-hidden','true');
+    }catch(e){}
+  }
+
+  // 點 bar：如果文字有 overflow 就開彈窗；否則都照開（方便睇全文）
+  try{ bar.addEventListener('click', function(){ openOverlay(); }); }catch(e){}
+  try{ backdrop?.addEventListener('click', function(e){ try{ e.preventDefault(); }catch(_){} closeOverlay(); }); }catch(e){}
+
+  window.agInfoBar = {
+    setDoing(zh,en){ setBi(state.doing, zh, en); render(); },
+    setMissing(zh,en){ setBi(state.missing, zh, en); render(); },
+    setError(zh,en){ setBi(state.error, zh, en); render(); },
+    clearError(){ state.error.zh=state.error.en=''; render(); },
+    clearMissing(){ state.missing.zh=state.missing.en=''; render(); },
+    clearAll(){ state.doing.zh=state.doing.en=''; state.missing.zh=state.missing.en=''; state.error.zh=state.error.en=''; render(); },
+    setErrorCurrentLang(msg){
+      const lang=getLang();
+      if(lang==='zh') state.error.zh=String(msg||'');
+      else state.error.en=String(msg||'');
+      render();
+    }
+  };
+
+  // 跟隨語言切換：包裝原本 updateLanguage()
+  try{
+    if(typeof window.updateLanguage === 'function' && !window.__ag_infoBar_lang_patched){
+      const _u = window.updateLanguage;
+      window.updateLanguage = function(){
+        const r = _u.apply(this, arguments);
+        try{ render(); }catch(e){}
+        return r;
+      };
+      window.__ag_infoBar_lang_patched = true;
+    }
+  }catch(e){}
+
+  // 捕捉全站 alert → 顯示到資訊欄（優先級最高）
+  try{
+    if(typeof window.agAlert === 'function' && !window.__ag_infoBar_alert_patched){
+      const _a = window.agAlert;
+      window.agAlert = function(msg){
+        try{ window.agInfoBar?.setErrorCurrentLang(msg); }catch(e){}
+        return _a.apply(this, arguments);
+      };
+      window.__ag_infoBar_alert_patched = true;
+    }
+  }catch(e){}
+
+  // 預設提示（常駐）
+  state.doing.zh = '系統準備就緒：先輸入「部件」同「材料」，再按「計算」。';
+  state.doing.en = 'System ready: enter items and materials, then click "Calculate".';
+
+  render();
+})();
+</script>
 
 
 <!-- AnyGen fix: 讓自製彈窗可用的背景模糊（由 openTune/closeTune 呼叫） -->
