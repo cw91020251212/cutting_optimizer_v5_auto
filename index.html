@@ -2674,7 +2674,7 @@ html.no-transitions, html.no-transitions * {
 #contentRoot{ filter: var(--display-filter); transition: filter 180ms ease; }
 
 /* 顯示調校彈窗（modal） */
-.tune-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 18px; }
+.tune-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 18px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 .tune-modal { width: min(520px, 92vw); background: rgba(25,25,25,0.92); border: 1px solid rgba(255,255,255,0.18); border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); overflow: hidden; color: #f2f5f9; }
 
 /* 光明版（sepia-mode）：顯示調校視窗改為淺米黃色底 */
@@ -9950,6 +9950,8 @@ document.addEventListener('DOMContentLoaded', function() {
         function refreshAutoReplenishOptionLabels(){
           const u = getAutoReplenishInputUnit();
           wrap.querySelectorAll('button[data-ar-len]').forEach(btn => {
+            // 令 bootstrap 一定可以關 modal（就算後面 JS 有任何意外）
+            try{ btn.setAttribute('data-bs-dismiss','modal'); }catch(e){}
             const mm = Number(btn.getAttribute('data-ar-len'));
             if (!Number.isFinite(mm)) return;
             // OFF 按鈕保持原樣
@@ -10156,6 +10158,26 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('show.bs.modal', on);
   document.addEventListener('shown.bs.modal', on);
   document.addEventListener('hidden.bs.modal', off);
+})();
+</script>
+
+<script>
+// === AnyGen patch: bootstrap modal 防殘留（避免 modal-backdrop / modal-open 卡住） ===
+(function(){
+  function cleanup(){
+    try{
+      // 清走殘留 backdrop
+      document.querySelectorAll('.modal-backdrop').forEach(function(el){ try{ el.remove(); }catch(e){} });
+      // 清走殘留 class / overflow
+      if(document.body){
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+      }
+    }catch(e){}
+    try{ if(window.agRefreshContentBlur) window.agRefreshContentBlur(); }catch(e){}
+  }
+  document.addEventListener('hidden.bs.modal', function(){ setTimeout(cleanup, 0); });
 })();
 </script>
 
@@ -12015,6 +12037,65 @@ button.btn-sm{
     if(!window.__ag_native_alert) window.__ag_native_alert = window.alert;
     window.alert = function(msg){ window.agAlert(msg); };
   }catch(e){}
+})();
+</script>
+
+
+
+<!-- AnyGen fix: 讓自製彈窗可用的背景模糊（由 openTune/closeTune 呼叫） -->
+<script id="ag-global-blur-helper-live">
+(function(){
+  // 目標：就算 bootstrap modal / 自製 overlay 事件漏咗，都唔會卡住 blur。
+  // 做法：以「畫面上實際有冇遮罩/彈窗」去決定需唔需要 blur。
+
+  function shouldBlur(){
+    try{
+      // 1) Bootstrap modal
+      if(document.querySelector('.modal.show')) return true;
+
+      // 2) 顯示調校（自製）
+      var tune = document.getElementById('displayTuneModal');
+      if(tune){
+        var disp = (tune.style && tune.style.display) ? tune.style.display : '';
+        if(disp && disp !== 'none' && tune.getAttribute('aria-hidden') !== 'true') return true;
+      }
+
+      // 3) 案例教學 overlay（自製）
+      var help = document.getElementById('ag-case-help-overlay');
+      if(help && help.dataset && help.dataset.open === 'true') return true;
+
+      // 4) Bootstrap 有時會殘留 modal-backdrop / modal-open
+      if(document.body && document.body.classList && document.body.classList.contains('modal-open')) return true;
+      if(document.querySelector('.modal-backdrop')) return true;
+    }catch(e){}
+    return false;
+  }
+
+  function apply(on){
+    const root = document.getElementById('contentRoot');
+    if(!root) return;
+    if(on){
+      root.style.setProperty('filter', 'var(--display-filter) blur(38px) saturate(.70) contrast(.95) brightness(.75)', 'important');
+      root.style.setProperty('transform', 'translateZ(0)', '');
+    }else{
+      root.style.removeProperty('filter');
+      root.style.removeProperty('transform');
+    }
+  }
+
+  // 兼容舊呼叫點：agSetContentBlur(true/false) 仍然可用
+  window.agSetContentBlur = function(){
+    try{ apply(shouldBlur()); }catch(e){}
+  };
+  window.agRefreshContentBlur = function(){
+    try{ apply(shouldBlur()); }catch(e){}
+  };
+
+  // watchdog：避免任何情況卡住
+  try{ setInterval(function(){ window.agRefreshContentBlur && window.agRefreshContentBlur(); }, 400); }catch(e){}
+
+  // 首次
+  try{ apply(shouldBlur()); }catch(e){}
 })();
 </script>
 
