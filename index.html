@@ -2324,7 +2324,7 @@ html.no-transitions, html.no-transitions * {
   /* overlay */
   #ag-case-help-overlay{position:fixed;inset:0;z-index:10000;display:none}
   #ag-case-help-overlay[data-open="true"]{display:block}
-  #ag-case-help-backdrop{position:absolute;inset:0;background:rgba(2,6,23,.58)}
+  #ag-case-help-backdrop{position:absolute;inset:0;background:rgba(2,6,23,.58);backdrop-filter: blur(10px);-webkit-backdrop-filter: blur(10px)}
 
   /* modal container */
   #ag-case-help-modal{
@@ -3132,6 +3132,29 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   outline: none !important;
 }
 </style>
+
+<!-- AnyGen patch: 統一頂部 7 粒功能鍵配色（光/暗同一套） -->
+<style id="ag-top-tools-unified-colors">
+  /* 目標：無論 light/dark mode，都用同一套工具鍵顏色，避免黑底黑字/白底白字 */
+  .top-tools .tool-btn,
+  .top-tools .tool-btn *{
+    color: #0f172a !important; /* 深藍黑：確保字/圖標可見 */
+  }
+  .top-tools .tool-btn{
+    background: #ffffff !important;
+    border: 1px solid rgba(15,23,42,.22) !important;
+  }
+  .top-tools .tool-btn:hover{
+    background: #f8fafc !important;
+    border-color: rgba(15,23,42,.30) !important;
+  }
+  .top-tools .tool-btn:active{
+    background: #f1f5f9 !important;
+  }
+  /* 個別鍵：#themeToggleBtn 係 icon，確保唔會被其他規則染色 */
+  .top-tools #themeToggleBtn i{ color:#0f172a !important; }
+</style>
+
 </head>
 <body>
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
@@ -3241,8 +3264,8 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     overlay.dataset.open='true';
     overlay.style.display='block';
     overlay.removeAttribute('aria-hidden');
-    // 背景模糊
-        if(window.agSetContentBlur) window.agSetContentBlur(true);
+    // 背景模糊：改用 backdrop-filter（避免把彈窗一齊 blur）
+    // if(window.agSetContentBlur) window.agSetContentBlur(true);
     // 防止背景頁面滾動
     try{ document.body.style.overflow='hidden'; }catch(e){}
   }
@@ -3251,7 +3274,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     overlay.dataset.open='false';
     overlay.style.display='none';
     overlay.setAttribute('aria-hidden','true');
-        if(window.agSetContentBlur) window.agSetContentBlur(false);
+    // if(window.agSetContentBlur) window.agSetContentBlur(false);
     try{ document.body.style.overflow=''; }catch(e){}
     // 清走 hash，避免任何 :target/路由殘留
     try{
@@ -12458,8 +12481,9 @@ button.btn-sm{
       }
 
       // 3) 案例教學 overlay（自製）
-      var help = document.getElementById('ag-case-help-overlay');
-      if(help && help.dataset && help.dataset.open === 'true') return true;
+      // 注意：案例彈窗自己用 backdrop-filter 做模糊，唔應該再 blur 全頁（否則彈窗內容會一齊變模糊）
+      // var help = document.getElementById('ag-case-help-overlay');
+      // if(help && help.dataset && help.dataset.open === 'true') return true;
 
       // 4) Bootstrap 有時會殘留 modal-backdrop / modal-open
       if(document.body && document.body.classList && document.body.classList.contains('modal-open')) return true;
@@ -12495,6 +12519,130 @@ button.btn-sm{
   try{ apply(shouldBlur()); }catch(e){}
 })();
 </script>
+
+<!-- AnyGen patch v2: 強制頂部7鍵兩模式同色（最後覆寫，確保贏晒） -->
+<style id="ag-top-tools-unified-colors-v2">
+  body .top-tools button.tool-btn,
+  body .top-tools .btn.tool-btn{
+    background: #ffffff !important;
+    border: 1px solid rgba(15,23,42,.22) !important;
+    color: #0f172a !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+  body .top-tools button.tool-btn *,
+  body .top-tools .btn.tool-btn *{
+    color: #0f172a !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+  body .top-tools button.tool-btn:hover,
+  body .top-tools .btn.tool-btn:hover{
+    background: #f8fafc !important;
+    border-color: rgba(15,23,42,.30) !important;
+  }
+  body .top-tools button.tool-btn:active,
+  body .top-tools .btn.tool-btn:active{
+    background: #f1f5f9 !important;
+  }
+</style>
+
+<!-- AnyGen patch v3: 統一「頂部7鍵彈出內容」配色（所有模式同一套） -->
+<style id="ag-unify-top-tools-content-colors-v3">
+  :root{
+    --ag-modal-bg: #ffffff;
+    --ag-modal-bg-2: #f6f7fb;
+    --ag-modal-text: #0f172a;
+    --ag-modal-muted: rgba(15,23,42,.72);
+    --ag-modal-border: rgba(15,23,42,.16);
+    --ag-modal-header-bg: linear-gradient(135deg, #1f3b73, #3b82f6);
+    --ag-modal-header-text: #ffffff;
+  }
+
+  /* 1) Bootstrap modals：Help / QR / 其他（儲存/載入/列印/單位選擇等） */
+  body :is(.modal-content){
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+  body :is(.modal-content) :is(.text-muted, .small, .small-hint){
+    color: var(--ag-modal-muted) !important;
+  }
+  body :is(.modal-content) :is(label, .form-label){
+    color: var(--ag-modal-text) !important;
+  }
+
+  /* Help modal：固定 header/body */
+  body #helpModal .modal-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+    border-bottom: none !important;
+  }
+  body #helpModal .modal-title,
+  body #helpModal .modal-header *{ color: var(--ag-modal-header-text) !important; text-shadow:none !important; }
+  body #helpModal .modal-body{
+    background: linear-gradient(180deg, var(--ag-modal-bg) 0%, var(--ag-modal-bg-2) 100%) !important;
+    color: var(--ag-modal-text) !important;
+  }
+
+  /* QR modal：header/body（若存在） */
+  body #qrModal .modal-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+  }
+  body #qrModal .modal-header *{ color: var(--ag-modal-header-text) !important; }
+  body #qrModal .modal-body{
+    background: linear-gradient(180deg, var(--ag-modal-bg) 0%, var(--ag-modal-bg-2) 100%) !important;
+    color: var(--ag-modal-text) !important;
+  }
+
+  /* 2) 自製「顯示調校」面板（#displayTuneModal） */
+  body #displayTuneModal .tune-modal{
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+  body #displayTuneModal .tune-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+    border-bottom: none !important;
+  }
+  body #displayTuneModal .tune-title,
+  body #displayTuneModal .tune-header *{ color: var(--ag-modal-header-text) !important; text-shadow:none !important; }
+  body #displayTuneModal .tune-body,
+  body #displayTuneModal .tune-row label,
+  body #displayTuneModal .tune-val,
+  body #displayTuneModal .tune-hint{
+    color: var(--ag-modal-text) !important;
+    text-shadow:none !important;
+  }
+  body #displayTuneModal .tune-hint{ color: var(--ag-modal-muted) !important; }
+
+  /* 3) 自製「例／案例」彈窗（#ag-case-help-...） */
+  body #ag-case-help-modal{
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+  body #ag-case-help-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+  }
+  body #ag-case-help-title,
+  body #ag-case-help-header *{ color: var(--ag-modal-header-text) !important; }
+  body #ag-case-help-body{ color: var(--ag-modal-text) !important; }
+  body #ag-case-help-body :is(p, li){ color: var(--ag-modal-text) !important; }
+  body #ag-case-help-body .ag-case-sub{ background: rgba(59,130,246,.08) !important; border-color: rgba(59,130,246,.20) !important; }
+  body #ag-case-help-close{ background: rgba(255,255,255,.92) !important; border-color: rgba(255,255,255,.35) !important; }
+  body #ag-case-help-close{ color: #0f172a !important; }
+
+  /* 4) 強制無視 sepia-mode 對彈窗配色嘅覆寫（用同一套） */
+  body.sepia-mode :is(.modal-content, #displayTuneModal .tune-modal, #ag-case-help-modal){
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+</style>
 
 </body>
 </html>
