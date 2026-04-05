@@ -3268,6 +3268,13 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     // if(window.agSetContentBlur) window.agSetContentBlur(true);
     // 防止背景頁面滾動
     try{ document.body.style.overflow='hidden'; }catch(e){}
+
+    // 狀態列：已開啟「舉例/案例」
+    try{
+      if(window.agStatus && typeof window.agStatus.doing==='function'){
+        window.agStatus.doing('已開啟舉例（案例）。','Opened examples (use cases).');
+      }
+    }catch(e){}
   }
   function close(){
     if(!overlay) return;
@@ -3280,6 +3287,13 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     try{
       if (location.hash) history.replaceState(null, '', location.pathname + location.search);
     } catch(e){}
+
+    // 狀態列：已關閉
+    try{
+      if(window.agStatus && typeof window.agStatus.doing==='function'){
+        window.agStatus.doing('已關閉舉例（案例）。','Closed examples (use cases).');
+      }
+    }catch(e){}
   }
 
   // 供工具列 onclick 使用（同其他5個鍵一致）
@@ -3306,6 +3320,13 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   tabs.forEach(t => {
     t.addEventListener('click', function(){
       setTab(this.dataset.tab);
+      // 狀態列：切換案例頁籤
+      try{
+        var key = String(this.dataset.tab||'');
+        var zh = (key==='case2') ? '已切換到案例二。' : '已切換到案例一。';
+        var en = (key==='case2') ? 'Switched to case 2.' : 'Switched to case 1.';
+        if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing(zh, en);
+      }catch(e){}
     });
   });
 
@@ -5234,6 +5255,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 
             tbody.appendChild(row);
 
+            try{
+              var z = '已新增部件：' + display + ' × ' + quantity + (purpose?('（' + purpose + '）'):'') + '。';
+              var e = 'Added item: ' + display + ' × ' + quantity + (purpose?(' (' + purpose + ')'):'') + '.';
+              if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing(z, e);
+            }catch(e){}
+
             clearCuttingInputs();
         }
 
@@ -5310,6 +5337,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
                     </td>
                 `;
             }
+
+            try{
+              var z = '已更新部件。';
+              var e = 'Item updated.';
+              if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing(z, e);
+            }catch(e){}
 
             exitCuttingEditMode();
         }
@@ -5388,6 +5421,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 
             tbody.appendChild(row);
 
+            try{
+              var z = '已新增材料：' + display + ' × ' + quantity + '。';
+              var e = 'Added material: ' + display + ' × ' + quantity + '.';
+              if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing(z, e);
+            }catch(e){}
+
             clearMaterialInputs();
         }
 
@@ -5465,6 +5504,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
                     </td>
                 `;
             }
+
+            try{
+              var z = '已更新材料。';
+              var e = 'Material updated.';
+              if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing(z, e);
+            }catch(e){}
 
             exitMaterialEditMode();
         }
@@ -7749,9 +7794,29 @@ function calculate() {
                 fi.addEventListener('change', function(){
                   try{
                     const lang = document.getElementById('language')?.value || 'zh';
-                    if (!lb) return;
-                    if (fi.files && fi.files.length > 0) lb.textContent = fi.files[0].name;
-                    else lb.textContent = (lang === 'zh') ? '未選擇檔案' : 'No file chosen';
+                    const hasFile = (fi.files && fi.files.length > 0);
+                    const fname = hasFile ? String(fi.files[0].name||'') : '';
+
+                    if (lb) {
+                      if (hasFile) lb.textContent = fname;
+                      else lb.textContent = (lang === 'zh') ? '未選擇檔案' : 'No file chosen';
+                    }
+
+                    // 狀態列：選擇檔案
+                    try{
+                      if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                        if (hasFile) {
+                          window.agInfoBar.setDoing(
+                            lang==='zh' ? ('已選擇檔案：' + fname) : ('File selected: ' + fname)
+                          );
+                        } else {
+                          window.agInfoBar.setDoing(
+                            lang==='zh' ? '未選擇檔案（請先揀 JSON 檔）' : 'No file selected (please pick a JSON file)'
+                          );
+                        }
+                        try { window.agInfoBar.clearError && window.agInfoBar.clearError(); } catch(e) {}
+                      }
+                    }catch(e){}
                   }catch(e){}
                 });
               }
@@ -7898,11 +7963,32 @@ function calculate() {
             const lang = document.getElementById("language").value;
 
             if (!fileInput.files || fileInput.files.length === 0) {
+                // 狀態列：提示要選檔
+                try{
+                  if (window.agInfoBar && typeof window.agInfoBar.setMissing === 'function') {
+                    window.agInfoBar.setMissing(
+                      lang==='zh' ? '請先選擇要匯入嘅 JSON 檔案。' : 'Please choose a JSON file to import first.'
+                    );
+                  }
+                }catch(e){}
+
                 alert(lang === "zh" ? "請選擇檔案" : "Please select a file");
                 return;
             }
 
             const file = fileInput.files[0];
+
+            // 狀態列：開始匯入
+            try{
+              if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                window.agInfoBar.setDoing(
+                  lang==='zh' ? ('正在匯入檔案：' + (file.name||'') + '…') : ('Importing: ' + (file.name||'') + '…')
+                );
+                try { window.agInfoBar.clearError && window.agInfoBar.clearError(); } catch(e) {}
+                try { window.agInfoBar.clearMissing && window.agInfoBar.clearMissing(); } catch(e) {}
+              }
+            }catch(e){}
+
             const reader = new FileReader();
 
             reader.onload = async function (e) {
@@ -7914,6 +8000,18 @@ function calculate() {
                         savedSchemes.push(schemeData);
                         localStorage.setItem("aluminumCuttingSchemes", JSON.stringify(savedSchemes));
 
+                        // 狀態列：匯入成功
+                        try{
+                          if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                            const showName = (schemeData && schemeData.name) ? String(schemeData.name) : (file && file.name ? String(file.name) : '');
+                            window.agInfoBar.setDoing(
+                              lang==='zh' ? ('匯入成功：' + showName) : ('Imported: ' + showName)
+                            );
+                            try { window.agInfoBar.clearError && window.agInfoBar.clearError(); } catch(e) {}
+                            try { window.agInfoBar.clearMissing && window.agInfoBar.clearMissing(); } catch(e) {}
+                          }
+                        }catch(e){}
+
                         fileInput.value = "";
                         loadScheme(true);
 
@@ -7923,17 +8021,46 @@ function calculate() {
                         const ask = (lang === 'zh') ? '匯入成功！要唔要即刻載入呢個方案？' : 'Imported! Load this scheme now?';
                         const ok = (typeof window.agConfirm === 'function') ? await window.agConfirm(ask) : confirm(ask);
                         if (ok) {
-                            loadSchemeData(newIndex);
                             // loadSchemeData 會自行關閉 modal
+                            loadSchemeData(newIndex);
                         } else {
                             // 留喺 modal，轉去「管理」方便用戶再揀
                             try { schemeHubShow('manage'); } catch(e) {}
+                            // 狀態列：已匯入但未載入
+                            try{
+                              if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                                const showName = (schemeData && schemeData.name) ? String(schemeData.name) : (file && file.name ? String(file.name) : '');
+                                window.agInfoBar.setDoing(
+                                  lang==='zh' ? ('已匯入（未載入）：' + showName) : ('Imported (not loaded): ' + showName)
+                                );
+                              }
+                            }catch(e){}
                         }
 
                     } else {
+                        // 狀態列：格式不正確
+                        try{
+                          if (window.agInfoBar) {
+                            const msg = (lang==='zh') ? '檔案格式不正確：需要包含 name / cuttingItems / materials。' : 'Invalid file format: must include name / cuttingItems / materials.';
+                            if (typeof window.agInfoBar.setErrorCurrentLang === 'function') window.agInfoBar.setErrorCurrentLang(msg);
+                            else if (typeof window.agInfoBar.setError === 'function') window.agInfoBar.setError(msg, msg);
+                          }
+                        }catch(e){}
+
                         alert(lang === "zh" ? "檔案格式不正確" : "Invalid file format");
                     }
                 } catch (error) {
+                    // 狀態列：讀取/解析失敗
+                    try{
+                      if (window.agInfoBar) {
+                        const msg = (lang==='zh')
+                          ? ('無法讀取檔案：' + String(error && error.message ? error.message : error))
+                          : ('Cannot read file: ' + String(error && error.message ? error.message : error));
+                        if (typeof window.agInfoBar.setErrorCurrentLang === 'function') window.agInfoBar.setErrorCurrentLang(msg);
+                        else if (typeof window.agInfoBar.setError === 'function') window.agInfoBar.setError(msg, msg);
+                      }
+                    }catch(e){}
+
                     alert(lang === "zh" ? "無法讀取檔案: " : "Cannot read file: " + error.message);
                 }
             };
@@ -7956,6 +8083,20 @@ function calculate() {
                       ? ('已載入：' + (scheme && scheme.name ? scheme.name : ('#' + (index+1))) + '（可按匯出）')
                       : ('Loaded: ' + (scheme && scheme.name ? scheme.name : ('#' + (index+1))) + ' (export available)');
                 }
+
+                // 狀態列：已載入方案
+                try{
+                  const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
+                  const scheme = savedSchemes[index];
+                  const name = (scheme && scheme.name) ? String(scheme.name) : ('#' + (index+1));
+                  if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                    window.agInfoBar.setDoing(
+                      lang==='zh' ? ('已載入方案：' + name) : ('Loaded scheme: ' + name)
+                    );
+                    try { window.agInfoBar.clearError && window.agInfoBar.clearError(); } catch(e) {}
+                    try { window.agInfoBar.clearMissing && window.agInfoBar.clearMissing(); } catch(e) {}
+                  }
+                }catch(e){}
             } catch(e) {}
 
             // 載入方案後：預設先唔自動計算/唔直出結果，因為用戶通常會先微調再按「計算」
@@ -8156,6 +8297,22 @@ function calculate() {
         function exportScheme(index) {
             try { window.__currentSchemeIndex = index; } catch(e) {}
             const lang = document.getElementById("language").value;
+
+            // 狀態列：匯出中
+            try{
+              const savedSchemes = JSON.parse(localStorage.getItem("aluminumCuttingSchemes") || "[]");
+              const scheme = savedSchemes[index];
+              const name = (scheme && scheme.name) ? String(scheme.name) : ('#' + (index+1));
+              if (window.agStatus && typeof window.agStatus.doing === 'function') {
+                window.agStatus.doing(
+                  lang==='zh' ? ('匯出方案：' + name + '…') : ('Exporting scheme: ' + name + '…')
+                );
+              } else if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                window.agInfoBar.setDoing(
+                  lang==='zh' ? ('匯出方案：' + name + '…') : ('Exporting scheme: ' + name + '…')
+                );
+              }
+            }catch(e){}
             // try to update hint in load scheme modal
             try {
                 const hint = document.getElementById('exportHint');
@@ -8189,14 +8346,47 @@ function calculate() {
                 a.click();
                 a.remove();
 
+                // 狀態列：已開始下載
+                try{
+                  if (window.agStatus && typeof window.agStatus.doing === 'function') {
+                    window.agStatus.doing(
+                      lang==='zh' ? '已開始下載匯出檔案。' : 'Download started.'
+                    );
+                  } else if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                    window.agInfoBar.setDoing(
+                      lang==='zh' ? '已開始下載匯出檔案。' : 'Download started.'
+                    );
+                  }
+                }catch(e){}
+
                 setTimeout(() => URL.revokeObjectURL(url), 500);
             } catch (e) {
+                // 狀態列：匯出失敗
+                try{
+                  const msg = (lang === 'zh' ? '匯出失敗：' : 'Export failed: ') + (e && e.message ? e.message : e);
+                  if (window.agStatus && typeof window.agStatus.errorNow === 'function') window.agStatus.errorNow(msg);
+                  else if (window.agInfoBar && typeof window.agInfoBar.setErrorCurrentLang === 'function') window.agInfoBar.setErrorCurrentLang(msg);
+                }catch(_e){}
+
                 alert((lang === "zh" ? "匯出失敗：" : "Export failed: ") + (e && e.message ? e.message : e));
             }
         }
 
         function exportCurrentScheme() {
             const lang = document.getElementById("language")?.value || 'zh';
+
+            // 狀態列：匯出目前方案
+            try{
+              if (window.agStatus && typeof window.agStatus.doing === 'function') {
+                window.agStatus.doing(
+                  lang==='zh' ? '匯出目前方案…' : 'Exporting current scheme…'
+                );
+              } else if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                window.agInfoBar.setDoing(
+                  lang==='zh' ? '匯出目前方案…' : 'Exporting current scheme…'
+                );
+              }
+            }catch(e){}
 
             try {
                 // 直接由目前畫面狀態組合方案（唔需要先儲存/先載入）
@@ -8253,9 +8443,30 @@ function calculate() {
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
+
+                // 狀態列：已開始下載
+                try{
+                  if (window.agStatus && typeof window.agStatus.doing === 'function') {
+                    window.agStatus.doing(
+                      lang==='zh' ? '已開始下載匯出檔案。' : 'Download started.'
+                    );
+                  } else if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                    window.agInfoBar.setDoing(
+                      lang==='zh' ? '已開始下載匯出檔案。' : 'Download started.'
+                    );
+                  }
+                }catch(e){}
+
                 setTimeout(() => URL.revokeObjectURL(url), 500);
 
             } catch (e) {
+                // 狀態列：匯出失敗
+                try{
+                  const msg = (lang === 'zh' ? '匯出失敗：' : 'Export failed: ') + (e && e.message ? e.message : e);
+                  if (window.agStatus && typeof window.agStatus.errorNow === 'function') window.agStatus.errorNow(msg);
+                  else if (window.agInfoBar && typeof window.agInfoBar.setErrorCurrentLang === 'function') window.agInfoBar.setErrorCurrentLang(msg);
+                }catch(_e){}
+
                 alert((lang === "zh" ? "匯出失敗：" : "Export failed: ") + (e && e.message ? e.message : e));
             }
         }
@@ -8270,6 +8481,19 @@ function calculate() {
                 savedSchemes.splice(index, 1);
                 localStorage.setItem("aluminumCuttingSchemes", JSON.stringify(savedSchemes));
                 loadScheme();
+
+                // 狀態列：已刪除
+                try{
+                  if (window.agStatus && typeof window.agStatus.doing === 'function') {
+                    window.agStatus.doing(
+                      lang==='zh' ? '已刪除方案。' : 'Scheme deleted.'
+                    );
+                  } else if (window.agInfoBar && typeof window.agInfoBar.setDoing === 'function') {
+                    window.agInfoBar.setDoing(
+                      lang==='zh' ? '已刪除方案。' : 'Scheme deleted.'
+                    );
+                  }
+                }catch(e){}
             }
         }
 
@@ -11657,6 +11881,19 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
 
     window.toggleTheme = function() {
         document.body.classList.toggle('sepia-mode');
+        // 同步寫入設定（避免 reload 後回復）
+        try{ if(typeof window.saveSettings==='function') window.saveSettings(); }catch(e){}
+
+        // 狀態列：光明/黑暗模式（sepia-mode = 光明版）
+        try{
+          var isSepia = document.body.classList.contains('sepia-mode');
+          if(window.agStatus && typeof window.agStatus.doing==='function'){
+            window.agStatus.doing(
+              isSepia ? '已切換到光明模式。' : '已切換到黑暗模式。',
+              isSepia ? 'Switched to light mode.' : 'Switched to dark mode.'
+            );
+          }
+        }catch(e){}
     };
 
     setTimeout(function() {
@@ -11866,6 +12103,13 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
     modal.setAttribute('aria-hidden','false');
     // 自製彈窗：手動加背景模糊
         if(window.agSetContentBlur) window.agSetContentBlur(true);
+
+    // 狀態列：已開啟顯示調校
+    try{
+      if(window.agStatus && typeof window.agStatus.doing==='function'){
+        window.agStatus.doing('已開啟顯示調校。','Display tuning opened.');
+      }
+    }catch(e){}
     document.addEventListener('keydown', onEsc);
   }
   function closeTune(){
@@ -11894,7 +12138,18 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
     var closeBtn=document.getElementById('tuneClose');
     if(closeBtn) closeBtn.addEventListener('click', closeTune);
     var doneBtn=document.getElementById('tuneDone');
-    if(doneBtn) doneBtn.addEventListener('click', function(){ applyFromSliders(true); closeTune(); });
+    if(doneBtn) doneBtn.addEventListener('click', function(){
+      applyFromSliders(true);
+      try{
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已套用顯示調校設定。','Display tuning applied.');
+        } else if(window.agInfoBar && typeof window.agInfoBar.setDoing==='function'){
+          var lang=getLang();
+          window.agInfoBar.setDoing(lang==='zh'?'已套用顯示調校設定。':'Display tuning applied.');
+        }
+      }catch(e){}
+      closeTune();
+    });
     var resetBtn=document.getElementById('tuneReset');
     if(resetBtn) resetBtn.addEventListener('click', function(){
       var set=function(id,val){ var el=document.getElementById(id); if(el) el.value=String(val); };
@@ -11905,11 +12160,42 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
       set('tunePaperTint',65);
       set('tunePaperStrength',65);
       applyFromSliders(true);
+      try{
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已重置顯示調校。','Display tuning reset.');
+        }
+      }catch(e){}
     });
 
     ['tuneBrightness','tuneContrast','tuneSaturate','tuneWarmth','tunePaperTint','tunePaperStrength'].forEach(function(id){
       var el=document.getElementById(id);
       if(el) el.addEventListener('input', function(){ applyFromSliders(false); });
+      // 放開滑桿後先出狀態列（避免每一格都狂刷）
+      if(el) el.addEventListener('change', function(){
+        try{
+          var v = String(el.value||'');
+          var zhLabelMap={
+            tuneBrightness:'亮度',
+            tuneContrast:'對比',
+            tuneSaturate:'飽和度',
+            tuneWarmth:'冷暖色',
+            tunePaperTint:'米黃色',
+            tunePaperStrength:'紙紋'
+          };
+          var enLabelMap={
+            tuneBrightness:'Brightness',
+            tuneContrast:'Contrast',
+            tuneSaturate:'Saturation',
+            tuneWarmth:'Warmth',
+            tunePaperTint:'Paper tint',
+            tunePaperStrength:'Paper texture'
+          };
+          var isPct = (id!=='tuneWarmth');
+          var z = '已調整' + (zhLabelMap[id]||'設定') + '：' + v + (isPct?'%':'');
+          var e = (enLabelMap[id]||'Setting') + ' set to ' + v + (isPct?'%':'');
+          if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing(z+'。', e+'.');
+        }catch(e){}
+      });
     });
 
     document.querySelectorAll('.tune-presets .tune-preset').forEach(function(btn){
@@ -11922,6 +12208,18 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
         set('tunePaperTint','data-py',65);
         set('tunePaperStrength','data-pt',65);
         applyFromSliders(true);
+
+        // 狀態列：已選擇某個預設（例如：護眼模式）
+        try{
+          var zhName = btn.getAttribute('data-zh') || btn.textContent || '預設';
+          var enName = btn.getAttribute('data-en') || btn.textContent || 'Preset';
+          if(window.agStatus && typeof window.agStatus.doing==='function'){
+            window.agStatus.doing('現在已選擇' + zhName + '。', 'Now selected: ' + enName + '.');
+          }else if(window.agInfoBar && typeof window.agInfoBar.setDoing==='function'){
+            var lang=getLang();
+            window.agInfoBar.setDoing(lang==='zh' ? ('現在已選擇' + zhName + '。') : ('Now selected: ' + enName + '.'));
+          }
+        }catch(e){}
       });
     });
 
@@ -12458,6 +12756,475 @@ button.btn-sm{
   state.doing.en = 'System ready: enter items and materials, then click "Calculate".';
 
   render();
+})();
+</script>
+
+<!-- AnyGen add: 統一即時狀態列 API（帶時間戳，避免停留舊狀態） -->
+<script id="ag-status-helper">
+(function(){
+  // 目標：
+  // 1) 所有狀態訊息都帶時間戳（避免停留舊狀態）
+  // 2) 狀態列「必須常駐顯示」：字體大小/縮放、QR、自動補料等關鍵狀態
+
+  function pad2(n){ n=Number(n||0); return (n<10?'0':'')+n; }
+  function timeTag(){
+    try{ var d=new Date(); return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
+    catch(e){ return ''; }
+  }
+  function withTag(msg){
+    var t=timeTag();
+    msg = String(msg||'');
+    if(!t) return msg;
+    if(/^\[\d{2}:\d{2}\]\s*/.test(msg)) return msg;
+    return '['+t+'] '+msg;
+  }
+  function getLang(){
+    try{ return (document.getElementById('language')?.value || 'zh')==='en' ? 'en' : 'zh'; }
+    catch(e){ return 'zh'; }
+  }
+
+  // === 常駐摘要狀態（顯示於 doing 訊息尾端）===
+  var summary = window.__agStatusSummary = window.__agStatusSummary || {
+    // 只有用戶撳過「大小」(字體 +/-) 先顯示字體摘要，節省狀態列位置
+    fontTouched: false,
+    fontPx: null,
+    fontPct: null,
+    fontDeltaPx: null,
+    arLabelZh: '',
+    arLabelEn: '',
+    arOn: null,
+    qrOpen: null
+  };
+
+  function fmtFont(){
+    try{
+      // 未用過字體 +/- 就唔顯示
+      if(!summary.fontTouched) return '';
+      if(!summary.fontPx) return '';
+      var px = Number(summary.fontPx||0);
+      var delta = (summary.fontDeltaPx==null) ? null : Number(summary.fontDeltaPx);
+      var pct = (summary.fontPct==null) ? null : Number(summary.fontPct);
+      var dStr = (delta==null) ? '' : ((delta>=0?'+':'') + delta.toFixed(0) + 'px');
+      var pStr = (pct==null) ? '' : (pct.toFixed(0)+'%');
+      // e.g. 字體 18px (+2px,112%)
+      var zh = '字體 ' + px.toFixed(0) + 'px' + (dStr||pStr?('（'+[dStr,pStr].filter(Boolean).join('，')+'）'):'');
+      var en = 'Font ' + px.toFixed(0) + 'px' + (dStr||pStr?(' ('+[dStr,pStr].filter(Boolean).join(', ')+')'):'');
+      return {zh: zh, en: en};
+    }catch(e){ return ''; }
+  }
+  function fmtAr(){
+    try{
+      if(summary.arOn==null && !summary.arLabelZh && !summary.arLabelEn) return '';
+      var on = !!summary.arOn;
+      var zhL = String(summary.arLabelZh||'');
+      var enL = String(summary.arLabelEn||'');
+      if(!zhL) zhL = on ? '已開啟' : '已關閉';
+      if(!enL) enL = on ? 'Enabled' : 'Disabled';
+      return {zh: '補料 ' + zhL, en: 'Top-up ' + enL};
+    }catch(e){ return ''; }
+  }
+  function fmtQr(){
+    if(summary.qrOpen==null) return '';
+    var on = !!summary.qrOpen;
+    return {zh: 'QR ' + (on?'顯示中':'已關閉'), en: 'QR ' + (on?'Open':'Closed')};
+  }
+
+  function buildSummary(lang){
+    var parts=[];
+    // 字體大小屬「即時提示」，唔應該喺用戶轉做其他操作後仍然常駐。
+    // 所以摘要只保留：自動補料 / QR 之類真正需要常駐嘅狀態。
+    var a=fmtAr(); if(a) parts.push((lang==='zh'?a.zh:a.en));
+    var q=fmtQr(); if(q) parts.push((lang==='zh'?q.zh:q.en));
+    if(!parts.length) return '';
+    return '  ｜  ' + parts.join('  ·  ');
+  }
+
+  // 記住「原始 doing 文案」，方便只更新摘要而唔改主訊息
+  var lastDoingRaw = { zh:'', en:'' };
+
+  function setDoingRaw(zh,en){
+    if(typeof zh === 'string') lastDoingRaw.zh = zh;
+    if(typeof en === 'string') lastDoingRaw.en = en;
+  }
+
+  function applyDoing(zh,en){
+    try{
+      if(!window.agInfoBar || typeof window.agInfoBar.setDoing!=='function') return;
+      setDoingRaw(zh,en);
+      var lang = getLang();
+      var sZh = withTag(zh) + buildSummary('zh');
+      var sEn = withTag(en) + buildSummary('en');
+      window.agInfoBar.setDoing(sZh, sEn);
+      try{ window.agInfoBar.clearError && window.agInfoBar.clearError(); }catch(e){}
+      try{ window.agInfoBar.clearMissing && window.agInfoBar.clearMissing(); }catch(e){}
+    }catch(e){}
+  }
+
+  function refreshDoing(){
+    // 用上一次 doing 文案 + 最新摘要重繪（等「字體/補料」即時常駐更新）
+    try{ applyDoing(lastDoingRaw.zh||'', lastDoingRaw.en||''); }catch(e){}
+  }
+
+  function setSummary(patch){
+    try{
+      if(!patch) return;
+      Object.keys(patch).forEach(function(k){ summary[k]=patch[k]; });
+      refreshDoing();
+    }catch(e){}
+  }
+
+  function readFontSummary(){
+    try{
+      var computed = window.getComputedStyle(document.documentElement).fontSize || '';
+      var px = parseFloat(computed);
+      if(!px || !isFinite(px)) return;
+      var base = 16; // 以瀏覽器預設 16px 作基準（最穩定、可解釋）
+      var delta = px - base;
+      var pct = (px/base)*100;
+      setSummary({ fontPx:px, fontDeltaPx:delta, fontPct:pct });
+    }catch(e){}
+  }
+
+  function readArSummary(){
+    try{
+      // 優先讀鋁材版設定 key（如不存在就 ignore）
+      var key = (typeof window.STORAGE_KEY==='string' ? window.STORAGE_KEY : 'aluminumCuttingSettings_v5');
+      var raw = localStorage.getItem(key);
+      if(!raw) return;
+      var s = JSON.parse(raw);
+      var on = !!(s && Number(s.autoReplenishLen||0) > 0);
+      var zhL = (s && s.autoReplenishLenLabelZh) ? String(s.autoReplenishLenLabelZh) : '';
+      var enL = (s && s.autoReplenishLenLabelEn) ? String(s.autoReplenishLenLabelEn) : '';
+      setSummary({ arOn:on, arLabelZh: zhL, arLabelEn: enL });
+    }catch(e){}
+  }
+
+  // 對外 API
+  window.agStatus = {
+    // doing：會自動加時間戳 + 常駐摘要
+    doing: function(zh,en){ applyDoing(String(zh||''), String(en||'')); },
+
+    // doingNow：只傳一段文字（當前語言）都得
+    doingNow: function(msg){
+      var m = String(msg||'');
+      applyDoing(m, m);
+    },
+
+    // missing / error：保留原樣（唔強行加摘要，避免干擾錯誤提示）
+    missing: function(zh,en){
+      try{ if(window.agInfoBar && typeof window.agInfoBar.setMissing==='function') window.agInfoBar.setMissing(withTag(zh), withTag(en)); }catch(e){}
+    },
+    error: function(zh,en){
+      try{ if(window.agInfoBar && typeof window.agInfoBar.setError==='function') window.agInfoBar.setError(withTag(zh), withTag(en)); }catch(e){}
+    },
+    errorNow: function(msg){
+      try{
+        if(window.agInfoBar && typeof window.agInfoBar.setErrorCurrentLang==='function') window.agInfoBar.setErrorCurrentLang(withTag(msg));
+        else if(window.agInfoBar && typeof window.agInfoBar.setError==='function') window.agInfoBar.setError(withTag(msg), withTag(msg));
+      }catch(e){}
+    },
+
+    // 摘要狀態控制
+    setSummary: setSummary,
+    refresh: refreshDoing,
+    readFontSummary: readFontSummary,
+    readArSummary: readArSummary
+  };
+
+  // 初始化：只讀補料（字體要用戶按過「大小」先顯示）
+  try{ readArSummary(); }catch(e){}
+
+  // 若頁面一開始未曾 setDoing，亦補一次預設訊息（保持一致）
+  try{
+    setTimeout(function(){
+      if(!lastDoingRaw.zh && !lastDoingRaw.en){
+        window.agStatus.doing('系統準備就緒。','System ready.');
+      }
+    }, 30);
+  }catch(e){}
+})();
+</script>
+
+
+<!-- AnyGen add: 主要操作即時狀態列提示（中英文） -->
+<script id="ag-status-bindings-v2">
+(function(){
+  function bindOnce(el, ev, fn){
+    try{
+      if(!el) return;
+      var key='__ag_bind_'+ev;
+      if(el[key]) return;
+      el[key]=true;
+      el.addEventListener(ev, fn);
+    }catch(e){}
+  }
+  function unitName(u, lang){
+    if(u==='imperial_decimal') return (lang==='zh') ? '英制（十進）' : 'Imperial (decimal)';
+    if(u==='imperial') return (lang==='zh') ? '英制' : 'Imperial';
+    return (lang==='zh') ? '公制' : 'Metric';
+  }
+  function algoName(v){
+    // 保留原值作 fallback
+    var map={
+      BFD:{zh:'最佳適配（BFD）',en:'Best-Fit Decreasing (BFD)'},
+      FFD:{zh:'首次適配（FFD）',en:'First-Fit Decreasing (FFD)'},
+      NFD:{zh:'下一適配（NFD）',en:'Next-Fit Decreasing (NFD)'},
+      GA:{zh:'遺傳算法（GA）',en:'Genetic Algorithm (GA)'}
+    };
+    return map[v] || {zh: String(v||'演算法'), en: String(v||'Algorithm')};
+  }
+
+  function bind(){
+    var langSel=document.getElementById('language');
+    var unitSel=document.getElementById('unit');
+    var gCutSel=document.getElementById('globalCutUnit');
+    var gMatSel=document.getElementById('globalMaterialUnit');
+    var algoSel=document.getElementById('algorithmSelector');
+    var saw=document.getElementById('sawThickness');
+
+    // 字體 +/-
+    var fontInc=document.getElementById('fontIncBtn');
+    var fontDec=document.getElementById('fontDecBtn');
+
+    // QR
+    var qrBtn=document.getElementById('qrBtn');
+    var qrModal=document.getElementById('qrModal');
+
+    // Auto-Replenish
+    var arToggle=document.getElementById('autoReplenishToggle');
+    var arModal=document.getElementById('autoReplenishModal');
+    var arOptions=document.getElementById('autoReplenishOptions');
+    var arApply=document.getElementById('autoReplenishCustomApply');
+    var arInput=document.getElementById('autoReplenishCustomLen');
+
+    bindOnce(langSel,'change', function(){
+      try{
+        var l = (langSel && langSel.value==='en') ? 'en' : 'zh';
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing(
+            (l==='zh'?'已切換語言：中文。':'已切換語言：英文。'),
+            (l==='zh'?'Language switched: Chinese.':'Language switched: English.')
+          );
+          // 注意：agStatus 會跟隨當前語言顯示；所以用中英兩句同時提供。
+        }
+      }catch(e){}
+    });
+
+    bindOnce(unitSel,'change', function(){
+      try{
+        var u = unitSel.value || 'metric';
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已選擇單位：' + unitName(u,'zh') + '。', 'Unit set to: ' + unitName(u,'en') + '.');
+        }
+      }catch(e){}
+    });
+
+    // 部件/材料：顯示單位（由「單位」彈窗改值時必定會觸發 change）
+    bindOnce(gCutSel,'change', function(){
+      try{
+        var u = gCutSel.value || 'metric';
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已設定部件單位：' + unitName(u,'zh') + '。', 'Cut items unit set to: ' + unitName(u,'en') + '.');
+        }
+      }catch(e){}
+    });
+    bindOnce(gMatSel,'change', function(){
+      try{
+        var u = gMatSel.value || 'metric';
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已設定材料單位：' + unitName(u,'zh') + '。', 'Materials unit set to: ' + unitName(u,'en') + '.');
+        }
+      }catch(e){}
+    });
+
+    // Auto-Replenish：開啟彈窗
+    try{
+      if(arModal && !arModal.__ag_status_bound){
+        arModal.__ag_status_bound=true;
+        arModal.addEventListener('show.bs.modal', function(){
+          try{
+            if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing('已開啟自動補料設定。','Auto-Replenish settings opened.');
+          }catch(e){}
+        });
+      }
+    }catch(e){}
+
+    // Auto-Replenish：OFF / 常用長度按鈕
+    try{
+      if(arOptions && !arOptions.__ag_status_bound){
+        arOptions.__ag_status_bound=true;
+        arOptions.addEventListener('click', function(ev){
+          try{
+            var btn = ev.target && ev.target.closest ? ev.target.closest('[data-ar-len]') : null;
+            if(!btn) return;
+            var zh = btn.getAttribute('data-ar-label-zh') || '已選擇自動補料設定。';
+            var en = btn.getAttribute('data-ar-label-en') || 'Auto-Replenish option selected.';
+            if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing('已選擇：' + zh + '。', 'Selected: ' + en + '.');
+          }catch(e){}
+        }, true);
+      }
+    }catch(e){}
+
+    // Auto-Replenish：自訂長度「套用」
+    try{
+      if(arApply){
+        bindOnce(arApply,'click', function(){
+          // 等原本程式寫入 localStorage 後再讀
+          setTimeout(function(){
+            try{
+              var key = (typeof window.STORAGE_KEY==='string' ? window.STORAGE_KEY : 'aluminumCuttingSettings_v5');
+              var raw = localStorage.getItem(key);
+              var s = raw ? JSON.parse(raw) : {};
+              var zhL = (s && s.autoReplenishLenLabelZh) ? String(s.autoReplenishLenLabelZh) : '';
+              var enL = (s && s.autoReplenishLenLabelEn) ? String(s.autoReplenishLenLabelEn) : '';
+              if(!zhL && arInput) zhL = String(arInput.value||'');
+              if(!enL && arInput) enL = String(arInput.value||'');
+              if(window.agStatus && typeof window.agStatus.doing==='function'){
+                window.agStatus.doing('已套用自訂補料長度：' + (zhL||'（已套用）') + '。', 'Custom top-up length applied: ' + (enL||'(applied)') + '.');
+              }
+            }catch(e){}
+          }, 60);
+        });
+      }
+    }catch(e){}
+
+    // Auto-Replenish：總開關（隱藏 checkbox 仍會 change）
+    bindOnce(arToggle,'change', function(){
+      try{
+        var on = !!arToggle.checked;
+        // 先顯示提示
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing(on ? '已開啟自動補料。' : '已關閉自動補料。', on ? 'Auto-Replenish enabled.' : 'Auto-Replenish disabled.');
+        }
+        // 再讀取實際設定（len / label）作常駐顯示
+        setTimeout(function(){
+          try{ window.agStatus && window.agStatus.readArSummary && window.agStatus.readArSummary(); }catch(e){}
+        }, 60);
+      }catch(e){}
+    });
+
+    bindOnce(algoSel,'change', function(){
+      try{
+        var v = algoSel.value || '';
+        var n = algoName(v);
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已選擇演算法：' + n.zh + '。', 'Algorithm selected: ' + n.en + '.');
+        }
+      }catch(e){}
+    });
+
+    bindOnce(saw,'change', function(){
+      try{
+        var v = String(saw.value||'');
+        if(!v) return;
+        if(window.agStatus && typeof window.agStatus.doing==='function'){
+          window.agStatus.doing('已設定鋸路厚度：' + v + ' mm。', 'Kerf thickness set to: ' + v + ' mm.');
+        }
+      }catch(e){}
+    });
+
+    // 字體放大/縮小：必須顯示目前字體大小 + 幅度
+    function afterFontChange(kind){
+      try{
+        // 等原本程式寫入 html{font-size} / localStorage 後再讀
+        setTimeout(function(){
+          // 字體大小：只做「即時提示」，唔再寫入常駐摘要（避免用戶轉做其他操作時仍然顯示舊字體訊息）
+          try{
+            var computed = window.getComputedStyle(document.documentElement).fontSize || '';
+            var px = parseFloat(computed);
+            if(!px || !isFinite(px)) return;
+            var base = 16;
+            var delta = px - base;
+            var pct = (px/base)*100;
+            if(window.agStatus && typeof window.agStatus.doing==='function'){
+              var zh = '字體' + (kind==='inc'?'放大':'縮小') + '：現在 ' + px.toFixed(0) + 'px（' + (delta>=0?'+':'') + delta.toFixed(0) + 'px，' + pct.toFixed(0) + '%）。';
+              var en = 'Font ' + (kind==='inc'?'increased':'decreased') + ': now ' + px.toFixed(0) + 'px (' + (delta>=0?'+':'') + delta.toFixed(0) + 'px, ' + pct.toFixed(0) + '%).';
+              window.agStatus.doing(zh, en);
+            }
+          }catch(e){}
+        }, 70);
+      }catch(e){}
+    }
+    bindOnce(fontInc,'click', function(){ afterFontChange('inc'); });
+    bindOnce(fontDec,'click', function(){ afterFontChange('dec'); });
+
+    // QR：按掣要顯示；開/關 modal 都要更新常駐狀態
+    bindOnce(qrBtn,'click', function(){
+      try{
+        window.agStatus && window.agStatus.setSummary && window.agStatus.setSummary({qrOpen:true});
+        if(window.agStatus && typeof window.agStatus.doing==='function') window.agStatus.doing('已按 QR 碼。','QR clicked.');
+      }catch(e){}
+    });
+    try{
+      if(qrModal && !qrModal.__ag_status_bound){
+        qrModal.__ag_status_bound=true;
+        qrModal.addEventListener('show.bs.modal', function(){
+          try{ window.agStatus && window.agStatus.setSummary && window.agStatus.setSummary({qrOpen:true}); }catch(e){}
+          try{ window.agStatus && window.agStatus.doing && window.agStatus.doing('QR 碼已顯示。','QR opened.'); }catch(e){}
+        });
+        qrModal.addEventListener('hidden.bs.modal', function(){
+          try{ window.agStatus && window.agStatus.setSummary && window.agStatus.setSummary({qrOpen:false}); }catch(e){}
+          try{ window.agStatus && window.agStatus.doing && window.agStatus.doing('QR 碼已關閉。','QR closed.'); }catch(e){}
+        });
+      }
+    }catch(e){}
+
+    // Auto-Replenish：揀完尺寸後，要顯示「而家揀咗邊個」+ 更新常駐狀態
+    try{
+      if(arOptions && !arOptions.__ag_status_summary_bound){
+        arOptions.__ag_status_summary_bound=true;
+        arOptions.addEventListener('click', function(){
+          setTimeout(function(){
+            try{ window.agStatus && window.agStatus.readArSummary && window.agStatus.readArSummary(); }catch(e){}
+          }, 80);
+        }, true);
+      }
+    }catch(e){}
+    try{
+      if(arApply && !arApply.__ag_status_summary_bound){
+        arApply.__ag_status_summary_bound=true;
+        arApply.addEventListener('click', function(){
+          setTimeout(function(){
+            try{ window.agStatus && window.agStatus.readArSummary && window.agStatus.readArSummary(); }catch(e){}
+          }, 90);
+        }, true);
+      }
+    }catch(e){}
+
+    // 監聽刪除按鈕（部件/材料）
+    if(!document.__ag_del_status_bound){
+      document.__ag_del_status_bound=true;
+      document.addEventListener('click', function(ev){
+        try{
+          var btn = ev.target && ev.target.closest ? ev.target.closest('button') : null;
+          if(!btn) return;
+          // 只處理垃圾桶 icon / 或 outline-danger
+          var isTrash = !!btn.querySelector('.fa-trash-can');
+          if(!isTrash && !(btn.classList && btn.classList.contains('btn-outline-danger'))) return;
+
+          // 部件 / 材料
+          var tr = btn.closest('tr');
+          var table = btn.closest('table');
+          if(!tr || !table) return;
+          var isCut = (table.id==='cuttingItemsTable');
+          var isMat = (table.id==='materialItemsTable');
+          if(!isCut && !isMat) return;
+
+          // 先讀 display（remove 前）
+          var disp = (tr && tr.dataset && tr.dataset.display) ? String(tr.dataset.display) : '';
+          if(window.agStatus && typeof window.agStatus.doing==='function'){
+            window.agStatus.doing(
+              (isCut ? ('已刪除部件：' + (disp||'（未命名）') ) : ('已刪除材料：' + (disp||'（未命名）'))) + '。',
+              (isCut ? ('Deleted item: ' + (disp||'(unnamed)')) : ('Deleted material: ' + (disp||'(unnamed)'))) + '.'
+            );
+          }
+        }catch(e){}
+      }, true);
+    }
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind);
+  else bind();
 })();
 </script>
 
