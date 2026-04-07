@@ -10179,13 +10179,13 @@ document.addEventListener('DOMContentLoaded', function() {
         // 新版：len=0 代表 OFF；>0 代表 ON
         autoReplenishLen: (function(){
           try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); const v=Number(s&&s.autoReplenishLen); if(!Number.isNaN(v)) return v; } } catch(e) {}
-          // 回退：如果 checkbox 開住，預設用 6000
+          // 回退：如果 checkbox 開住，預設用 3000
           const chk = document.getElementById('autoReplenishToggle');
-          return (chk && chk.checked) ? 6000 : 0;
+          return (chk && chk.checked) ? 3000 : 0;
         })(),
         autoReplenishLastLen: (function(){
           try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); const v=Number(s&&s.autoReplenishLastLen); if(!Number.isNaN(v)) return v; } } catch(e) {}
-          return 6000;
+          return 3000;
         })(),
         autoReplenishLenLabelZh: (function(){
           try { const saved = localStorage.getItem(STORAGE_KEY); if(saved){ const s=JSON.parse(saved); return s && s.autoReplenishLenLabelZh; } } catch(e) {}
