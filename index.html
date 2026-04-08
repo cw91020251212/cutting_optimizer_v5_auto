@@ -1284,7 +1284,8 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
 
         .step-indicator {
             background-color: #ffc107;
-            color: #212529;
+            /* 數字用啡色（按你截圖紅圈 1/4） */
+            color: #6a5040;
             padding: 5px 15px;
             border-radius: 20px;
             font-weight: 700;
@@ -11375,8 +11376,26 @@ body.sepia-mode .card {
 
 body.sepia-mode .card-header,
 body.sepia-mode .section-header {
-    background: linear-gradient(135deg, #6a5040 0%, #8a6a50 100%) !important;
+    /* Light Mode（sepia）標題條：左深右淺（取消灰色、深啡唔好太深） */
+    background: linear-gradient(90deg,
+      #6f5a4a 0%,
+      #7c604e 24%,
+      #8a6a50 55%,
+      #ad8a6b 80%,
+      #dccbb7 100%
+    ) !important;
     border-bottom: 2px solid #8b6f47 !important;
+}
+
+/* 只針對「設定」卡：左深右淺（取消灰色、深啡唔好太深） */
+body.sepia-mode #settings-card .section-header{
+    background: linear-gradient(90deg,
+      #6b5748 0%,
+      #7a5f4d 22%,
+      #8a6a50 55%,
+      #a8876a 78%,
+      #dccbb7 100%
+    ) !important;
 }
 
 body.sepia-mode .card-body,
@@ -11408,6 +11427,11 @@ body.sepia-mode .section-title,
 body.sepia-mode .card-header *,
 body.sepia-mode .section-header * {
     color: #ffffff !important;
+}
+
+/* 例外：步驟徽章數字要啡色（避免被上面白字規則蓋過） */
+body.sepia-mode .section-header .step-indicator{
+    color: #6a5040 !important;
 }
 
 body.sepia-mode h2, body.sepia-mode h3,
