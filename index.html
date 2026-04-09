@@ -1,7 +1,12 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh">
 <head>
-
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link href="https://cdn.jsdelivr.net" rel="dns-prefetch"/>
+<link crossorigin="" href="https://cdn.jsdelivr.net" rel="preconnect"/>
+<link href="https://cdnjs.cloudflare.com" rel="dns-prefetch"/>
+<link crossorigin="" href="https://cdnjs.cloudflare.com" rel="preconnect"/>
 <style id="critical-preload-bg">
   /* Prevent startup flash: match background to preload theme before the rest of CSS/JS loads */
   html.preload-normal body { background-color: #f3f5f7 !important; }
@@ -31,7 +36,6 @@
   html.preload-sepia  .card-body,
   html.preload-sepia  .card-body-light { background-color: #f5ead5 !important; }
 </style>
-
 <script>
 /* Anti-flash：在畫面渲染前，先套用主題/字體（避免先閃灰色畫面） */
 (function(){
@@ -50,6 +54,49 @@
   } catch(e) {}
 })();
 </script>
+<script id="ag-auto-low-perf">
+// Auto low-performance mode: disable heavy blur/shadow effects on weak devices
+(function(){
+  try{
+    var force = localStorage.getItem('ag_low_perf') === '1';
+    var mem = navigator.deviceMemory || 0;
+    var cores = navigator.hardwareConcurrency || 0;
+    var weak = (mem && mem <= 4) || (cores && cores <= 4);
+    var reduced = false;
+    try{ reduced = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+    if(force || weak || reduced){
+      document.documentElement.classList.add('ag-low-perf');
+    }
+  }catch(e){}
+})();
+</script>
+
+<style id="ag-low-perf-css">
+/* Low-performance mode (auto) */
+html.ag-low-perf *{
+  /* disable expensive backdrop blur */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html.ag-low-perf #contentRoot{
+  filter: none !important;
+  transition: none !important;
+}
+html.ag-low-perf body *{
+  text-shadow: none !important;
+}
+html.ag-low-perf .card,
+html.ag-low-perf .btn,
+html.ag-low-perf .tool-btn,
+html.ag-low-perf .modal-content{
+  box-shadow: none !important;
+}
+html.ag-low-perf .modal-backdrop{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+</style>
+
 <style>
       /* Equalize height and look for algorithm select and saw thickness input */
 
@@ -698,7 +745,7 @@ body{ --ag-white-text-shadow: 0 1px 3px rgba(0,0,0,.22); }
 
 /* 保險：就算 backdrop-filter（部份瀏覽器/情況）效果弱，仍強制把內容區 blur 到睇唔清 */
 body.modal-open #contentRoot{
-  filter: var(--display-filter) blur(38px) saturate(.70) contrast(.95) brightness(.75) !important;
+  filter: var(--display-filter) blur(16px) saturate(.70) contrast(.95) brightness(.75) !important;
   transform: translateZ(0);
 }
 
@@ -901,20 +948,17 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
     border-radius: 14px !important;
   }
 </style>
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
         body {
             background-color: #6b7280; /* fallback */
-            background-image:
-              /* 暗板灰：上淺下深漸變（增加層次） */
-              linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%),
-              /* 原本格仔紋理 */
-              linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
-              linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px);
-            background-size: 100% 100%, 24px 24px, 24px 24px;
+            /* v9：背景底層精簡（只留主漸變），紋理由 body::before 提供 */
+            background-image: linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%);
+            background-size: 100% 100%;
             background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-position: center top;
             color: #1f2d2a;
             padding: 8px;
         }
@@ -1281,74 +1325,20 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
         }
 
 
-/* 不規則紋理層（針對大面積漸變：避免太平凡） */
-        /* 套用範圍：
-           - #pageTitle（頂部藍色大橫幅）
-           - .section-header（包括「設置」呢類大面積漸變）
-           - 你日後如有其他大面積漸變，亦可手動加 class="ag-textured-gradient" */
-        .ag-textured-gradient,
-        .section-header,
-        #pageTitle{
-            position: relative;
-            overflow: hidden;
-        }
-        /* 一般（跟隨模式）：卡片內容區用較細緻；橫幅/標題會另有更粗版本 */
-        .ag-textured-gradient::after,
-        .card-body-light::after{
-            content: "";
-            position: absolute;
-            inset: 0;
-            /* 兩層同一紋理，少少 offset 造出更「凹凸」嘅立體感 */
-            background-image: var(--ag-irregular-texture), var(--ag-irregular-texture);
-            background-size: 220px 220px, 220px 220px;
-            background-position: 0 0, 2px 2px;
-            opacity: 0.30;
-            mix-blend-mode: overlay;
-            filter: contrast(175%) brightness(1.08);
-            pointer-events: none;
-            z-index: 1;
-        }
+/*
+  紋理策略（2026-04-09）：只保留「背景」紋理。
+  - 已移除 #pageTitle / .section-header / card 等所有前景紋理覆蓋層
+  - 背景紋理仍由 body::before 提供（見下方）
+*/
+.ag-textured-gradient::after,
+.section-header::after,
+#pageTitle::after,
+.card-body-light::after{ display:none !important; }
+.ag-textured-gradient,
+.section-header,
+#pageTitle,
+.card-body-light{ overflow: visible !important; }
 
-        /* 黑暗模式：用白色紋理先睇得清 */
-        body:not(.sepia-mode) .ag-textured-gradient::after,
-        body:not(.sepia-mode) .card-body-light::after{
-            background-image: var(--ag-irregular-texture-dark), var(--ag-irregular-texture-dark);
-            mix-blend-mode: soft-light;
-            opacity: 0.22;
-            filter: contrast(150%) brightness(1.15);
-        }
-
-        /* 橫幅/大標題：圖案要大啲、凹凸更重（你圈住嘅兩個位） */
-        .section-header::after,
-        #pageTitle::after{
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image: var(--ag-irregular-texture), var(--ag-irregular-texture);
-            background-size: 360px 360px, 360px 360px;
-            background-position: 0 0, 4px 4px;
-            opacity: 0.42;
-            mix-blend-mode: hard-light;
-            filter: contrast(210%) brightness(1.10);
-            pointer-events: none;
-            z-index: 1;
-        }
-        body:not(.sepia-mode) .section-header::after,
-        body:not(.sepia-mode) #pageTitle::after{
-            background-image: var(--ag-irregular-texture-dark), var(--ag-irregular-texture-dark);
-            mix-blend-mode: overlay;
-            opacity: 0.36;
-            filter: contrast(205%) brightness(1.25);
-        }
-
-        /* .card-body-light 本身未必有 position，所以補返（唔影響布局） */
-        .card-body-light{ position: relative; overflow: hidden; }
-
-        /* 確保文字/Icon/step indicator 永遠喺紋理之上 */
-        .ag-textured-gradient > *,
-        .section-header > *,
-        #pageTitle > *,
-        .card-body-light > *{ position: relative; z-index: 3; }
 
         
         .section-title {
@@ -2244,7 +2234,7 @@ body.sepia-mode #agAutoReplenishWarning.ag-ar-warning{
     padding-top: 1.5rem !important;
 }
 </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 /* 大標題：跟返舊版做法（Nut 左、標題中、曲尺右；build 置於標題下方） */
 h2#pageTitle{
@@ -2335,76 +2325,163 @@ body.sepia-mode .opt-summary-box {
 html.preload-normal,
 html.preload-normal body {
   background-color: #6b7280 !important; /* fallback */
-  background-image:
-    /* 暗板灰：上淺下深漸變（避免單調） */
-    linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%),
-    /* 原本格仔紋理 */
-    linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
-    linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
-  background-size: 100% 100%, 24px 24px, 24px 24px !important;
+  /* v9：背景底層精簡（只留主漸變），紋理由 body::before 提供 */
+  background-image: linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%) !important;
+  background-size: 100% 100% !important;
   background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-position: center top !important;
   color: #1f2d2a !important;
 }
 html.preload-sepia,
 html.preload-sepia body {
   background-color: var(--ag-sepia-bg-fallback) !important;
-  background-image:
-    /* 主漸變：上淺下深（可一鍵換色） */
-    var(--ag-sepia-bg-main),
-    /* 第二色調：淡淡青綠陰影，令背景有層次 */
-    radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
-    /* 微細紋理：紙張/金屬「拉絲感」(直/橫細紋) */
-    repeating-linear-gradient(90deg, rgba(255,255,255,0.065) 0px, rgba(255,255,255,0.065) 1px, rgba(0,0,0,0.040) 2px, rgba(255,255,255,0.000) 4px),
-    repeating-linear-gradient(0deg,  rgba(255,255,255,0.040) 0px, rgba(255,255,255,0.040) 1px, rgba(0,0,0,0.022) 2px, rgba(255,255,255,0.000) 6px),
-    /* 原有格仔：保留，但降低存在感 */
-    linear-gradient(135deg, rgba(139,111,71,0.060) 0, rgba(139,111,71,0.060) 1px, transparent 1px, transparent 12px),
-    linear-gradient(45deg, rgba(0,0,0,0.045) 0, rgba(0,0,0,0.045) 1px, transparent 1px, transparent 12px) !important;
-  background-size: 100% 100%, auto, 7px 7px, 9px 9px, 24px 24px, 24px 24px !important;
+  /* v9：背景底層精簡（只留主漸變），紋理由 body::before 提供 */
+  background-image: var(--ag-sepia-bg-main) !important;
+  background-size: 100% 100% !important;
   background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-position: center top !important;
   color: #3e2a10 !important;
 }
 body:not(.sepia-mode) {
   background-color: #6b7280 !important; /* fallback */
-  background-image:
-    /* 暗板灰：上淺下深漸變 */
-    linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%),
-    /* 原本格仔紋理 */
-    linear-gradient(135deg, rgba(255,255,255,0.06) 0, rgba(255,255,255,0.06) 1px, transparent 1px, transparent 12px),
-    linear-gradient(45deg,  rgba(0,0,0,0.10) 0, rgba(0,0,0,0.10) 1px, transparent 1px, transparent 12px) !important;
-  background-size: 100% 100%, 24px 24px, 24px 24px !important;
+  /* v9：背景底層精簡（只留主漸變），紋理由 body::before 提供 */
+  background-image: linear-gradient(180deg, #808895 0%, #6b7280 45%, #3d434d 100%) !important;
+  background-size: 100% 100% !important;
   background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-position: center top !important;
   color: #1f2d2a !important;
 }
 
-/* === AnyGen patch: 背景也做紋理（與大標題同款） ===
-   你提到「紋理唔明顯」+「應該統一用返同一種」：
-   下面改為 *完全跟 #pageTitle / .section-header* 同一套紋理參數。
-   - sepia/光明版：hard-light、360px、較高對比
-   - 黑暗模式：overlay、360px、提高亮度
+/* v9：已移除舊多層背景（拉絲/格仔等），改用上方精簡版 */
+
+/* === AnyGen patch: 背景麻布質地（移植自宿舍頁 + 放大紋理） ===
+   你想要嘅係「質地/紋理」而唔係顏色：
+   - 深色背景：用白色凹凸紋理 + overlay，再加少少拉絲線，立體感更強
+   - 光明版/sepia：用深色凹凸紋理 + multiply，喺淺底都睇得清
+   - 紋理 size 放大（手機唔會細到睇唔到）
 */
+:root{
+  /* ✅ 真・麻布紋（burlap weave）— 純質地，透明底 */
+  --ag-burlap-weave-light: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27320%27%20height%3D%27320%27%20viewBox%3D%270%200%20320%20320%27%3E%3Cdefs%3E%3Cpattern%20id%3D%27w%27%20width%3D%2732%27%20height%3D%2732%27%20patternUnits%3D%27userSpaceOnUse%27%3E%3Cg%20opacity%3D%270.85%27%3E%3Cpath%20d%3D%27M0%208%20H32%27%20stroke%3D%27rgba(255,255,255,0.38)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M0%2024%20H32%27%20stroke%3D%27rgba(255,255,255,0.30)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M8%200%20V32%27%20stroke%3D%27rgba(255,255,255,0.30)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M24%200%20V32%27%20stroke%3D%27rgba(255,255,255,0.24)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M0%2016%20H32%27%20stroke%3D%27rgba(255,255,255,0.18)%27%20stroke-width%3D%271%27/%3E%3Cpath%20d%3D%27M16%200%20V32%27%20stroke%3D%27rgba(255,255,255,0.16)%27%20stroke-width%3D%271%27/%3E%3C/g%3E%3C/pattern%3E%3Cfilter%20id%3D%27d%27%20x%3D%27-15%25%27%20y%3D%27-15%25%27%20width%3D%27130%25%27%20height%3D%27130%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.9%27%20numOctaves%3D%272%27%20seed%3D%277%27%20result%3D%27n%27/%3E%3CfeDisplacementMap%20in%3D%27SourceGraphic%27%20in2%3D%27n%27%20scale%3D%271.6%27%20xChannelSelector%3D%27R%27%20yChannelSelector%3D%27G%27/%3E%3C/filter%3E%3C/defs%3E%3Crect%20width%3D%27320%27%20height%3D%27320%27%20fill%3D%27url(%23w)%27%20filter%3D%27url(%23d)%27/%3E%3C/svg%3E");
+  --ag-burlap-weave-dark: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27320%27%20height%3D%27320%27%20viewBox%3D%270%200%20320%20320%27%3E%3Cdefs%3E%3Cpattern%20id%3D%27w%27%20width%3D%2732%27%20height%3D%2732%27%20patternUnits%3D%27userSpaceOnUse%27%3E%3Cg%20opacity%3D%270.85%27%3E%3Cpath%20d%3D%27M0%208%20H32%27%20stroke%3D%27rgba(0,0,0,0.26)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M0%2024%20H32%27%20stroke%3D%27rgba(0,0,0,0.20)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M8%200%20V32%27%20stroke%3D%27rgba(0,0,0,0.20)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M24%200%20V32%27%20stroke%3D%27rgba(0,0,0,0.16)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M0%2016%20H32%27%20stroke%3D%27rgba(0,0,0,0.12)%27%20stroke-width%3D%271%27/%3E%3Cpath%20d%3D%27M16%200%20V32%27%20stroke%3D%27rgba(0,0,0,0.10)%27%20stroke-width%3D%271%27/%3E%3C/g%3E%3C/pattern%3E%3Cfilter%20id%3D%27d%27%20x%3D%27-15%25%27%20y%3D%27-15%25%27%20width%3D%27130%25%27%20height%3D%27130%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.9%27%20numOctaves%3D%272%27%20seed%3D%277%27%20result%3D%27n%27/%3E%3CfeDisplacementMap%20in%3D%27SourceGraphic%27%20in2%3D%27n%27%20scale%3D%271.6%27%20xChannelSelector%3D%27R%27%20yChannelSelector%3D%27G%27/%3E%3C/filter%3E%3C/defs%3E%3Crect%20width%3D%27320%27%20height%3D%27320%27%20fill%3D%27url(%23w)%27%20filter%3D%27url(%23d)%27/%3E%3C/svg%3E");
+
+  /* ✅ 放大少少：數值越大 = 紋理越粗（手機更清晰） */
+  --ag-bg-texture-size: 110px;
+
+  /* ✅ 紋理強度（可微調）：越大越明顯 */
+  --ag-bg-texture-opacity-dark: 0.44;
+  --ag-bg-texture-opacity-light: 0.32;
+
+  /* ✅ 立體感：對比/亮度微調（會有少少性能成本） */
+  --ag-bg-texture-relief: contrast(240%) brightness(1.06) saturate(1.02);
+  --ag-bg-texture-relief-light: contrast(225%) brightness(0.98) saturate(1.02);
+}
+
+/* 手機：再放大少少，避免紋理過幼 */
+@media (max-width: 520px){
+  :root{ --ag-bg-texture-size: 150px; }
+}
+
 body{ position: relative; }
-body::before{
-  content:"";
+
+/* 深色主題（預設）：overlay 更有「麻布凹凸」立體感 */
+body:not(.sepia-mode)::before{
+  content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background-image: var(--ag-irregular-texture), var(--ag-irregular-texture);
-  background-size: 360px 360px, 360px 360px;
-  background-position: 0 0, 4px 4px;
-  opacity: 0.32;
-  mix-blend-mode: hard-light;
-  filter: contrast(210%) brightness(1.10);
-}
-/* 黑暗模式：跟大標題 dark 版做法 */
-body:not(.sepia-mode)::before{
-  background-image: var(--ag-irregular-texture-dark), var(--ag-irregular-texture-dark);
+
+  background-image:
+    var(--ag-burlap-weave-light),
+    var(--ag-burlap-weave-light),
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.055) 0px,
+      rgba(255,255,255,0.055) 1px,
+      rgba(0,0,0,0.020) 2px,
+      rgba(255,255,255,0.000) 5px
+    );
+  background-size:
+    var(--ag-bg-texture-size) var(--ag-bg-texture-size),
+    calc(var(--ag-bg-texture-size) * 0.82) calc(var(--ag-bg-texture-size) * 0.82),
+    7px 7px;
+  background-position:
+    0 0,
+    5px 5px,
+    0 0;
+
+  opacity: var(--ag-bg-texture-opacity-dark);
   mix-blend-mode: overlay;
-  opacity: 0.28;
-  filter: contrast(205%) brightness(1.25);
+  filter: var(--ag-bg-texture-relief);
 }
+
+/* 光明版 / sepia：multiply 先喺淺底睇得出質地 */
+body.sepia-mode::before,
+html.preload-sepia body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background-image:
+    var(--ag-burlap-weave-dark),
+    var(--ag-burlap-weave-dark),
+    repeating-linear-gradient(90deg,
+      rgba(0,0,0,0.040) 0px,
+      rgba(0,0,0,0.040) 1px,
+      rgba(255,255,255,0.00) 5px
+    );
+  background-size:
+    var(--ag-bg-texture-size) var(--ag-bg-texture-size),
+    calc(var(--ag-bg-texture-size) * 0.82) calc(var(--ag-bg-texture-size) * 0.82),
+    7px 7px;
+  background-position:
+    0 0,
+    5px 5px,
+    0 0;
+
+  opacity: var(--ag-bg-texture-opacity-light);
+  mix-blend-mode: multiply;
+  filter: var(--ag-bg-texture-relief-light);
+}
+
+/* 輕微暗角：增加凹凸感（唔會太搶） */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(1200px 800px at 50% 30%, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
+  opacity: 0.22;
+  mix-blend-mode: soft-light;
+}
+body.sepia-mode::after,
+html.preload-sepia body::after{
+  background: radial-gradient(1200px 800px at 50% 30%, rgba(255,255,255,0.70), rgba(0,0,0,0.10));
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+}
+
+/* 低性能模式：減低合成成本，避免手機掉幀 */
+html.ag-low-perf body::before{
+  mix-blend-mode: normal !important;
+  filter: none !important;
+  opacity: 0.18 !important;
+}
+html.ag-low-perf body::after{
+  mix-blend-mode: normal !important;
+  opacity: 0.10 !important;
+}
+
 /* 確保內容永遠喺紋理層之上 */
 body > *{ position: relative; z-index: 1; }
+
+/* v8：用戶回饋手機更窒 —— 已移除所有前景（卡片）紋理覆蓋層，只保留 body 背景紋理。 */
 
 @media print{
   body::before{ display:none !important; }
@@ -2415,7 +2492,6 @@ html.no-transitions, html.no-transitions * {
   animation: none !important;
 }
 </style>
-
 <!-- AnyGen: 案例彈窗樣式（香港用語） -->
 <style id="ag-case-help-style">
   /* === AnyGen: Use-cases modal (beautified) === */
@@ -2572,7 +2648,6 @@ html.no-transitions, html.no-transitions * {
   body.sepia-mode .ag-case-tab[aria-selected="true"]{background: linear-gradient(135deg, #6a5040, #4f3a2e); border-color:#4f3a2e;}
   body.sepia-mode .ag-case-steps li{background: rgba(255,253,248,.92);}
 </style>
-
 <style id="ag-final-height-sync-fix">
 /* 最後覆寫：Bootstrap 的 .align-items-center 有 !important，
    必須用更高 specificity 先可以令同一行元素真正 stretch 同高 */
@@ -2993,7 +3068,6 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
   #displayTuneModal .tune-presets .tune-preset.preset-warmer{      background: linear-gradient(135deg, #ffd26a 0%, #ffb04a 45%, #ff7a2f 100%) !important; color:#1b1b1b !important; text-shadow: 0 1px 2px rgba(255,255,255,0.22) !important; }
   #displayTuneModal .tune-presets .tune-preset.preset-eye{ background: linear-gradient(135deg, #ffe9b8 0%, #ffd59b 40%, #f7b777 100%) !important; color:#1b1b1b !important; text-shadow: none !important; }
 </style>
-
 <style id="ag-float-buttons-fixed-style">
   /* 浮動鍵：只保留中/英（固定顏色、不分光暗），陰影跟宿舍：硬邊 0 blur */
   #languageToggle.language-toggle{
@@ -3062,7 +3136,6 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
     #languageToggle.language-toggle{ width: 38px !important; height: 38px !important; font-size: 0.86rem !important; top: calc(20px + env(safe-area-inset-top)) !important; }
   }
 </style>
-
 <style id="ag-button-hard-shadow-v1">
   /* 目標：全部主要按鈕改用「實體硬邊投影」（0 blur），刪除模糊陰影。
      例子參考：右上「中/英」浮動掣，但位移只要少少。
@@ -3118,7 +3191,6 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
       -8px 11px 0 1px rgba(0,0,0,0.22) !important;
   }
 </style>
-
 <style id="ag-shadow-final-v2">
 /* === AnyGen patch: 按鈕硬邊投影（最終覆寫 v2 / 2026-03-28） ===
    修正：投影方向改為「左下」；並放到 
@@ -3127,10 +3199,12 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
   if(window.agSetContentBlur) return;
   let count = 0;
   function apply(){
+    // Low-perf：避免用 blur/filter（呢類會令手機掉幀）
+    try{ if(document.documentElement.classList.contains('ag-low-perf')) return; }catch(e){}
     const root = document.getElementById('contentRoot');
     if(!root) return;
     if(count>0){
-      root.style.setProperty('filter', 'var(--display-filter) blur(38px) saturate(.70) contrast(.95) brightness(.75)', 'important');
+      root.style.setProperty('filter', 'var(--display-filter) blur(16px) saturate(.70) contrast(.95) brightness(.75)', 'important');
       root.style.setProperty('transform', 'translateZ(0)', '');
     }else{
       root.style.removeProperty('filter');
@@ -3148,7 +3222,16 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
 })();
 </script>
 
-</head> 前最後一段，確保覆蓋所有較後 style（包括 sepia-mode 內的 !important）。
+
+<style id="ag-v4-content-visibility">
+/* v4 perf: skip rendering offscreen sections */
+#cuttingItemsSection, #materialsSection, #resultsSection {
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
+</style>
+<style id="ag-btn-shadow-v4">
+/* </head> 前最後一段，確保覆蓋所有較後 style（包括 sepia-mode 內的 !important）。
    保留：#languageToggle（右上浮動中/英）原本投影。
 */
 :root{
@@ -3243,7 +3326,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   outline: none !important;
 }
 </style>
-
 <!-- AnyGen patch: 統一頂部 7 粒功能鍵配色（光/暗同一套） -->
 <style id="ag-top-tools-unified-colors">
   /* 目標：無論 light/dark mode，都用同一套工具鍵顏色，避免黑底黑字/白底白字 */
@@ -3265,71 +3347,71 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   /* 個別鍵：#themeToggleBtn 係 icon，確保唔會被其他規則染色 */
   .top-tools #themeToggleBtn i{ color:#0f172a !important; }
 </style>
-
+<style id="ag-perf-hints">
+/* Performance hints (auto) */
+@media (prefers-reduced-motion: reduce){
+  *{ scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+}
+</style>
 </head>
 <body>
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
-<button id="languageToggle" class="language-toggle fixed-btn" type="button" aria-label="Language">EN</button>
+<button aria-label="Language" class="language-toggle fixed-btn" id="languageToggle" type="button">EN</button>
 <div id="contentRoot">
 <div class="container-fluid">
 <h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
-<span id="titleNut" class="title-nut" aria-hidden="true"></span>
+<span aria-hidden="true" class="title-nut" id="titleNut"></span>
 <span id="titleText">鋁材切割排版</span>
-
-<span id="titleRuler" class="title-ruler" aria-hidden="true"></span>
+<span aria-hidden="true" class="title-ruler" id="titleRuler"></span>
 </h2>
-
-<div class="top-tools" aria-label="Toolbar">
-  <button class="btn tool-btn tool-btn-soft tool-btn-font" id="fontIncBtn" type="button" title="Increase font size" onclick="adjustFontSize(1)"><span class="tool-text">A+</span></button>
-  <button class="btn tool-btn tool-btn-soft tool-btn-font" id="fontDecBtn" type="button" title="Decrease font size" onclick="adjustFontSize(-1)"><span class="tool-text">A-</span></button>
-  <button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" type="button" title="Light/Dark" onclick="toggleTheme()"><i class="fa-solid fa-circle-half-stroke"></i></button>
-  <button class="btn tool-btn tool-btn-soft" id="displayTuneBtn" type="button" title="顯示調校" aria-label="顯示調校"><i class="fa-solid fa-sliders"></i></button>
-  <button class="btn tool-btn tool-btn-soft" id="newHelpBtn" type="button" title="Help" aria-label="Help" onclick="try{ if(window.showHelp) showHelp(); else { var hb=document.getElementById('helpButton'); if(hb) hb.click(); }}catch(e){}"><span class="tool-text">?</span></button>
-  <!-- 案例（固定放喺頂部工具列：唔靠 JS 插入） -->
-  <button class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" type="button" title="Examples" aria-label="Examples" aria-haspopup="dialog" aria-controls="ag-case-help-overlay" onclick="showCaseHelp()"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
-  <button class="btn tool-btn tool-btn-soft" id="qrBtn" type="button" title="QR Code" aria-label="QR Code" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&amp;&amp;window.bootstrap&amp;&amp;bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
+<div aria-label="Toolbar" class="top-tools">
+<button class="btn tool-btn tool-btn-soft tool-btn-font" id="fontIncBtn" onclick="adjustFontSize(1)" title="Increase font size" type="button"><span class="tool-text">A+</span></button>
+<button class="btn tool-btn tool-btn-soft tool-btn-font" id="fontDecBtn" onclick="adjustFontSize(-1)" title="Decrease font size" type="button"><span class="tool-text">A-</span></button>
+<button class="btn tool-btn tool-btn-soft" id="themeToggleBtn" onclick="toggleTheme()" title="Light/Dark" type="button"><i class="fa-solid fa-circle-half-stroke"></i></button>
+<button aria-label="顯示調校" class="btn tool-btn tool-btn-soft" id="displayTuneBtn" title="顯示調校" type="button"><i class="fa-solid fa-sliders"></i></button>
+<button aria-label="Help" class="btn tool-btn tool-btn-soft" id="newHelpBtn" onclick="try{ if(window.showHelp) showHelp(); else { var hb=document.getElementById('helpButton'); if(hb) hb.click(); }}catch(e){}" title="Help" type="button"><span class="tool-text">?</span></button>
+<!-- 案例（固定放喺頂部工具列：唔靠 JS 插入） -->
+<button aria-controls="ag-case-help-overlay" aria-haspopup="dialog" aria-label="Examples" class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" onclick="showCaseHelp()" title="Examples" type="button"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
+<button aria-label="QR Code" class="btn tool-btn tool-btn-soft" id="qrBtn" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&amp;&amp;window.bootstrap&amp;&amp;bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}" title="QR Code" type="button"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
 </div>
-
 <!-- AnyGen: 案例彈窗（兩個案例） -->
-<div id="ag-case-help-overlay" role="dialog" aria-modal="true" aria-label="Use cases">
-  <a id="ag-case-help-backdrop" href="#" aria-label="Close use cases dialog"></a>
-  <div id="ag-case-help-modal">
-    <div id="ag-case-help-header">
-      <div id="ag-case-help-title">使用案例</div>
-      <a id="ag-case-help-close" href="#" role="button">關閉</a>
-    </div>
-    <div id="ag-case-help-tabs" role="tablist">
-      <button class="ag-case-tab" type="button" role="tab" aria-selected="true" data-tab="case1">案例一：未知庫存做預算</button>
-      <button class="ag-case-tab" type="button" role="tab" aria-selected="false" data-tab="case2">案例二：碎料優先清貨倉</button>
-    </div>
-    <div id="ag-case-help-body">
-      <section class="ag-case-panel" data-panel="case1" data-active="true">
-        <h2 class="ag-case-h">案例一：未知庫存，快速估算用料預算</h2>
-        <p class="ag-case-sub"><b>適用情況：</b>你未清楚貨倉仲有幾多現成料，只想快手估算要準備幾多新料（報價／做預算用）。</p>
-        <ol class="ag-case-steps">
-          <li><b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。</li>
-          <li><b>注意：</b>當有切割項目長度超出材料尺寸，系統自動製造補料，不依用家設定。</li>
-          <li><b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。</li>
-          <li><b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。</li>
-          <li><b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。</li>
-        </ol>
-        <div class="ag-case-tip"><b>小貼士：</b>最啱報價階段，用唔著翻貨倉點料，幾秒就估到材料成本。</div>
-      </section>
-
-      <section class="ag-case-panel" data-panel="case2" data-active="false">
-        <h2 class="ag-case-h">案例二：有碎料舊料，叫系統優先「清貨倉」</h2>
-        <p class="ag-case-sub"><b>適用情況：</b>貨倉有碎料想先用晒，唔夠先補新料，盡量慳成本。</p>
-        <ol class="ag-case-steps">
-          <li><b>排版設定改做「碎料優先」：</b>呢步最重要，等於直接同系統講「先用舊料」。</li>
-          <li><b>輸入部件需求：</b>喺「部件區」填尺寸 + 數量。</li>
-          <li><b>輸入現有碎料：</b>喺「材料／物料區」如實填碎料尺寸 + 數量。</li>
-          <li><b>按「計算」睇排版圖：</b>畫面會清楚展示點樣優先用碎料；唔夠嘅部分會由「自動補料」補標準新料。</li>
-        </ol>
-      </section>
-    </div>
-  </div>
+<div aria-label="Use cases" aria-modal="true" id="ag-case-help-overlay" role="dialog">
+<a aria-label="Close use cases dialog" href="#" id="ag-case-help-backdrop"></a>
+<div id="ag-case-help-modal">
+<div id="ag-case-help-header">
+<div id="ag-case-help-title">使用案例</div>
+<a href="#" id="ag-case-help-close" role="button">關閉</a>
 </div>
-
+<div id="ag-case-help-tabs" role="tablist">
+<button aria-selected="true" class="ag-case-tab" data-tab="case1" role="tab" type="button">案例一：未知庫存做預算</button>
+<button aria-selected="false" class="ag-case-tab" data-tab="case2" role="tab" type="button">案例二：碎料優先清貨倉</button>
+</div>
+<div id="ag-case-help-body">
+<section class="ag-case-panel" data-active="true" data-panel="case1">
+<h2 class="ag-case-h">案例一：未知庫存，快速估算用料預算</h2>
+<p class="ag-case-sub"><b>適用情況：</b>你未清楚貨倉仲有幾多現成料，只想快手估算要準備幾多新料（報價／做預算用）。</p>
+<ol class="ag-case-steps">
+<li><b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。</li>
+<li><b>注意：</b>當有切割項目長度超出材料尺寸，系統自動製造補料，不依用家設定。</li>
+<li><b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。</li>
+<li><b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。</li>
+<li><b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。</li>
+</ol>
+<div class="ag-case-tip"><b>小貼士：</b>最啱報價階段，用唔著翻貨倉點料，幾秒就估到材料成本。</div>
+</section>
+<section class="ag-case-panel" data-active="false" data-panel="case2">
+<h2 class="ag-case-h">案例二：有碎料舊料，叫系統優先「清貨倉」</h2>
+<p class="ag-case-sub"><b>適用情況：</b>貨倉有碎料想先用晒，唔夠先補新料，盡量慳成本。</p>
+<ol class="ag-case-steps">
+<li><b>排版設定改做「碎料優先」：</b>呢步最重要，等於直接同系統講「先用舊料」。</li>
+<li><b>輸入部件需求：</b>喺「部件區」填尺寸 + 數量。</li>
+<li><b>輸入現有碎料：</b>喺「材料／物料區」如實填碎料尺寸 + 數量。</li>
+<li><b>按「計算」睇排版圖：</b>畫面會清楚展示點樣優先用碎料；唔夠嘅部分會由「自動補料」補標準新料。</li>
+</ol>
+</section>
+</div>
+</div>
+</div>
 <script>
 (function(){
   const overlay=document.getElementById('ag-case-help-overlay');
@@ -3610,7 +3692,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   //（保留腳本但唔再依賴 click 綁定 / 插入）
 })();
 </script>
-
 <div class="card" id="settings-card"><div class="section-header">
 <div class="section-title">
 <i class="fa-solid fa-gear fa-lg me-2"></i>
@@ -3619,13 +3700,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <span class="step-indicator">1/4</span>
 </div>
 <div class="card-body card-body-light">
-
 <div class="row g-3 settings-top-row">
 <div class="col-6 col-md-3" style="display:none">
 <label class="form-label" id="languageLabel">語言:</label>
 <select class="form-select form-select-sm" id="language" onchange="updateLanguage()">
 <option value="zh">Chinese</option>
-<option value="en" selected>English</option>
+<option selected="" value="en">English</option>
 </select>
 </div>
 <div class="col-md-3">
@@ -3636,238 +3716,225 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <option value="imperial">英</option>
 <option value="imperial_decimal">英(D)</option>
 </select>
-<button class="btn btn-success" id="unitPickerBtn" type="button" data-bs-toggle="modal" data-bs-target="#unitPickerModal" style="height:40px;width:56px;font-size:1.1rem;font-weight:700;padding:0;" data-target-select="unit">公</button>
+<button class="btn btn-success" data-bs-target="#unitPickerModal" data-bs-toggle="modal" data-target-select="unit" id="unitPickerBtn" style="height:40px;width:56px;font-size:1.1rem;font-weight:700;padding:0;" type="button">公</button>
 </div>
 </div>
 <div class="col-12 col-md-6">
-  <div class="algo-saw-grid">
-    <label class="form-label algo-label" id="algorithmLabel">算法:</label>
-    <label class="form-label saw-label" id="sawThicknessLabel">鋸片厚度:</label>
-
-    <select class="form-select equal-height algo-control" id="algorithmSelector">
-      <option value="AutoBest">自動最慳料</option>
-      <option value="CostFirst">碎料優先</option>
-      <option value="BFD">BFD</option>
-      <option value="FFD">FFD</option>
-      <option value="SizeGrouping">智能優化</option>
-    </select>
-
-    <div class="saw-thickness-input equalize saw-control">
-      <input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;"/>
-      <span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
-    </div>
-
-    <div class="small-hint ag-hint-placeholder algo-hint" aria-hidden="true">&nbsp;</div>
-    <div class="saw-hint-wrap">
-      <div class="small-hint" id="sawThicknessHint">例如: 3.2 (毫米) 或 1 (分)</div>
-      <div class="error-message" id="sawThicknessError"></div>
-    </div>
-  </div>
+<div class="algo-saw-grid">
+<label class="form-label algo-label" id="algorithmLabel">算法:</label>
+<label class="form-label saw-label" id="sawThicknessLabel">鋸片厚度:</label>
+<select class="form-select equal-height algo-control" id="algorithmSelector">
+<option value="AutoBest">自動最慳料</option>
+<option value="CostFirst">碎料優先</option>
+<option value="BFD">BFD</option>
+<option value="FFD">FFD</option>
+<option value="SizeGrouping">智能優化</option>
+</select>
+<div class="saw-thickness-input equalize saw-control">
+<input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;"/>
+<span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
+</div>
+<div aria-hidden="true" class="small-hint ag-hint-placeholder algo-hint"> </div>
+<div class="saw-hint-wrap">
+<div class="small-hint" id="sawThicknessHint">例如: 3.2 (毫米) 或 1 (分)</div>
+<div class="error-message" id="sawThicknessError"></div>
+</div>
+</div>
 </div>
 </div>
 <div class="row g-3 mt-0" style="margin-top:3px;">
 <div class="col-md-12">
 <label class="form-label" id="schemeManagementLabel">方案管理:</label>
 <div class="d-flex align-items-center gap-2 scheme-actions-row" style="overflow: visible; width:100%;">
-  <div class="scheme-left">
-    <button class="btn btn-sm save-scheme-btn ag-action-btn" id="saveSchemeButton" onclick="saveScheme()">
-      <i class="fas fa-save me-1"></i>儲存方案
+<div class="scheme-left">
+<button class="btn btn-sm save-scheme-btn ag-action-btn" id="saveSchemeButton" onclick="saveScheme()">
+<i class="fas fa-save me-1"></i>儲存方案
     </button>
-    <button class="btn btn-sm load-scheme-btn ag-action-btn" id="loadSchemeButton" onclick="openSchemeHub()">
-      <i class="fas fa-folder-open me-1"></i>方案
+<button class="btn btn-sm load-scheme-btn ag-action-btn" id="loadSchemeButton" onclick="openSchemeHub()">
+<i class="fas fa-folder-open me-1"></i>方案
     </button>
-  </div>
-
-  <!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
-  <div class="scheme-right" id="autoReplenishWrap">
-    <div class="auto-replenish-title" id="autoReplenishBtnTitle"><span id="autoReplenishTitleMain">自動<br>補料</span><span id="autoReplenishWarnText" class="ag-ar-warn-text" aria-live="polite" style="display:none;">（長度不足）</span></div>
-    <button class="btn btn-success btn-sm" id="autoReplenishPickerBtn" type="button"
-            data-bs-toggle="modal" data-bs-target="#autoReplenishModal"
-            title="自動補料" aria-label="自動補料">OFF</button>
-    <!-- 保留舊 checkbox 作相容（隱藏），供既有程式用 checked 判斷 -->
-    <input type="checkbox" id="autoReplenishToggle" checked style="display:none !important;">
-    <span class="visually-hidden" id="autoReplenishA11yLabel">Auto-Replenish</span>
-  </div>
+</div>
+<!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
+<div class="scheme-right" id="autoReplenishWrap">
+<div class="auto-replenish-title" id="autoReplenishBtnTitle"><span id="autoReplenishTitleMain">自動<br/>補料</span><span aria-live="polite" class="ag-ar-warn-text" id="autoReplenishWarnText" style="display:none;">（長度不足）</span></div>
+<button aria-label="自動補料" class="btn btn-success btn-sm" data-bs-target="#autoReplenishModal" data-bs-toggle="modal" id="autoReplenishPickerBtn" title="自動補料" type="button">OFF</button>
+<!-- 保留舊 checkbox 作相容（隱藏），供既有程式用 checked 判斷 -->
+<input checked="" id="autoReplenishToggle" style="display:none !important;" type="checkbox"/>
+<span class="visually-hidden" id="autoReplenishA11yLabel">Auto-Replenish</span>
 </div>
 </div>
 </div>
 </div>
 </div>
-
+</div>
 <!-- 將切割項目與材料卡片放在同一行，各佔一半寬度，以充分利用橫向空間 -->
 <div class="row g-3 ag-main-cards-row">
-  <div class="col-md-6">
-    <div class="card" id="cutting-items-card"><div class="section-header">
-    <div class="section-title">
-    <i class="fa-solid fa-list-check fa-lg me-2"></i>
-    <span id="cuttingItemsTitle">切割項目</span>
-    </div>
-    <span class="step-indicator">2/4</span>
-    </div>
-    <div class="card-body card-body-light">
-    
-    <div id="cuttingItems" class="ag-items-section">
-    <div class="cutting-item">
-    <div class="row g-3 align-items-center">
-    <div class="col-md-12">
-    <label class="form-label cutLengthLabel">長度:</label>
-    <div class="row g-2 length-input-group d-flex align-items-end">
-    <div class="col">
-    <input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-    <label class="small-hint cutLengthHint">米</label>
-    <div class="error-message cutLengthError"></div>
-    </div>
-    <div class="col">
-    <input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-    <label class="small-hint cutLengthHint">厘米</label>
-    </div>
-    <div class="col">
-    <input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-    <label class="small-hint cutLengthHint">毫米</label>
-    </div>
-    </div>
-    </div>
-    <div class="row g-2 mt-2 cut-qtypurpose-row">
-    <div class="col-6">
-    <label class="form-label cutQtyLabel">數量:</label>
-    <input class="cutQty form-control form-control-sm" min="0" placeholder="0" type="number"/>
-    <div class="small-hint cutQtyHint">例如：5</div>
-    </div>
-    <div class="col-6">
-    <label class="form-label cutPurposeLabel">用途:</label>
-    <input class="cutPurpose form-control form-control-sm" placeholder=""/>
-    <div class="small-hint cutPurposeHint">例如：邊框</div>
-    </div>
-    </div>
-    <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-    <button class="btn btn-success btn-sm flex-fill ag-action-btn" id="addCuttingButton" onclick="addCuttingItem()">
-    <i class="fas fa-plus me-1"></i>新增項目
-                                    </button>
-    <button class="btn btn-secondary btn-sm flex-fill ag-action-btn" id="clearCuttingButton" onclick="clearCuttingInputs()">
-    <i class="fas fa-times me-1"></i>清除輸入
-                                    </button>
-    <select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="display:none !important">
-    <option selected="selected" value="metric">公</option>
-    <option value="imperial">英</option>
-    </select>
-<button class="btn btn-success btn-sm flex-shrink-0" id="globalCutUnitBtn" type="button" data-bs-toggle="modal" data-bs-target="#unitPickerModal" data-target-select="globalCutUnit" style="height:31px;width:48px;font-size:1rem;font-weight:800;padding:0;">公</button>
-    </div>
-    </div>
-    </div>
-    </div>
-    <!-- 加入 table-responsive 以適應小螢幕 -->
-    <div class="table-responsive" style="margin-top:-10px;">
-    <table class="table table-sm table-hover mt-0" id="cuttingItemsTable">
-    <thead>
-    <tr class="table-active">
-    <th>長度</th>
-    <th>數量</th>
-    <th>用途</th>
-    <th class="text-center" style="width:100px">操作</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-    </table>
-    </div>
-    <div class="d-flex gap-2 mt-2">
-    <button class="btn btn-warning btn-sm update-btn" id="updateCuttingButton" onclick="updateCuttingItem()" style="display:none">
-    <i class="fas fa-edit me-1"></i>更新項目
-                        </button>
-    </div>
-    <input id="editingCuttingIndex" type="hidden" value="-1"/>
-    </div>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card" id="materials-card"><div class="section-header">
-    <div class="section-title">
-    <i class="fa-solid fa-ruler-combined fa-lg me-2"></i>
-    <span id="materialTitle">材料</span>
-    </div>
-    <span class="step-indicator">3/4</span>
-    </div>
-    <div class="card-body card-body-light">
-    
-    <div id="materialItems" class="ag-items-section">
-      <div class="material-item">
-        <div class="row g-3 align-items-center">
-          <div class="col-md-12">
-            <label class="form-label materialLengthLabel">材料長度:</label>
-            <div class="row g-2 length-input-group d-flex align-items-end">
-              <div class="col">
-                <input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-                <label class="small-hint materialLengthHint">米</label>
-                <div class="error-message materialLengthError"></div>
-              </div>
-              <div class="col">
-                <input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-                <label class="small-hint materialLengthHint">厘米</label>
-              </div>
-              <div class="col">
-                <input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
-                <label class="small-hint materialLengthHint">毫米</label>
-              </div>
-            </div>
-
-            <div class="row g-2 mt-2 material-qtytype-row">
-              <div class="col-6 material-qty-col">
-                <label class="form-label materialQtyLabel">數量:</label>
-                <input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
-                <div class="small-hint materialQtyHint">10</div>
-              </div>
-
-              <div class="col-6 material-type-col">
-                <label class="form-label materialClassLabel">材料類別:</label>
-                <select class="form-select form-select-sm materialClass" style="height:31px;">
-                  <option value="scrap" selected>碎料</option>
-                  <option value="original">原裝</option>
-                </select>
-                <div class="small-hint ag-hint-placeholder" aria-hidden="true">&nbsp;</div>
-              </div>
-            </div>
-
-            <div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
-              <button class="btn btn-success btn-sm flex-fill ag-action-btn" id="addMaterialButton" onclick="addMaterialItem()">
-                <i class="fas fa-plus me-1"></i>新增材料
-              </button>
-              <button class="btn btn-secondary btn-sm flex-fill ag-action-btn" id="clearMaterialButton" onclick="clearMaterialInputs()">
-                <i class="fas fa-times me-1"></i>清除輸入
-              </button>
-              <select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0" id="globalMaterialUnit" style="display:none !important">
-                <option selected="selected" value="metric">公</option>
-                <option value="imperial">英</option>
-              </select>
-<button class="btn btn-success btn-sm flex-shrink-0" id="globalMaterialUnitBtn" type="button" data-bs-toggle="modal" data-bs-target="#unitPickerModal" data-target-select="globalMaterialUnit" style="height:31px;width:48px;font-size:1rem;font-weight:800;padding:0;">公</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="table-responsive" style="margin-top:-10px;">
-    <table class="table table-sm table-hover mt-0" id="materialItemsTable">
-    <thead>
-    <tr class="table-active">
-    <th>長度</th>
-    <th>數量</th>
-    <th class="text-center" style="width:110px">類別</th>
-    <th class="text-center" style="width:80px">使用狀態</th>
-    <th class="text-center" style="width:100px">操作</th>
-    </tr>
-    </thead>
-    <tbody></tbody>
-    </table>
-    </div>
-    <div class="d-flex gap-2 mt-2">
-    <button class="btn btn-warning btn-sm update-btn" id="updateMaterialButton" onclick="updateMaterialItem()" style="display:none">
-    <i class="fas fa-edit me-1"></i>更新材料
-                        </button>
-    </div>
-    <input id="editingMaterialIndex" type="hidden" value="-1"/>
-    </div>
-    </div>
-  </div>
+<div class="col-md-6">
+<div class="card" id="cutting-items-card"><div class="section-header">
+<div class="section-title">
+<i class="fa-solid fa-list-check fa-lg me-2"></i>
+<span id="cuttingItemsTitle">切割項目</span>
 </div>
-
+<span class="step-indicator">2/4</span>
+</div>
+<div class="card-body card-body-light">
+<div class="ag-items-section" id="cuttingItems">
+<div class="cutting-item">
+<div class="row g-3 align-items-center">
+<div class="col-md-12">
+<label class="form-label cutLengthLabel">長度:</label>
+<div class="row g-2 length-input-group d-flex align-items-end">
+<div class="col">
+<input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint cutLengthHint">米</label>
+<div class="error-message cutLengthError"></div>
+</div>
+<div class="col">
+<input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint cutLengthHint">厘米</label>
+</div>
+<div class="col">
+<input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint cutLengthHint">毫米</label>
+</div>
+</div>
+</div>
+<div class="row g-2 mt-2 cut-qtypurpose-row">
+<div class="col-6">
+<label class="form-label cutQtyLabel">數量:</label>
+<input class="cutQty form-control form-control-sm" min="0" placeholder="0" type="number"/>
+<div class="small-hint cutQtyHint">例如：5</div>
+</div>
+<div class="col-6">
+<label class="form-label cutPurposeLabel">用途:</label>
+<input class="cutPurpose form-control form-control-sm" placeholder=""/>
+<div class="small-hint cutPurposeHint">例如：邊框</div>
+</div>
+</div>
+<div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+<button class="btn btn-success btn-sm flex-fill ag-action-btn" id="addCuttingButton" onclick="addCuttingItem()">
+<i class="fas fa-plus me-1"></i>新增項目
+                                    </button>
+<button class="btn btn-secondary btn-sm flex-fill ag-action-btn" id="clearCuttingButton" onclick="clearCuttingInputs()">
+<i class="fas fa-times me-1"></i>清除輸入
+                                    </button>
+<select class="form-select form-select-sm unit-select cutLengthUnit flex-shrink-0" id="globalCutUnit" style="display:none !important">
+<option selected="selected" value="metric">公</option>
+<option value="imperial">英</option>
+</select>
+<button class="btn btn-success btn-sm flex-shrink-0" data-bs-target="#unitPickerModal" data-bs-toggle="modal" data-target-select="globalCutUnit" id="globalCutUnitBtn" style="height:31px;width:48px;font-size:1rem;font-weight:800;padding:0;" type="button">公</button>
+</div>
+</div>
+</div>
+</div>
+<!-- 加入 table-responsive 以適應小螢幕 -->
+<div class="table-responsive" style="margin-top:-10px;">
+<table class="table table-sm table-hover mt-0" id="cuttingItemsTable">
+<thead>
+<tr class="table-active">
+<th>長度</th>
+<th>數量</th>
+<th>用途</th>
+<th class="text-center" style="width:100px">操作</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="d-flex gap-2 mt-2">
+<button class="btn btn-warning btn-sm update-btn" id="updateCuttingButton" onclick="updateCuttingItem()" style="display:none">
+<i class="fas fa-edit me-1"></i>更新項目
+                        </button>
+</div>
+<input id="editingCuttingIndex" type="hidden" value="-1"/>
+</div>
+</div>
+</div>
+<div class="col-md-6">
+<div class="card" id="materials-card"><div class="section-header">
+<div class="section-title">
+<i class="fa-solid fa-ruler-combined fa-lg me-2"></i>
+<span id="materialTitle">材料</span>
+</div>
+<span class="step-indicator">3/4</span>
+</div>
+<div class="card-body card-body-light">
+<div class="ag-items-section" id="materialItems">
+<div class="material-item">
+<div class="row g-3 align-items-center">
+<div class="col-md-12">
+<label class="form-label materialLengthLabel">材料長度:</label>
+<div class="row g-2 length-input-group d-flex align-items-end">
+<div class="col">
+<input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint materialLengthHint">米</label>
+<div class="error-message materialLengthError"></div>
+</div>
+<div class="col">
+<input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint materialLengthHint">厘米</label>
+</div>
+<div class="col">
+<input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<label class="small-hint materialLengthHint">毫米</label>
+</div>
+</div>
+<div class="row g-2 mt-2 material-qtytype-row">
+<div class="col-6 material-qty-col">
+<label class="form-label materialQtyLabel">數量:</label>
+<input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
+<div class="small-hint materialQtyHint">10</div>
+</div>
+<div class="col-6 material-type-col">
+<label class="form-label materialClassLabel">材料類別:</label>
+<select class="form-select form-select-sm materialClass" style="height:31px;">
+<option selected="" value="scrap">碎料</option>
+<option value="original">原裝</option>
+</select>
+<div aria-hidden="true" class="small-hint ag-hint-placeholder"> </div>
+</div>
+</div>
+<div class="d-flex mt-2 gap-2 flex-nowrap align-items-center controls-row">
+<button class="btn btn-success btn-sm flex-fill ag-action-btn" id="addMaterialButton" onclick="addMaterialItem()">
+<i class="fas fa-plus me-1"></i>新增材料
+              </button>
+<button class="btn btn-secondary btn-sm flex-fill ag-action-btn" id="clearMaterialButton" onclick="clearMaterialInputs()">
+<i class="fas fa-times me-1"></i>清除輸入
+              </button>
+<select class="form-select form-select-sm unit-select materialLengthUnit flex-shrink-0" id="globalMaterialUnit" style="display:none !important">
+<option selected="selected" value="metric">公</option>
+<option value="imperial">英</option>
+</select>
+<button class="btn btn-success btn-sm flex-shrink-0" data-bs-target="#unitPickerModal" data-bs-toggle="modal" data-target-select="globalMaterialUnit" id="globalMaterialUnitBtn" style="height:31px;width:48px;font-size:1rem;font-weight:800;padding:0;" type="button">公</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="table-responsive" style="margin-top:-10px;">
+<table class="table table-sm table-hover mt-0" id="materialItemsTable">
+<thead>
+<tr class="table-active">
+<th>長度</th>
+<th>數量</th>
+<th class="text-center" style="width:110px">類別</th>
+<th class="text-center" style="width:80px">使用狀態</th>
+<th class="text-center" style="width:100px">操作</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+<div class="d-flex gap-2 mt-2">
+<button class="btn btn-warning btn-sm update-btn" id="updateMaterialButton" onclick="updateMaterialItem()" style="display:none">
+<i class="fas fa-edit me-1"></i>更新材料
+                        </button>
+</div>
+<input id="editingMaterialIndex" type="hidden" value="-1"/>
+</div>
+</div>
+</div>
+</div>
 <div class="card" id="results-card"><div class="section-header">
 <div class="section-title">
 <i class="fa-solid fa-chart-bar fa-lg me-2"></i>
@@ -3876,11 +3943,10 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <span class="step-indicator">4/4</span>
 </div>
 <div class="card-body text-center">
-
 <div class="button-group">
 <button class="btn ag-calc-btn" id="calculateButton" onclick="calculateAndScroll()">
-  <i class="fas fa-calculator ag-calc-icon" aria-hidden="true"></i>
-  <span class="ag-calc-label">計算</span>
+<i aria-hidden="true" class="fas fa-calculator ag-calc-icon"></i>
+<span class="ag-calc-label">計算</span>
 </button>
 <button class="btn btn-danger" id="resetButton" onclick="reset()">
 <i class="fas fa-undo me-2"></i>重置
@@ -3917,72 +3983,69 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 </div>
 </div><!-- /contentRoot -->
-
 <!-- 顯示調校（由「宿舍」移植） -->
-<div id="displayTuneModal" class="tune-backdrop" aria-hidden="true" onclick="try{ if(event.target===this){window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}}catch(e){}">
-  <div class="tune-modal" role="dialog" aria-modal="true" aria-label="顯示調校">
-    <div class="tune-header">
-      <div class="tune-title" id="tuneTitle">顯示調校</div>
-      <button type="button" id="tuneClose" class="tune-close" aria-label="關閉" onclick="try{window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}catch(e){}">×</button>
-    </div>
-    <div class="tune-body">
-      <!-- 預設：平時最常用，放最頂（唔使捲到最底） -->
-      <div class="tune-presets" aria-label="顯示調校預設">
-        <span class="preset-label" id="tunePresetLabel">預設：</span>
-        <!-- 由深 → 淺（更易分辨），暖色獨立放最後 -->
-        <button type="button" class="tune-preset preset-ultra-black" data-b="86" data-c="138" data-s="112" data-w="0" data-zh="超級深黑" data-en="Ultra black">超級深黑</button>
-        <button type="button" class="tune-preset preset-extra-deep" data-b="94" data-c="115" data-s="110" data-w="0" data-zh="超深" data-en="Extra deep">超深</button>
-        <button type="button" class="tune-preset preset-deeper" data-b="96" data-c="108" data-s="106" data-w="0" data-zh="深色" data-en="Deeper">深色</button>
-        <button type="button" class="tune-preset preset-standard" data-b="100" data-c="100" data-s="100" data-w="0" data-zh="標準" data-en="Standard">標準</button>
-        <button type="button" class="tune-preset preset-lighter" data-b="108" data-c="96" data-s="96" data-w="4" data-zh="淺色" data-en="Lighter">淺色</button>
-        <button type="button" class="tune-preset preset-ultra-light" data-b="118" data-c="92" data-s="84" data-w="6" data-pt="65" data-py="65" data-zh="一鍵白淨" data-en="Ultra light">一鍵白淨</button>
-        <button type="button" class="tune-preset preset-warmer" data-b="100" data-c="104" data-s="102" data-w="20" data-zh="暖啲" data-en="Warmer">暖啲</button>
-        <button type="button" class="tune-preset preset-eye" data-b="90" data-c="98" data-s="92" data-w="28" data-py="82" data-pt="70" data-zh="護眼模式" data-en="Eye comfort">護眼模式</button>
-      </div>
-
-      <!-- 進階滑桿：平時收起，需用先展開 -->
-      <button type="button" id="tuneAdvancedToggle" class="tune-advanced-toggle" aria-expanded="false">顯示進階滑桿</button>
-      <div id="tuneAdvanced" class="tune-advanced" hidden>
-        <div class="tune-row">
-          <label for="tuneBrightness"><span id="tuneBrightnessLabel">亮度</span></label>
-          <input id="tuneBrightness" type="range" min="70" max="130" value="100" />
-          <span id="tuneBrightnessVal" class="tune-val">100%</span>
-        </div>
-        <div class="tune-row">
-          <label for="tuneContrast"><span id="tuneContrastLabel">對比</span></label>
-          <input id="tuneContrast" type="range" min="80" max="140" value="100" />
-          <span id="tuneContrastVal" class="tune-val">100%</span>
-        </div>
-        <div class="tune-row">
-          <label for="tuneSaturate"><span id="tuneSaturateLabel">飽和度</span></label>
-          <input id="tuneSaturate" type="range" min="80" max="160" value="100" />
-          <span id="tuneSaturateVal" class="tune-val">100%</span>
-        </div>
-        <div class="tune-row">
-          <label for="tuneWarmth"><span id="tuneWarmthLabel">冷暖色</span></label>
-          <input id="tuneWarmth" type="range" min="0" max="35" value="0" />
-          <span id="tuneWarmthVal" class="tune-val">0</span>
-        </div>
-        <div class="tune-row">
-          <label for="tunePaperTint"><span id="tunePaperTintLabel">米黃色</span></label>
-          <input id="tunePaperTint" type="range" min="0" max="100" value="65" />
-          <span id="tunePaperTintVal" class="tune-val">65%</span>
-        </div>
-        <div class="tune-row">
-          <label for="tunePaperStrength"><span id="tunePaperStrengthLabel">紙紋</span></label>
-          <input id="tunePaperStrength" type="range" min="0" max="100" value="65" />
-          <span id="tunePaperStrengthVal" class="tune-val">65%</span>
-        </div>
-      </div>
-      <div class="tune-hint" id="tuneHint">提示：想「深色啲」通常加少少對比/飽和度，再微調亮度。</div>
-      <div class="tune-actions">
-        <button type="button" id="tuneReset" class="btn btn-warning btn-3d">重置</button>
-        <button type="button" id="tuneDone" class="btn btn-success btn-3d">完成</button>
-      </div>
-    </div>
-  </div>
+<div aria-hidden="true" class="tune-backdrop" id="displayTuneModal" onclick="try{ if(event.target===this){window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}}catch(e){}">
+<div aria-label="顯示調校" aria-modal="true" class="tune-modal" role="dialog">
+<div class="tune-header">
+<div class="tune-title" id="tuneTitle">顯示調校</div>
+<button aria-label="關閉" class="tune-close" id="tuneClose" onclick="try{window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}catch(e){}" type="button">×</button>
 </div>
-
+<div class="tune-body">
+<!-- 預設：平時最常用，放最頂（唔使捲到最底） -->
+<div aria-label="顯示調校預設" class="tune-presets">
+<span class="preset-label" id="tunePresetLabel">預設：</span>
+<!-- 由深 → 淺（更易分辨），暖色獨立放最後 -->
+<button class="tune-preset preset-ultra-black" data-b="86" data-c="138" data-en="Ultra black" data-s="112" data-w="0" data-zh="超級深黑" type="button">超級深黑</button>
+<button class="tune-preset preset-extra-deep" data-b="94" data-c="115" data-en="Extra deep" data-s="110" data-w="0" data-zh="超深" type="button">超深</button>
+<button class="tune-preset preset-deeper" data-b="96" data-c="108" data-en="Deeper" data-s="106" data-w="0" data-zh="深色" type="button">深色</button>
+<button class="tune-preset preset-standard" data-b="100" data-c="100" data-en="Standard" data-s="100" data-w="0" data-zh="標準" type="button">標準</button>
+<button class="tune-preset preset-lighter" data-b="108" data-c="96" data-en="Lighter" data-s="96" data-w="4" data-zh="淺色" type="button">淺色</button>
+<button class="tune-preset preset-ultra-light" data-b="118" data-c="92" data-en="Ultra light" data-pt="65" data-py="65" data-s="84" data-w="6" data-zh="一鍵白淨" type="button">一鍵白淨</button>
+<button class="tune-preset preset-warmer" data-b="100" data-c="104" data-en="Warmer" data-s="102" data-w="20" data-zh="暖啲" type="button">暖啲</button>
+<button class="tune-preset preset-eye" data-b="90" data-c="98" data-en="Eye comfort" data-pt="70" data-py="82" data-s="92" data-w="28" data-zh="護眼模式" type="button">護眼模式</button>
+</div>
+<!-- 進階滑桿：平時收起，需用先展開 -->
+<button aria-expanded="false" class="tune-advanced-toggle" id="tuneAdvancedToggle" type="button">顯示進階滑桿</button>
+<div class="tune-advanced" hidden="" id="tuneAdvanced">
+<div class="tune-row">
+<label for="tuneBrightness"><span id="tuneBrightnessLabel">亮度</span></label>
+<input id="tuneBrightness" max="130" min="70" type="range" value="100"/>
+<span class="tune-val" id="tuneBrightnessVal">100%</span>
+</div>
+<div class="tune-row">
+<label for="tuneContrast"><span id="tuneContrastLabel">對比</span></label>
+<input id="tuneContrast" max="140" min="80" type="range" value="100"/>
+<span class="tune-val" id="tuneContrastVal">100%</span>
+</div>
+<div class="tune-row">
+<label for="tuneSaturate"><span id="tuneSaturateLabel">飽和度</span></label>
+<input id="tuneSaturate" max="160" min="80" type="range" value="100"/>
+<span class="tune-val" id="tuneSaturateVal">100%</span>
+</div>
+<div class="tune-row">
+<label for="tuneWarmth"><span id="tuneWarmthLabel">冷暖色</span></label>
+<input id="tuneWarmth" max="35" min="0" type="range" value="0"/>
+<span class="tune-val" id="tuneWarmthVal">0</span>
+</div>
+<div class="tune-row">
+<label for="tunePaperTint"><span id="tunePaperTintLabel">米黃色</span></label>
+<input id="tunePaperTint" max="100" min="0" type="range" value="65"/>
+<span class="tune-val" id="tunePaperTintVal">65%</span>
+</div>
+<div class="tune-row">
+<label for="tunePaperStrength"><span id="tunePaperStrengthLabel">紙紋</span></label>
+<input id="tunePaperStrength" max="100" min="0" type="range" value="65"/>
+<span class="tune-val" id="tunePaperStrengthVal">65%</span>
+</div>
+</div>
+<div class="tune-hint" id="tuneHint">提示：想「深色啲」通常加少少對比/飽和度，再微調亮度。</div>
+<div class="tune-actions">
+<button class="btn btn-warning btn-3d" id="tuneReset" type="button">重置</button>
+<button class="btn btn-success btn-3d" id="tuneDone" type="button">完成</button>
+</div>
+</div>
+</div>
+</div>
 <div aria-hidden="true" aria-labelledby="printOptionsModalLabel" class="modal fade" id="printOptionsModal" tabindex="-1">
 <div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
@@ -3995,49 +4058,49 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="form-check">
 <input checked="checked" class="form-check-input" id="printSettings" type="checkbox"/>
 <label class="form-check-label" for="printSettings" id="printSettingsLabel">
-                            <span id="printSettingsText">設置</span>
-                            <span class="description" id="printSettingsDesc">語言、顯示單位、鋸片厚度</span>
+<span id="printSettingsText">設置</span>
+<span class="description" id="printSettingsDesc">語言、顯示單位、鋸片厚度</span>
 </label>
 </div>
 <div class="form-check">
 <input checked="checked" class="form-check-input" id="printCuttingItems" type="checkbox"/>
 <label class="form-check-label" for="printCuttingItems" id="printCuttingItemsLabel">
-                            <span id="printCuttingItemsText">切割項目</span>
-                            <span class="description" id="printCuttingItemsDesc">所有輸入的切割長度、數量和用途</span>
+<span id="printCuttingItemsText">切割項目</span>
+<span class="description" id="printCuttingItemsDesc">所有輸入的切割長度、數量和用途</span>
 </label>
 </div>
 <div class="form-check">
 <input checked="checked" class="form-check-input" id="printMaterials" type="checkbox"/>
 <label class="form-check-label" for="printMaterials" id="printMaterialsLabel">
-                            <span id="printMaterialsText">材料</span>
-                            <span class="description" id="printMaterialsDesc">所有輸入的材料長度和數量</span>
+<span id="printMaterialsText">材料</span>
+<span class="description" id="printMaterialsDesc">所有輸入的材料長度和數量</span>
 </label>
 </div>
 <div class="form-check">
 <input checked="checked" class="form-check-input" id="printResults" type="checkbox"/>
 <label class="form-check-label" for="printResults" id="printResultsLabel">
-                            <span id="printResultsText">切割結果 (包含摘要)</span>
-                            <span class="description" id="printResultsDesc">優化後的切割方案詳情</span>
+<span id="printResultsText">切割結果 (包含摘要)</span>
+<span class="description" id="printResultsDesc">優化後的切割方案詳情</span>
 </label>
 </div>
 <div class="form-check">
 <input checked="checked" class="form-check-input" id="printVisualization" type="checkbox"/>
 <label class="form-check-label" for="printVisualization" id="printVisualizationLabel">
-                            <span id="printVisualizationText">視覺化圖表</span>
-                            <span class="description" id="printVisualizationDesc">切割方案的圖形化展示</span>
+<span id="printVisualizationText">視覺化圖表</span>
+<span class="description" id="printVisualizationDesc">切割方案的圖形化展示</span>
 </label>
 </div>
 <div class="form-check">
 <input checked="checked" class="form-check-input" id="printLegend" type="checkbox"/>
 <label class="form-check-label" for="printLegend" id="printLegendLabel">
-                            <span id="printLegendText">顏色圖例</span>
-                            <span class="description" id="printLegendDesc">切割件長度對應顏色說明</span>
+<span id="printLegendText">顏色圖例</span>
+<span class="description" id="printLegendDesc">切割件長度對應顏色說明</span>
 </label>
 </div>
 </div>
 <div class="modal-footer">
 <button class="btn btn-secondary" data-bs-dismiss="modal" id="printCancelBtn" type="button">取消</button>
-<button class="btn btn-primary" onclick="triggerPrint()" id="printConfirmBtn" type="button">確認列印</button>
+<button class="btn btn-primary" id="printConfirmBtn" onclick="triggerPrint()" type="button">確認列印</button>
 </div>
 </div>
 </div>
@@ -4057,12 +4120,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 <div class="modal-footer">
 <button class="btn btn-secondary" data-bs-dismiss="modal" id="saveCancelBtn" type="button">取消</button>
-<button class="btn btn-primary" onclick="confirmSaveScheme()" id="saveConfirmBtn" type="button">確認儲存</button>
+<button class="btn btn-primary" id="saveConfirmBtn" onclick="confirmSaveScheme()" type="button">確認儲存</button>
 </div>
 </div>
 </div>
 </div>
-<div aria-hidden="true" aria-labelledby="loadSchemeModalLabel" class="modal fade" id="loadSchemeModal" tabindex="-1" data-bs-focus="false">
+<div aria-hidden="true" aria-labelledby="loadSchemeModalLabel" class="modal fade" data-bs-focus="false" id="loadSchemeModal" tabindex="-1">
 <div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
 <div class="modal-header">
@@ -4070,107 +4133,95 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
 </div>
 <div class="modal-body">
-  <!-- 方案B：向導式主入口 -->
-  <div id="schemeHub">
-    <div class="mb-2" style="font-size:13px;color:#6b7280" id="schemeHubHint">第一次用？先揀你想做咩，入去先再見到細節。</div>
-
-    <div class="scheme-hub-actions" id="schemeHubActions">
-      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('load')" id="schemeHubBtnLoad">
-        <span class="sha-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span>
-        <span class="sha-text">
-          <span class="sha-title" id="schemeHubBtnLoadTitle">載入已儲存方案</span>
-          <span class="sha-sub" id="schemeHubBtnLoadSub">用返之前保存嘅資料</span>
-        </span>
-      </button>
-
-      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('import')" id="schemeHubBtnImport">
-        <span class="sha-icon" aria-hidden="true"><i class="fas fa-file-import"></i></span>
-        <span class="sha-text">
-          <span class="sha-title" id="schemeHubBtnImportTitle">匯入檔案</span>
-          <span class="sha-sub" id="schemeHubBtnImportSub">從 JSON 檔加入一個新方案</span>
-        </span>
-      </button>
-
-      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('export')" id="schemeHubBtnExport">
-        <span class="sha-icon" aria-hidden="true"><i class="fas fa-share-alt"></i></span>
-        <span class="sha-text">
-          <span class="sha-title" id="schemeHubBtnExportTitle">匯出／分享</span>
-          <span class="sha-sub" id="schemeHubBtnExportSub">將而家方案變成檔案或 QR</span>
-        </span>
-      </button>
-
-      <button type="button" class="scheme-hub-action" onclick="schemeHubShow('manage')" id="schemeHubBtnManage">
-        <span class="sha-icon" aria-hidden="true"><i class="fas fa-toolbox"></i></span>
-        <span class="sha-text">
-          <span class="sha-title" id="schemeHubBtnManageTitle">備份／還原</span>
-          <span class="sha-sub" id="schemeHubBtnManageSub">管理多個備份版本</span>
-        </span>
-      </button>
-    </div>
-
-    <hr class="my-3"/>
-
-    <!-- 子畫面：載入 -->
-    <div id="schemeHubPanelLoad" class="scheme-hub-panel" style="display:none;">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="m-0"><span aria-hidden="true">📂</span> <span id="schemeHubPanelLoadTitle">載入方案</span></h6>
-      </div>
-      <div id="savedSchemesList"></div>
-    </div>
-
-    <!-- 子畫面：匯入 -->
-    <div id="schemeHubPanelImport" class="scheme-hub-panel" style="display:none;">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="m-0"><span aria-hidden="true">📥</span> <span id="schemeHubPanelImportTitle">從檔案匯入方案</span></h6>
-      </div>
-      <input accept=".json" id="schemeFileInput" type="file" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;"/>
-      <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-        <button type="button" class="btn btn-outline-secondary" id="schemeFilePickBtn" style="font-weight:800;" onclick="document.getElementById('schemeFileInput').click()">Choose file</button>
-        <span id="schemeFilePickLabel" class="small text-muted">No file chosen</span>
-      </div>
-      <div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-        <button class="btn btn-primary" id="uploadSchemeBtn" onclick="uploadSchemeFile()" type="button" style="font-weight:800;">Upload</button>
-        <div style="font-size:12px;color:#6b7280" id="importHint">After uploading, it will be added to “Saved schemes”. You can load it immediately.</div>
-      </div>
-    </div>
-
-    <!-- 子畫面：匯出/分享 -->
-    <div id="schemeHubPanelExport" class="scheme-hub-panel" style="display:none;">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="m-0"><span aria-hidden="true">📤</span> <span id="schemeHubPanelExportTitle">匯出／分享</span></h6>
-      </div>
-
-      <div class="p-2 border rounded mb-3" style="background:rgba(0,0,0,.02)">
-        <div class="fw-bold mb-2" id="exportCurrentTitle">Current scheme (the one on screen now)</div>
-        <div class="d-flex gap-2 flex-wrap align-items-center">
-          <button class="btn btn-success" id="exportCurrentSchemeBtn" onclick="exportCurrentScheme()" type="button" style="font-weight:900;"><span aria-hidden="true">📤</span> <span id="exportCurrentBtnText">Export current scheme</span></button>
-          <div class="small text-muted" id="exportCurrentHint">No need to save / load first.</div>
-        </div>
-      </div>
-
-      <div>
-        <div class="fw-bold mb-2" id="savedSchemesExportTitle">Saved schemes</div>
-        <div class="small text-muted mb-2" id="savedSchemesExportHint">Pick one from the list to export.</div>
-        <div id="savedSchemesExportList"></div>
-      </div>
-    </div>
-
-    <!-- 子畫面：管理 -->
-    <div id="schemeHubPanelManage" class="scheme-hub-panel" style="display:none;">
-      <div class="d-flex justify-content-between align-items-center mb-2">
-        <h6 class="m-0"><span aria-hidden="true">🧰</span> <span id="schemeHubPanelManageTitle">管理已儲存方案</span></h6>
-      </div>
-      <div id="savedSchemesManageList"></div>
-    </div>
-  </div>
+<!-- 方案B：向導式主入口 -->
+<div id="schemeHub">
+<div class="mb-2" id="schemeHubHint" style="font-size:13px;color:#6b7280">第一次用？先揀你想做咩，入去先再見到細節。</div>
+<div class="scheme-hub-actions" id="schemeHubActions">
+<button class="scheme-hub-action" id="schemeHubBtnLoad" onclick="schemeHubShow('load')" type="button">
+<span aria-hidden="true" class="sha-icon"><i class="fas fa-folder-open"></i></span>
+<span class="sha-text">
+<span class="sha-title" id="schemeHubBtnLoadTitle">載入已儲存方案</span>
+<span class="sha-sub" id="schemeHubBtnLoadSub">用返之前保存嘅資料</span>
+</span>
+</button>
+<button class="scheme-hub-action" id="schemeHubBtnImport" onclick="schemeHubShow('import')" type="button">
+<span aria-hidden="true" class="sha-icon"><i class="fas fa-file-import"></i></span>
+<span class="sha-text">
+<span class="sha-title" id="schemeHubBtnImportTitle">匯入檔案</span>
+<span class="sha-sub" id="schemeHubBtnImportSub">從 JSON 檔加入一個新方案</span>
+</span>
+</button>
+<button class="scheme-hub-action" id="schemeHubBtnExport" onclick="schemeHubShow('export')" type="button">
+<span aria-hidden="true" class="sha-icon"><i class="fas fa-share-alt"></i></span>
+<span class="sha-text">
+<span class="sha-title" id="schemeHubBtnExportTitle">匯出／分享</span>
+<span class="sha-sub" id="schemeHubBtnExportSub">將而家方案變成檔案或 QR</span>
+</span>
+</button>
+<button class="scheme-hub-action" id="schemeHubBtnManage" onclick="schemeHubShow('manage')" type="button">
+<span aria-hidden="true" class="sha-icon"><i class="fas fa-toolbox"></i></span>
+<span class="sha-text">
+<span class="sha-title" id="schemeHubBtnManageTitle">備份／還原</span>
+<span class="sha-sub" id="schemeHubBtnManageSub">管理多個備份版本</span>
+</span>
+</button>
+</div>
+<hr class="my-3"/>
+<!-- 子畫面：載入 -->
+<div class="scheme-hub-panel" id="schemeHubPanelLoad" style="display:none;">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h6 class="m-0"><span aria-hidden="true">📂</span> <span id="schemeHubPanelLoadTitle">載入方案</span></h6>
+</div>
+<div id="savedSchemesList"></div>
+</div>
+<!-- 子畫面：匯入 -->
+<div class="scheme-hub-panel" id="schemeHubPanelImport" style="display:none;">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h6 class="m-0"><span aria-hidden="true">📥</span> <span id="schemeHubPanelImportTitle">從檔案匯入方案</span></h6>
+</div>
+<input accept=".json" id="schemeFileInput" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;" type="file"/>
+<div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<button class="btn btn-outline-secondary" id="schemeFilePickBtn" onclick="document.getElementById('schemeFileInput').click()" style="font-weight:800;" type="button">Choose file</button>
+<span class="small text-muted" id="schemeFilePickLabel">No file chosen</span>
+</div>
+<div style="margin-top:10px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+<button class="btn btn-primary" id="uploadSchemeBtn" onclick="uploadSchemeFile()" style="font-weight:800;" type="button">Upload</button>
+<div id="importHint" style="font-size:12px;color:#6b7280">After uploading, it will be added to “Saved schemes”. You can load it immediately.</div>
+</div>
+</div>
+<!-- 子畫面：匯出/分享 -->
+<div class="scheme-hub-panel" id="schemeHubPanelExport" style="display:none;">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h6 class="m-0"><span aria-hidden="true">📤</span> <span id="schemeHubPanelExportTitle">匯出／分享</span></h6>
+</div>
+<div class="p-2 border rounded mb-3" style="background:rgba(0,0,0,.02)">
+<div class="fw-bold mb-2" id="exportCurrentTitle">Current scheme (the one on screen now)</div>
+<div class="d-flex gap-2 flex-wrap align-items-center">
+<button class="btn btn-success" id="exportCurrentSchemeBtn" onclick="exportCurrentScheme()" style="font-weight:900;" type="button"><span aria-hidden="true">📤</span> <span id="exportCurrentBtnText">Export current scheme</span></button>
+<div class="small text-muted" id="exportCurrentHint">No need to save / load first.</div>
+</div>
+</div>
+<div>
+<div class="fw-bold mb-2" id="savedSchemesExportTitle">Saved schemes</div>
+<div class="small text-muted mb-2" id="savedSchemesExportHint">Pick one from the list to export.</div>
+<div id="savedSchemesExportList"></div>
+</div>
+</div>
+<!-- 子畫面：管理 -->
+<div class="scheme-hub-panel" id="schemeHubPanelManage" style="display:none;">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<h6 class="m-0"><span aria-hidden="true">🧰</span> <span id="schemeHubPanelManageTitle">管理已儲存方案</span></h6>
+</div>
+<div id="savedSchemesManageList"></div>
+</div>
+</div>
 </div>
 <div class="modal-footer">
-<button class="btn btn-secondary" id="loadCancelBtn" type="button" onclick="handleSchemeCancel(event)" aria-label="Back"><i class="fas fa-reply" aria-hidden="true"></i></button>
+<button aria-label="Back" class="btn btn-secondary" id="loadCancelBtn" onclick="handleSchemeCancel(event)" type="button"><i aria-hidden="true" class="fas fa-reply"></i></button>
 </div>
 </div>
 </div>
 </div>
-
 <div aria-hidden="true" aria-labelledby="helpModalLabel" class="modal fade" id="helpModal" tabindex="-1">
 <div class="modal-dialog modal-lg modal-dialog-scrollable">
 <div class="modal-content">
@@ -4185,35 +4236,1267 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 </div>
 </div>
-
 <div aria-hidden="true" aria-labelledby="qrModalLabel" class="modal fade" id="qrModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="qrModalLabel">QR碼</h5>
-        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-flex flex-column align-items-center gap-3">
-          <div id="qrCodeBox"></div>
-          <div class="w-100">
-            <div class="small text-muted" id="qrUrlLabel">網址：</div>
-            <div class="small" style="word-break:break-all" id="qrUrlText"></div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal" type="button" id="qrCloseBtn">關閉</button>
-      </div>
-    </div>
-  </div>
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="qrModalLabel">QR碼</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="d-flex flex-column align-items-center gap-3">
+<div id="qrCodeBox"></div>
+<div class="w-100">
+<div class="small text-muted" id="qrUrlLabel">網址：</div>
+<div class="small" id="qrUrlText" style="word-break:break-all"></div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" id="qrCloseBtn" type="button">關閉</button>
+</div>
+</div>
+</div>
+</div>
+<script defer="" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script defer="" src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- 以下保留所有原始 JavaScript 函數，完全不動 -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Auto-Replenish length picker modal -->
+<div aria-hidden="true" aria-labelledby="autoReplenishModalLabel" class="modal fade" id="autoReplenishModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="autoReplenishModalLabel">自動補料：選擇補料長度</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="small text-muted mb-2 ag-ar-hint">提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。</div>
+<div class="d-grid gap-2" id="autoReplenishOptions">
+<button class="ag-ar-off-btn btn btn-outline-secondary" data-ar-label-en="OFF (Disable Auto-Replenish)" data-ar-label-zh="OFF（關閉自動補料）" data-ar-len="0" type="button">OFF（關閉自動補料）</button>
+<div class="small text-muted mt-2"><span class="ag-ar-custom-title">自訂</span></div>
+<div class="input-group">
+<input class="form-control" id="autoReplenishCustomLen" inputmode="text" placeholder="e.g., 6 ft / 68 in / 2.5 m / 1500 mm" type="text"/>
+<button class="btn btn-outline-dark" id="autoReplenishCustomApply" type="button">套用</button>
+</div>
+<div class="small text-muted" id="autoReplenishCustomHint">支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。</div>
+<div class="small text-muted mt-2"><span class="ag-ar-common-mm">常用（mm）</span></div>
+<button class="btn btn-outline-success" data-ar-label-en="6000 mm" data-ar-label-zh="6000 mm" data-ar-len="6000" type="button">6000 mm</button>
+<button class="btn btn-outline-success" data-ar-label-en="5000 mm" data-ar-label-zh="5000 mm" data-ar-len="5000" type="button">5000 mm</button>
+<button class="btn btn-outline-success" data-ar-label-en="4000 mm" data-ar-label-zh="4000 mm" data-ar-len="4000" type="button">4000 mm</button>
+<button class="btn btn-outline-success" data-ar-label-en="3000 mm" data-ar-label-zh="3000 mm" data-ar-len="3000" type="button">3000 mm</button>
+<button class="btn btn-outline-success" data-ar-label-en="2000 mm" data-ar-label-zh="2000 mm" data-ar-len="2000" type="button">2000 mm</button>
+<div class="small text-muted mt-2"><span class="ag-ar-common-ft">常用（英尺）</span></div>
+<button class="btn btn-outline-primary" data-ar-display="ft" data-ar-label-en="8 ft" data-ar-label-zh="8 ft" data-ar-len="2438.4" type="button">8 ft</button>
+<button class="btn btn-outline-primary" data-ar-display="ft" data-ar-label-en="6 ft" data-ar-label-zh="6 ft" data-ar-len="1828.8" type="button">6 ft</button>
+<button class="btn btn-outline-primary" data-ar-display="ft" data-ar-label-en="4 ft" data-ar-label-zh="4 ft" data-ar-len="1219.2" type="button">4 ft</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Unit picker modal (replaces native <select> popup so we can show descriptions) -->
+<div aria-hidden="true" aria-labelledby="unitPickerModalLabel" class="modal fade" id="unitPickerModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="unitPickerModalLabel">Select display unit</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="d-grid gap-2">
+<button class="btn btn-outline-success" data-unit-value="metric" type="button">
+<span style="font-size:1.1rem;font-weight:800;">公</span>
+<span class="small text-muted">Metric</span>
+</button>
+<button class="btn btn-outline-primary" data-unit-value="imperial" type="button">
+<span style="font-size:1.1rem;font-weight:800;">英</span>
+<span class="small text-muted">Imperial</span>
+</button>
+<button class="btn btn-outline-primary" data-unit-value="imperial_decimal" id="unitPickDecimal" type="button">
+<span style="font-size:1.1rem;font-weight:800;">英(D)</span>
+<span class="small text-muted">Imperial decimal display</span>
+</button>
+</div>
+</div>
+</div>
+</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<!-- 以下保留所有原始 JavaScript 函數，完全不動 -->
+
+
+
+<style>
+#cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.25rem; padding-bottom: 1.5rem; }
+
+#cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1rem; }
+#cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 0.75rem; }
+#cuttingItems .controls-row { margin-top: 0.75rem; margin-bottom: 1.25rem; }
+@media (max-width: 767.98px) {
+  #cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.5rem; padding-bottom: 2rem; }
+  
+  
+  #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.25rem; }
+}
+</style>
+<style>
+#cutting-items-card .card-body, #materials-card .card-body { padding-top: 2rem !important; padding-bottom: 2.5rem !important; }
+
+#cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.5rem !important; }
+#cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 1.25rem !important; }
+#cuttingItems .controls-row { margin-top: 1rem !important; margin-bottom: 1.75rem !important; }
+@media (max-width: 767.98px) {
+  #cutting-items-card .card-body, #materials-card .card-body { padding-top: 2.25rem !important; padding-bottom: 3rem !important; }
+  
+  
+  #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.75rem !important; }
+}
+</style>
+<style>
+#cutting-items-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
+#cutting-items-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
+
+#materials-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
+#materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
+
+#cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
+
+#cuttingItems .controls-row { margin-bottom: 0.5rem !important; }
+
+@media (max-width: 767.98px) {
+}
+
+        #calculateButton {
+            background-color: #198754;
+            border-color: #198754;
+            color: #fff;
+        }
+        #calculateButton:hover {
+            background-color: #157347;
+            border-color: #146c43;
+        }
+</style>
+
+<style>
+button, .btn {
+    /* 保留文字邊線設定；唔再全局清除 text-shadow（會蓋過白字陰影效果） */
+    -webkit-text-stroke: 0 !important;
+}
+
+#fontIncBtn, #fontDecBtn,
+button[onclick*="toggleTheme"],
+button[onclick*="showHelp"],
+#qrBtn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body:not(.sepia-mode) .card {
+    /* 舊書淺黃底色（紅圈） */
+    background-color: #faf6ed !important;
+    border: 1px solid #c9a876 !important;
+    color: #212529 !important;
+}
+
+body:not(.sepia-mode) .card-body-light {
+    /* 舊書淺黃底色（紅圈） */
+    background-color: #f5ead5 !important;
+    color: #212529 !important;
+}
+
+.btn-3d,
+#globalCutUnit,
+#globalMaterialUnit {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+.btn-3d:hover,
+#globalCutUnit:hover,
+#globalMaterialUnit:hover {
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-3d:active,
+#globalCutUnit:active,
+#globalMaterialUnit:active {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+    transform: translateY(0px) !important;
+}
+
+body:not(.sepia-mode) .card-body-light #colorLegend,
+body:not(.sepia-mode) .card-body-light .color-legend {
+    color: #212529 !important;
+}
+
+body:not(.sepia-mode) .card-body:not(.card-body-light) #colorLegend,
+body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
+    color: #ffffff !important;
+}
+
+/* === 計算按鈕：光明/黑暗兩套 + 呼吸動畫（2026-04-02） === */
+
+/* 色票：計算按鈕（光明/黑暗用同一套） */
+body{
+  --ag-calc-bg: linear-gradient(135deg, #00ff48 0%, #006400 100%) !important; /* 跟你提供的之前黑暗版參考 */
+  --ag-calc-border: rgba(0,0,0,0.18);
+  --ag-calc-icon-shadow: 0 3px 8px rgba(0,0,0,0.45);
+  --ag-calc-icon-color: #ffcc33; /* 橙黃色 */
+}
+
+#calculateButton.ag-calc-btn{
+  background: var(--ag-calc-bg) !important;
+  border: 1px solid var(--ag-calc-border) !important;
+  color: #fff !important;
+
+  position: relative;
+  overflow: hidden;
+
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: .85rem !important; /* 加大圖示與文字距離 */
+
+  /* keep 3D depth + hard shadow system */
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,0.50) inset,
+    0 1px 0 rgba(0,0,0,0.28) inset,
+    -1px 0 0 rgba(255,255,255,0.22) inset,
+    1px 0 0 rgba(0,0,0,0.18) inset,
+    0 2px 8px rgba(0,0,0,0.22) !important;
+}
+
+#calculateButton.ag-calc-btn:hover{
+  box-shadow:
+    0 -2px 0 rgba(255,255,255,0.60) inset,
+    0 2px 0 rgba(0,0,0,0.28) inset,
+    -2px 0 0 rgba(255,255,255,0.30) inset,
+    2px 0 0 rgba(0,0,0,0.18) inset,
+    0 3px 10px rgba(0,0,0,0.26) !important;
+  transform: translateY(-1px);
+}
+
+#calculateButton.ag-calc-btn:active{
+  box-shadow:
+    0 1px 0 rgba(0,0,0,0.40) inset,
+    0 -1px 0 rgba(255,255,255,0.20) inset,
+    0 1px 4px rgba(0,0,0,0.22) !important;
+  transform: translateY(1px);
+}
+
+/* 右上高光 */
+#calculateButton.ag-calc-btn::before{
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 52%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.55), rgba(255,255,255,0.08));
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 走光 */
+#calculateButton.ag-calc-btn::after{
+  content: "";
+  position: absolute;
+  top: -50%; left: -120%;
+  width: 34%; height: 210%;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.92), transparent);
+  transform: rotate(25deg);
+  animation: shine 8s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 3;
+}
+
+@keyframes shine{
+  0% { left: -120%; opacity: 0; }
+  10% { opacity: 1; }
+  40% { left: 220%; opacity: 0; }
+  100% { left: 220%; }
+}
+
+/* 圖示：加大 + 搶眼陰影 */
+#calculateButton .ag-calc-icon{
+  color: var(--ag-calc-icon-color) !important;
+  font-size: 1.55em !important;
+  line-height: 1 !important;
+  margin-right: 0 !important; /* 覆蓋 me-2 */
+  filter: drop-shadow(var(--ag-calc-icon-shadow));
+}
+
+/* 文字：呼吸效果靠 scale + 字距 + 陰影強弱（唔依賴可變字重） */
+#calculateButton .ag-calc-label{
+  font-weight: 900;
+  letter-spacing: 0;
+  display: inline-block;
+  transform-origin: 50% 60%;
+}
+
+/* 呼吸（效能優化 v5）：
+   - 開機唔再無限循環（避免手機長期 repaint）
+   - 改為「只有 hover 才播」（手機基本唔會 hover，即等於默認無動畫）
+*/
+#calculateButton.ag-calc-btn .ag-calc-label{
+  animation: none !important;
+}
+#calculateButton.ag-calc-btn .ag-calc-icon{
+  animation: none !important;
+}
+#calculateButton.ag-calc-btn:hover .ag-calc-icon{
+  animation: agCalcIconBreathe 1.65s ease-in-out infinite;
+}
+
+@keyframes agCalcTextBreathe{
+  0%,100%{ transform: scale(1); letter-spacing: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.28); }
+  50%{ transform: scale(1.06); letter-spacing: .85px; text-shadow: 0 2px 8px rgba(0,0,0,0.42); }
+}
+
+@keyframes agCalcIconBreathe{
+  /* 效能優化：動畫期間唔再改 filter（filter 會令部分裝置重繪/卡頓） */
+  0%,100%{ transform: scale(1); }
+  50%{ transform: scale(1.18); }
+}
+
+@media (prefers-reduced-motion: reduce){
+  #calculateButton.ag-calc-btn .ag-calc-label,
+  #calculateButton.ag-calc-btn .ag-calc-icon,
+  #calculateButton.ag-calc-btn::after{
+    animation: none !important;
+  }
+}
+
+
+#helpButton, #printButton { display: none !important; }
+
+#resetButton,
+body:not(.sepia-mode) #resetButton,
+body:not(.sepia-mode) .btn-danger {
+    background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
+    border: 1px solid #ff5500 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 6px rgba(255, 85, 0, 0.30) !important;
+    text-shadow: none !important;
+    -webkit-text-stroke: 0 !important;
+    font-weight: 600 !important;
+}
+body:not(.sepia-mode) #resetButton:hover,
+body:not(.sepia-mode) .btn-danger:hover {
+    background: linear-gradient(135deg, #ffc78f 0%, #ff7733 50%, #ffa8a8 100%) !important;
+    transform: translateY(-1px);
+}
+
+body.sepia-mode * {
+    /* sepia-mode 唔再全局清除 text-shadow（會蓋過白字陰影效果） */
+    -webkit-text-stroke: 0 !important;
+}
+
+body.sepia-mode {
+    background-color: var(--ag-sepia-bg-fallback) !important;
+    background: var(--ag-sepia-bg-main) fixed !important;
+    background-image:
+      /* 主漸變：上淺下深（可一鍵換色） */
+      var(--ag-sepia-bg-main),
+      /* 第二色調：淡淡青綠陰影 */
+      radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
+      /* 微細紋理：紙張/金屬質感（細紋） */
+      repeating-linear-gradient(90deg, rgba(255,255,255,0.065) 0px, rgba(255,255,255,0.065) 1px, rgba(0,0,0,0.040) 2px, rgba(255,255,255,0.000) 4px),
+      repeating-linear-gradient(0deg,  rgba(255,255,255,0.040) 0px, rgba(255,255,255,0.040) 1px, rgba(0,0,0,0.022) 2px, rgba(255,255,255,0.000) 6px) !important;
+    background-size: 100% 100%, auto, 7px 7px, 9px 9px !important;
+    background-attachment: fixed !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode .card {
+    background: #faf6ed !important;
+    border: 1px solid #c9a876 !important;
+    box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2) !important;
+}
+
+body.sepia-mode .card-header,
+body.sepia-mode .section-header {
+    /* Light Mode（sepia）標題條：左深右淺（取消灰色、深啡唔好太深） */
+    background: linear-gradient(90deg,
+      #6f5a4a 0%,
+      #7c604e 24%,
+      #8a6a50 55%,
+      #ad8a6b 80%,
+      #dccbb7 100%
+    ) !important;
+    border-bottom: 2px solid #8b6f47 !important;
+}
+
+/* 只針對「設定」卡：左深右淺（取消灰色、深啡唔好太深） */
+body.sepia-mode #settings-card .section-header{
+    background: linear-gradient(90deg,
+      #6b5748 0%,
+      #7a5f4d 22%,
+      #8a6a50 55%,
+      #a8876a 78%,
+      #dccbb7 100%
+    ) !important;
+}
+
+body.sepia-mode .card-body,
+body.sepia-mode .card-body-light {
+    background-color: #f5ead5 !important;
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.60) 0px,
+        rgba(255,255,255,0.60) 1px,
+        rgba(101,67,33,0.15) 2px,
+        rgba(255,255,255,0.30) 4px,
+        rgba(101,67,33,0.10) 6px
+      ),
+      linear-gradient(
+        180deg,
+        rgba(255,255,255,0.60) 0%,
+        rgba(255,255,255,0.00) 25%,
+        rgba(101,67,33,0.08) 60%,
+        rgba(255,255,255,0.30) 100%
+      ) !important;
+    background-size: auto, 100% 100% !important;
+    background-attachment: local !important;
+}
+
+body.sepia-mode h1,
+body.sepia-mode #titleText,
+body.sepia-mode .section-title,
+body.sepia-mode .card-header *,
+body.sepia-mode .section-header * {
+    color: #ffffff !important;
+}
+
+/* 例外：步驟徽章數字要啡色（避免被上面白字規則蓋過） */
+body.sepia-mode .section-header .step-indicator{
+    color: #6a5040 !important;
+}
+
+body.sepia-mode h2, body.sepia-mode h3,
+body.sepia-mode h4, body.sepia-mode h5, body.sepia-mode h6 {
+    color: #5a4030 !important;
+}
+
+body.sepia-mode .form-control,
+body.sepia-mode .form-select {
+    background: #fffbf5 !important;
+    border: 1px solid #c9a876 !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode .table {
+    color: #4a3a2a !important;
+    border-color: #c9a876 !important;
+    background: #faf6ed !important;
+}
+
+body.sepia-mode .table thead,
+body.sepia-mode .table-active {
+    background: #e8dcc4 !important;
+}
+
+body.sepia-mode [class*="bg-light"],
+body.sepia-mode .bg-secondary {
+    background: #f0e6d2 !important;
+}
+
+/* 光明版：按鈕分層配色（避免所有掣一樣色） */
+body.sepia-mode .btn-primary {
+    /* 主操作：偏青綠（同背景第二色調呼應） */
+    background: linear-gradient(135deg, #2f6f63 0%, #22524b 100%) !important;
+    border: 1px solid #1b3f3a !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+}
+
+body.sepia-mode .btn-success {
+    /* 成功/新增：偏綠 */
+    background: linear-gradient(135deg, #3f7a3a 0%, #2f5f2b 100%) !important;
+    border: 1px solid #284e25 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+}
+
+body.sepia-mode .btn-secondary,
+body.sepia-mode .btn-outline-secondary {
+    /* 次要/取消：暖灰啡 */
+    background: linear-gradient(135deg, #b79a72 0%, #8f7756 100%) !important;
+    border: 1px solid #6f5a42 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.40) !important;
+}
+
+body.sepia-mode .btn-warning {
+    /* 編輯/提示：琥珀金 */
+    background: linear-gradient(135deg, #e0b15a 0%, #b97b2f 100%) !important;
+    border: 1px solid #8d5c20 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.40) !important;
+}
+
+body.sepia-mode #resetButton,
+body.sepia-mode .btn-danger {
+    /* 危險/清除：紅橙（最突出） */
+    background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
+    border: 1px solid #ff5500 !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+}
+
+/* 重要：光明模式入面如果掣底色偏深，一律強制白字（包括 icon/span），避免『深色底 + 深色字』睇唔到 */
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark),
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark) *{
+  color: #ffffff !important;
+}
+
+/* 光明版：只係「冇語意 class」嗰類普通掣先用素色底
+   （否則會蓋過 btn-primary/success/... 令全部一樣色） */
+body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark):not([class*="btn-outline"]) {
+    background:
+        linear-gradient(45deg, rgba(255,255,255,0.22) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.22) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
+        #ead9bf !important;
+    background-size: 20px 20px !important;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+    border: 1px solid #b8956a !important;
+    color: #4a3a2a !important;
+    text-shadow: none !important;
+}
+
+/* 光明版（sepia）：深色文字一律唔做陰影
+   注意：白字按鈕（btn-primary/success/...）需要陰影提升可讀性，唔應該被取消。
+*/
+body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark) *,
+body.sepia-mode label,
+body.sepia-mode .form-label,
+body.sepia-mode .small-hint{
+  text-shadow: none !important;
+}
+
+/* 白色字按鈕：統一保留細陰影（最幼，但有效果） */
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark),
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark) *{
+  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
+}
+
+/* 光明版：切割項目 / 材料 兩組 action 按鈕：移除高光/shine，改用純投影（參考其它按鈕投影） */
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn::before,
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn::after,
+body.sepia-mode #materialItems .controls-row .ag-action-btn::before,
+body.sepia-mode #materialItems .controls-row .ag-action-btn::after{
+  content: none !important;
+  display: none !important;
+}
+
+/* v21: 光明版同樣要按鈕漸變由左至右（只調整高光方向，不改底色） */
+body.sepia-mode .btn:not(.btn-close):not(.tool-btn):not(.ag-ar-len-warning)::before{
+  background: linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0.08)) !important;
+}
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
+body.sepia-mode #materialItems .controls-row .ag-action-btn{
+  filter: none !important;
+  transform: none !important;
+  box-shadow: 0 3px 10px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.14) !important;
+}
+
+/* 光明版：7個圓形功能鍵（tool-btn）移除文字陰影，保留投影 */
+body.sepia-mode .top-tools .tool-btn,
+body.sepia-mode .top-tools .tool-btn *{
+  text-shadow: none !important;
+}
+
+body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark):not([class*="btn-outline"]):hover {
+    background:
+        linear-gradient(45deg, rgba(255,255,255,0.26) 25%, transparent 25%),
+        linear-gradient(-45deg, rgba(255,255,255,0.26) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.22) 75%),
+        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.22) 75%),
+        #dcc9a5 !important;
+    background-size: 20px 20px !important;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
+}
+
+body.sepia-mode .btn-outline-warning {
+    background: linear-gradient(to bottom, #d4a574, #c9956a) !important;
+    border: 1px solid #a0826d !important;
+    color: #3a2a1a !important;
+}
+
+body.sepia-mode .btn-outline-danger {
+    background: linear-gradient(to bottom, #b8714a, #a0522d) !important;
+    border: 1px solid #8b4513 !important;
+    color: #1f2d2a !important;
+}
+
+/* 表格「垃圾桶」掣：改淺粉紅（避免太深色） */
+.action-buttons .btn-outline-danger{
+  background: linear-gradient(to bottom, #f8c9d9, #e7a7bd) !important;
+  border: 1px solid #c98aa2 !important;
+  color: #4a1f2d !important;
+}
+.action-buttons .btn-outline-danger i{ color: #4a1f2d !important; }
+.action-buttons .btn-outline-danger:hover{
+  filter: brightness(1.03) saturate(1.05);
+}
+
+/* 光明模式下避免被其它 btn-outline-danger 規則蓋過 */
+body.sepia-mode .action-buttons .btn-outline-danger{
+  background: linear-gradient(to bottom, #f8c9d9, #e7a7bd) !important;
+  border: 1px solid #c98aa2 !important;
+  color: #4a1f2d !important;
+}
+body.sepia-mode .action-buttons .btn-outline-danger i{ color: #4a1f2d !important; }
+
+body.sepia-mode .modal-content {
+    background: #faf6ed !important;
+    border: 1px solid #c9a876 !important;
+    color: #4a3a2a !important;
+}
+
+body.sepia-mode label {
+    color: #5a4030 !important;
+}
+
+body.sepia-mode .text-muted,
+body.sepia-mode .small-hint {
+    color: #8b7355 !important;
+}
+
+body.sepia-mode #colorLegend,
+body.sepia-mode .color-legend,
+body.sepia-mode [id*="colorLegend"] {
+    color: #3a2a1a !important;
+}
+
+body.sepia-mode .btn-3d,
+body.sepia-mode #globalCutUnit,
+body.sepia-mode #globalMaterialUnit {
+    box-shadow: 0 2px 4px rgba(107, 85, 51, 0.2) !important;
+}
+
+body.sepia-mode select.form-select:not(.unit-select),
+body.sepia-mode select.form-select-sm:not(.unit-select) {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%235a4030' d='M4.2 6.2a1 1 0 0 1 1.4 0L8 8.6l2.4-2.4a1 1 0 1 1 1.4 1.4l-3.1 3.1a1 1 0 0 1-1.4 0L4.2 7.6a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right .55rem center !important;
+  background-size: .8rem .8rem !important;
+  padding-right: 1.9rem !important;
+}
+
+body.sepia-mode select.unit-select,
+body.sepia-mode #unit,
+body.sepia-mode #globalCutUnit,
+body.sepia-mode #globalMaterialUnit {
+  background-image: none !important;
+  padding-right: 0 !important;
+}
+
+/* 光明版：公制/英制按鈕（unit-select）要清晰分色：公制=綠、英制=藍 */
+body.sepia-mode .unit-select.metric-active,
+body.sepia-mode select.unit-select.metric-active{
+  background: linear-gradient(135deg, #2fb344 0%, #1f7a34 100%) !important;
+  border-color: #19652b !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+}
+
+body.sepia-mode .unit-select.imperial-active,
+body.sepia-mode select.unit-select.imperial-active{
+  /* 英制：藍色要夠「藍」同綠色拉開距離（隔遠都分到） */
+  /* 改淺少少 + 偏天藍，隔遠更易同綠色分辨 */
+  background: linear-gradient(135deg, #6fd3ff 0%, #2f7bff 100%) !important;
+  border-color: #1f5fd6 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+  /* 加少少內光邊，提升對比（唔影響暗色模式） */
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.35),
+    0 1px 0 rgba(0,0,0,.08) !important;
+}
+
+/* 重要：光明版入面「公/英」其實係用按鈕顯示（唔係 <select> 本身），
+   而 JS 會用 btn-success / btn-primary 去標記狀態。
+   但光明版全局 btn-primary 會被調成偏青綠，令英制睇落去好似綠色。
+   所以要針對呢幾粒 unit picker 按鈕強制改返做清晰藍色。 */
+body.sepia-mode #unitPickerBtn.btn-primary,
+body.sepia-mode #globalCutUnitBtn.btn-primary,
+body.sepia-mode #globalMaterialUnitBtn.btn-primary{
+  background: linear-gradient(135deg, #6fd3ff 0%, #2f7bff 100%) !important;
+  border: 1px solid #1f5fd6 !important;
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.35),
+    0 1px 0 rgba(0,0,0,.08) !important;
+}
+
+body.sepia-mode #unitPickerBtn.btn-success,
+body.sepia-mode #globalCutUnitBtn.btn-success,
+body.sepia-mode #globalMaterialUnitBtn.btn-success{
+  background: linear-gradient(135deg, #2fb344 0%, #1f7a34 100%) !important;
+  border: 1px solid #19652b !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
+}
+
+.form-control,
+.form-select,
+textarea {
+  /* 輸入欄位：加返最幼輪廓線 + 少少立體感（比之前清晰，但唔誇張） */
+  border: 1px solid var(--ag-outline, #b8956a) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.70),
+    0 3px 8px rgba(0,0,0,.12) !important;
+  transition: box-shadow .15s ease, border-color .15s ease !important;
+}
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+  /* focus：保持輕微光暈 + 少少投影 + 保留輪廓線 */
+  border-color: var(--ag-outline, #8f7756) !important;
+  box-shadow:
+    0 0 0 .12rem rgba(0,0,0,.06),
+    0 4px 10px rgba(0,0,0,.14) !important;
+}
+
+/* === Fix (2026-04-03): 強制所有輸入欄保持淺色底 ===
+   目標：同舊版（021）一樣，無論瀏覽器深色模式 / 自動配色 / 擴充套件點搞，
+   input 都要保持淺色底 + 淺色框線。
+
+   關鍵：
+   - 同時寫死 background-color + background-image（只寫 background 有時會畀插件蓋過）
+   - 加 color-scheme: light（避免 UA 以深色控件渲染）
+   - 補埋 webkit autofill（Chrome 自動填充會變黃/變深）
+*/
+body:not(.sepia-mode){
+  color-scheme: light;
+}
+body:not(.sepia-mode) :is(
+  .form-control,
+  .form-select,
+  textarea,
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="search"],
+  input[type="url"],
+  input[type="password"]
+){
+  background-color: #ffffff !important;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90)) !important;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+  border-color: rgba(0,0,0,.18) !important; /* 跟舊檔 light-mode 接近 */
+}
+body:not(.sepia-mode) :is(.form-control,.form-select,textarea)::placeholder{
+  color: rgba(17,24,39,.45) !important;
+  -webkit-text-fill-color: rgba(17,24,39,.45) !important;
+}
+body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill,
+body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill:hover,
+body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill:focus{
+  -webkit-text-fill-color: #111827 !important;
+  transition: background-color 999999s ease-out 0s;
+  box-shadow: 0 0 0 1000px #ffffff inset !important;
+}
+
+.btn,
+.top-tools .tool-btn {
+  box-shadow: 0 3px 10px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.14) !important;
+  transition: box-shadow .12s ease, transform .08s ease !important;
+}
+.btn:hover,
+.top-tools .tool-btn:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.16) !important;
+  transform: translateY(-1px) !important;
+}
+.btn:active,
+.top-tools .tool-btn:active {
+  box-shadow: 0 2px 6px rgba(0,0,0,.20) !important;
+  transform: translateY(0) !important;
+}
+
+/* 全局按鈕：字體放大時可換行，按鈕高度自動加高 */
+button.btn,
+.btn{
+  white-space: normal !important;
+  height: auto !important;
+  min-height: 38px;
+  line-height: 1.15;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* 有啲掣入面包咗 span / i / small，佢哋自己可能仍然 nowrap，強制繼承換行 */
+.btn *{ white-space: inherit !important; }
+
+/* 注意：頂部工具列係固定圓形掣，唔應該因為字體放大而變形 */
+.top-tools .tool-btn{
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  white-space: nowrap !important;
+  flex-wrap: nowrap !important;
+  line-height: 1 !important;
+}
+
+/* 彈窗背景模糊：改用 JS inline filter（見 ag-global-blur-helper） */
+
+body.sepia-mode #resetButton {
+  box-shadow: 0 4px 12px rgba(0,0,0,.26) !important;
+}
+
+/* === 2026-03-28 Fix: 光明版紅圈兩組按鈕（切割項目/材料） ===
+   目標：
+   - 字色深啡（跟其他深色字一致）
+   - 深色字/圖示一律無陰影
+   - 移除「陰影/立體內陰影」效果，只保留外投影
+*/
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
+body.sepia-mode #materialItems .controls-row .ag-action-btn{
+  color: rgba(62,42,16,.92) !important; /* 深啡色 */
+  text-shadow: none !important;
+  box-shadow: 0 6px 14px rgba(0,0,0,.18) !important; /* 純投影 */
+}
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn *,
+body.sepia-mode #materialItems .controls-row .ag-action-btn *{
+  color: inherit !important;
+  text-shadow: none !important;
+}
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn:hover,
+body.sepia-mode #materialItems .controls-row .ag-action-btn:hover{
+  transform: none !important;
+  box-shadow: 0 8px 18px rgba(0,0,0,.20) !important;
+}
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn:active,
+body.sepia-mode #materialItems .controls-row .ag-action-btn:active{
+  transform: none !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,.16) !important;
+}
+
+/* 光明版：7個圓形功能鍵（頂部工具列）深色字一律無陰影 */
+
+/* 光明版：覆蓋『白字加陰影』全局規則（避免 btn-success/secondary 仍被加 text-shadow） */
+body.sepia-mode :is(.btn-primary,.btn-success,.btn-danger,.btn-info,.btn-dark,.btn-secondary,
+  .save-scheme-btn,.load-scheme-btn,.help-btn,#calculateButton,.unit-select.metric-active,.unit-select.imperial-active,
+  .tool-btn, .tool-text){
+  text-shadow: none !important;
+}
+
+/* 光明版：確保紅圈兩組按鈕只用外投影（禁止 inset/立體陰影） */
+body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
+body.sepia-mode #materialItems .controls-row .ag-action-btn{
+  box-shadow: 0 6px 14px rgba(0,0,0,.18) !important; /* only drop shadow */
+}
+
+</style>
+
+
+
+<style id="ag-shadow-final-v3">
+/* === AnyGen patch: 按鈕硬邊投影（全檔最終覆寫 v3 / 2026-03-28） ===
+   原因：此檔案在 <body> 內仍有多段 <style>（含 !important）會覆蓋 <head> 的設定。
+   做法：把最終覆寫放到 
+<!-- AnyGen patch: 最終覆寫兩粒重置掣（白字 + 最幼邊線） -->
+<style id="ag-reset-white-final">
+  /* 需求修正：你講「白色」係指字體。
+     所以：保留原本底色（橙/黃漸變），只改：
+     - 字色：白
+     - 輪廓線：最幼
+  */
+
+  /* 結果區大粒重置 */
+  #resetButton,
+  body:not(.sepia-mode) #resetButton,
+  body.sepia-mode #resetButton,
+  #resetButton.btn-danger{
+    color: #fff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.55) !important;
+    border: 0.5px solid #ff5500 !important;
+  }
+
+  /* 顯示微調彈窗重置 */
+  #displayTuneModal #tuneReset.btn-warning,
+  #tuneReset{
+    color: #fff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.55) !important;
+    border: 0.5px solid rgba(0,0,0,0.22) !important;
+  }
+</style>
+<!-- AnyGen patch: 只為4粒按鈕鎖定硬邊投影（避免再被其他CSS蓋走） -->
+<style id="ag-btn-radius-final">
+/* === AnyGen patch: buttons radius slightly rounder ===
+   需求：所有按鈕圓角再圓少少，但唔好太圓。
+   做法：集中用一個變數，並對常見按鈕 class/元件做最終覆寫。
+*/
+:root{ --ag-btn-radius: 14px; }
+
+/* Bootstrap buttons + 站內主要按鈕 */
+button.btn,
+.btn,
+.ag-action-btn,
+#calculateButton,
+#resetButton,
+.save-scheme-btn,
+.load-scheme-btn,
+.help-btn,
+.unit-select,
+.tool-btn{
+  border-radius: var(--ag-btn-radius) !important;
+}
+
+/* 小型按鈕保持唔好過份圓：比主按鈕略細 */
+.btn-sm,
+button.btn-sm{
+  border-radius: 12px !important;
+}
+
+/* 圓形功能鍵（頂部工具列 / 浮動語言鍵）維持圓形，不受上面影響 */
+.top-tools .tool-btn,
+#languageToggle.language-toggle{
+  border-radius: 999px !important;
+}
+</style>
+<style id="ag-four-btn-shadow-final">
+  /* 重要：sepia-mode 內有較高 specificity + !important 會蓋走投影
+     所以呢度用更高 specificity（帶埋 #cuttingItems/#materialItems）強制四粒掣有硬邊投影。
+     同時：唔改任何底色（保持原本格仔色）。
+  */
+
+  /* 切割項目兩粒 */
+  body.sepia-mode #cuttingItems .controls-row #addCuttingButton,
+  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton,
+  /* 材料兩粒 */
+  body.sepia-mode #materialItems .controls-row #addMaterialButton,
+  body.sepia-mode #materialItems .controls-row #clearMaterialButton,
+  /* 其他模式（保險） */
+  #addCuttingButton,
+  #clearCuttingButton,
+  #addMaterialButton,
+  #clearMaterialButton{
+    box-shadow: var(--ag-btn-inset-hi), var(--ag-btn-inset-lo), var(--ag-btn-drop-hard) !important;
+
+    /* 重要：呢幾粒掣底色偏深，強制白字（避免被其他規則蓋走） */
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.50) !important;
+  }
+
+  body.sepia-mode #cuttingItems .controls-row #addCuttingButton *,
+  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton *,
+  body.sepia-mode #materialItems .controls-row #addMaterialButton *,
+  body.sepia-mode #materialItems .controls-row #clearMaterialButton *{
+    color: #ffffff !important;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.50) !important;
+  }
+
+  body.sepia-mode #cuttingItems .controls-row #addCuttingButton:active,
+  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton:active,
+  body.sepia-mode #materialItems .controls-row #addMaterialButton:active,
+  body.sepia-mode #materialItems .controls-row #clearMaterialButton:active,
+  #addCuttingButton:active,
+  #clearCuttingButton:active,
+  #addMaterialButton:active,
+  #clearMaterialButton:active{
+    box-shadow: var(--ag-btn-inset-hi), var(--ag-btn-inset-lo), var(--ag-btn-drop-press) !important;
+    transform: translateY(1px) !important;
+  }
+</style>
+
+<!-- AnyGen patch: Custom alert/confirm (for background blur) -->
+<div aria-hidden="true" class="modal fade" id="agAlertModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="agAlertTitle">提示</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body" id="agAlertBody"></div>
+<div class="modal-footer">
+<button class="btn btn-primary" data-bs-dismiss="modal" id="agAlertOk" type="button">確定</button>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" class="modal fade" id="agConfirmModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="agConfirmTitle">確認</h5>
+<button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body" id="agConfirmBody"></div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-ag-confirm="0" id="agConfirmCancel" type="button">取消</button>
+<button class="btn btn-primary" data-ag-confirm="1" id="agConfirmOk" type="button">確定</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- AnyGen: 底部資訊欄（參考 index_宿舍：結構/字體/顏色） -->
+<style id="ag-bottom-infobar-style">
+  :root{ --ag-infobar-h: 46px; }
+
+  /* 參考宿舍：半透明黑底 + 小 blur + 黃色字（常駐，冇隱藏掣） */
+  #ag-info-bar{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
+    display: flex;
+    align-items: center;
+    background: rgba(32, 32, 32, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 9999;
+  }
+
+  /* 內容唔畀 bar 遮 */
+  body{ padding-bottom: calc(var(--ag-infobar-h) + env(safe-area-inset-bottom)); }
+
+  #ag-info-message{
+    display:flex;
+    align-items:center;
+    min-width: 0;
+    width: 100%;
+    font-size: 0.95rem; /* 跟宿舍 */
+    color: yellow !important;
+    gap: 8px;
+  }
+
+  #ag-info-message span,
+  #ag-statusText{ color: yellow !important; }
+
+  #ag-statusIcon{ margin-right: 2px; font-size: 1.05rem; line-height: 1; flex: 0 0 auto; }
+
+  /* 單行：太長就可以橫向拉；同時保留省略（未拉之前） */
+  #ag-statusText{
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    text-shadow: 0 1px 0 rgba(0,0,0,.65);
+    padding-bottom: 2px; /* 比少少位俾 scrollbar */
+  }
+  /* 狀態文字如果可橫向滑動：將 scrollbar 改到好幼，唔礙眼 */
+  #ag-statusText{ scrollbar-width: thin; scrollbar-color: rgba(255,255,0,.22) transparent; }
+  #ag-statusText::-webkit-scrollbar{ height: 2px; }
+  #ag-statusText::-webkit-scrollbar-thumb{ background: rgba(255,255,0,.22); border-radius: 999px; }
+
+  /* 點擊提示：用家知可以撳/拉 */
+  #ag-info-bar{ cursor: pointer; }
+
+  /* 彈出全文（輕量 overlay） */
+  #ag-info-overlay{ position: fixed; inset: 0; z-index: 10000; display:none; }
+  #ag-info-overlay[data-open="true"]{ display:block; }
+  #ag-info-backdrop{ position:absolute; inset:0; background: rgba(32,32,32,.78); }
+  #ag-info-modal{
+    position:absolute;
+    left: 50%;
+    bottom: calc(var(--ag-infobar-h) + 18px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    width: min(820px, calc(100vw - 24px));
+    background: rgba(18,22,28,.92);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 16px;
+    padding: 14px 14px;
+    color: #fff;
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  }
+  #ag-info-modal h3{ margin: 0 0 8px 0; font-size: 14px; font-weight: 900; }
+  #ag-info-full{ margin:0; font-size: 14px; line-height: 1.35; color: rgba(255,255,255,.92); white-space: pre-wrap; word-break: break-word; }
+  #ag-info-closeHint{ margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.70); }
+
+  @media (max-width: 980px){
+    :root{ --ag-infobar-h: 50px; }
+  }
+</style>
+<div aria-label="Status" aria-live="polite" data-kind="doing" id="ag-info-bar" role="status">
+<div class="status-message" id="ag-info-message">
+<span aria-hidden="true" class="status-icon" id="ag-statusIcon">ℹ️</span>
+<span id="ag-statusText"></span>
+</div>
+</div>
+<div aria-hidden="true" id="ag-info-overlay">
+<a aria-label="Close" href="#" id="ag-info-backdrop"></a>
+<div aria-label="Message" aria-modal="true" id="ag-info-modal" role="dialog">
+<h3 id="ag-info-modal-title">訊息</h3>
+<p id="ag-info-full"></p>
+<div id="ag-info-closeHint">（點擊背景關閉）</div>
+</div>
+</div>
+
+<!-- AnyGen add: 統一即時狀態列 API（帶時間戳，避免停留舊狀態） -->
+
+<!-- AnyGen add: 主要操作即時狀態列提示（中英文） -->
+
+<!-- AnyGen fix: 讓自製彈窗可用的背景模糊（由 openTune/closeTune 呼叫） -->
+
+<!-- AnyGen patch v2: 強制頂部7鍵兩模式同色（最後覆寫，確保贏晒） -->
+<style id="ag-top-tools-unified-colors-v2">
+  body .top-tools button.tool-btn,
+  body .top-tools .btn.tool-btn{
+    background: #ffffff !important;
+    border: 1px solid rgba(15,23,42,.22) !important;
+    color: #0f172a !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+  body .top-tools button.tool-btn *,
+  body .top-tools .btn.tool-btn *{
+    color: #0f172a !important;
+    text-shadow: none !important;
+    filter: none !important;
+  }
+  body .top-tools button.tool-btn:hover,
+  body .top-tools .btn.tool-btn:hover{
+    background: #f8fafc !important;
+    border-color: rgba(15,23,42,.30) !important;
+  }
+  body .top-tools button.tool-btn:active,
+  body .top-tools .btn.tool-btn:active{
+    background: #f1f5f9 !important;
+  }
+</style>
+<!-- AnyGen patch v3: 統一「頂部7鍵彈出內容」配色（所有模式同一套） -->
+<style id="ag-unify-top-tools-content-colors-v3">
+  :root{
+    --ag-modal-bg: #ffffff;
+    --ag-modal-bg-2: #f6f7fb;
+    --ag-modal-text: #0f172a;
+    --ag-modal-muted: rgba(15,23,42,.72);
+    --ag-modal-border: rgba(15,23,42,.16);
+    --ag-modal-header-bg: linear-gradient(135deg, #1f3b73, #3b82f6);
+    --ag-modal-header-text: #ffffff;
+  }
+
+  /* 1) Bootstrap modals：Help / QR / 其他（儲存/載入/列印/單位選擇等） */
+  body :is(.modal-content){
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+  body :is(.modal-content) :is(.text-muted, .small, .small-hint){
+    color: var(--ag-modal-muted) !important;
+  }
+  body :is(.modal-content) :is(label, .form-label){
+    color: var(--ag-modal-text) !important;
+  }
+
+  /* Help modal：固定 header/body */
+  body #helpModal .modal-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+    border-bottom: none !important;
+  }
+  body #helpModal .modal-title,
+  body #helpModal .modal-header *{ color: var(--ag-modal-header-text) !important; text-shadow:none !important; }
+  body #helpModal .modal-body{
+    background: linear-gradient(180deg, var(--ag-modal-bg) 0%, var(--ag-modal-bg-2) 100%) !important;
+    color: var(--ag-modal-text) !important;
+  }
+
+  /* QR modal：header/body（若存在） */
+  body #qrModal .modal-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+  }
+  body #qrModal .modal-header *{ color: var(--ag-modal-header-text) !important; }
+  body #qrModal .modal-body{
+    background: linear-gradient(180deg, var(--ag-modal-bg) 0%, var(--ag-modal-bg-2) 100%) !important;
+    color: var(--ag-modal-text) !important;
+  }
+
+  /* 2) 自製「顯示調校」面板（#displayTuneModal） */
+  body #displayTuneModal .tune-modal{
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+  body #displayTuneModal .tune-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+    border-bottom: none !important;
+  }
+  body #displayTuneModal .tune-title,
+  body #displayTuneModal .tune-header *{ color: var(--ag-modal-header-text) !important; text-shadow:none !important; }
+  body #displayTuneModal .tune-body,
+  body #displayTuneModal .tune-row label,
+  body #displayTuneModal .tune-val,
+  body #displayTuneModal .tune-hint{
+    color: var(--ag-modal-text) !important;
+    text-shadow:none !important;
+  }
+  body #displayTuneModal .tune-hint{ color: var(--ag-modal-muted) !important; }
+
+  /* 3) 自製「例／案例」彈窗（#ag-case-help-...） */
+  body #ag-case-help-modal{
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+  body #ag-case-help-header{
+    background: var(--ag-modal-header-bg) !important;
+    color: var(--ag-modal-header-text) !important;
+  }
+  body #ag-case-help-title,
+  body #ag-case-help-header *{ color: var(--ag-modal-header-text) !important; }
+  body #ag-case-help-body{ color: var(--ag-modal-text) !important; }
+  body #ag-case-help-body :is(p, li){ color: var(--ag-modal-text) !important; }
+  body #ag-case-help-body .ag-case-sub{ background: rgba(59,130,246,.08) !important; border-color: rgba(59,130,246,.20) !important; }
+  body #ag-case-help-close{ background: rgba(255,255,255,.92) !important; border-color: rgba(255,255,255,.35) !important; }
+  body #ag-case-help-close{ color: #0f172a !important; }
+
+  /* 4) 強制無視 sepia-mode 對彈窗配色嘅覆寫（用同一套） */
+  body.sepia-mode :is(.modal-content, #displayTuneModal .tune-modal, #ag-case-help-modal){
+    background: var(--ag-modal-bg) !important;
+    color: var(--ag-modal-text) !important;
+    border-color: var(--ag-modal-border) !important;
+  }
+</style>
 <script>
+// ======= Performance: moved inline scripts to end (auto) =======
+</script><script>
   (function(){
     var baseFontPx = 16;
     try {
@@ -4268,8 +5551,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
       if(localStorage.getItem('theme_light_mode') === '1') document.body.classList.add('light-mode');
     } catch(e) {}
   })();
-</script>
-<script>
+</script><script>
         let INCH_TO_MM = 25.4;
         let MM_TO_INCH = 1 / INCH_TO_MM;
         let FT_TO_MM = 304.8;
@@ -7701,59 +8983,16 @@ function calculate() {
                 }
             }
 
-            bins.forEach((bin, binIndex) => {
-                const usedLength = bin.cuts.reduce((sum, cut) => sum + cut.length, 0);
-                const kerfLength = bin.cuts.length > 0 ? (bin.cuts.length - 1) * sawThickness : 0;
-                const waste = bin.length - usedLength - kerfLength;
-                const wasteSafe = (waste < 0 ? 0 : waste);
-                const wastePercentage = ((wasteSafe / bin.length) * 100).toFixed(1);
+            // === v11：分批渲染（避免一次過 innerHTML + 大量 DOM 造成『窒一窒』）===
+            // 觀感：會由上而下逐段出結果，但 UI 唔會被鎖死。
+            // - 小結果：維持一次過渲染（更快）
+            // - 中等/大結果：用 requestAnimationFrame 分批插入
+            const __PROGRESSIVE_CUTS = 420; // 達到呢個 cut 數就啟動分批渲染
+            const __PROGRESSIVE_BINS = 60;
+            const __needProgressive = (__totalCuts >= __PROGRESSIVE_CUTS) || (bins.length >= __PROGRESSIVE_BINS);
 
-                html += `
-                    <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9; border: 1px solid var(--ag-outline);">
-                        <div style="font-weight: bold; margin-bottom: 8px; color: #333;">
-                            ${_rLang==='zh'?'原料':'Bar'} #${binIndex + 1} - ${formatLengthForDisplay(bin.length, unit)}
-                            ${bin.autoAdded ? ' <span style="color: #f57c00; font-size: 0.9em;">['+(_rLang==='zh'?'自動添加':'Auto Added')+']</span>' : ''}
-                        </div>
-                        <div style="display: flex; height: 50px; border: 1px solid var(--ag-outline); border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: white;">
-                `;
-
-                bin.cuts.forEach((cut, cutIndex) => {
-                    const roundedLength = Math.round(cut.length * 10) / 10;
-                    const percentage = (cut.length / bin.length) * 100;
-                    const color = lengthColorMap[roundedLength];
-                    const label = lengthLabelMap[roundedLength];
-
-                    html += `
-                        <div style="width: ${percentage.toFixed(1)}%; background: ${ (window.__agPartFill ? window.__agPartFill(color) : color) }; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);" 
-                             title="${formatLengthForDisplay(cut.length, unit)}">
-                            ${label}
-                        </div>
-                    `;
-                });
-
-                if (wasteSafe > 0) {
-                    const wastePercentageVisual = (wasteSafe / bin.length) * 100;
-                    html += `
-                        <div style="width: ${wastePercentageVisual.toFixed(1)}%; background: repeating-linear-gradient(45deg, #ffcccc 0px, #ffcccc 5px, #ff9999 5px, #ff9999 10px); display: flex; align-items: center; justify-content: center; color: #a00; font-weight: bold; font-size: 11px; border-left: 1px solid var(--ag-outline); padding: 0 4px;">
-                            ${_rLang==='zh'?'餘料':'Waste'}
-                        </div>
-                    `;
-                }
-
-                html += `
-                        </div>
-                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
-                            <strong>${_rLang==='zh'?'使用長度':'Used Length'}：</strong> ${formatLengthForDisplay(usedLength + kerfLength, unit)} | 
-                            <strong>${_rLang==='zh'?'餘料':'Waste'}：</strong> ${formatLengthForDisplay(wasteSafe, unit)} (${wastePercentage}%)
-                        </div>
-                        <div style="font-size: 11px; color: #666;">
-                            <strong>${_rLang==='zh'?'切割順序':'Cut Order'}：</strong> 
-                            ${bin.cuts.map(cut => formatLengthForDisplay(Math.round(cut.length * 10) / 10, unit)).join(" → ")}
-                        </div>
-                    </div>
-                `;
-            });
-
+            // 先寫入摘要/警告，並預留容器
+            html += `<div id="agResultsContainer"></div>`;
             resultDetails.innerHTML = html;
 
             // 更新漸變風格 label（按掣後會重繪，呢度確保每次 render 都同步顯示）
@@ -7762,45 +9001,150 @@ function calculate() {
               if (lab && window.__getGradientModeLabel) lab.textContent = window.__getGradientModeLabel(_rLang);
             } catch(e) {}
 
-            // 統計每個尺寸出現件數（每一刀 = 一件）
-            const lengthCountMap = {};
-            bins.forEach(bin => {
-                bin.cuts.forEach(cut => {
-                    const roundedLength = Math.round(cut.length * 10) / 10;
+            const __container = document.getElementById('agResultsContainer');
+            if (!__container) return;
+
+            // 渲染一支料（回傳 HTML 字串）
+            function __renderOneBin(bin, binIndex){
+              const cuts = (bin && bin.cuts) ? bin.cuts : [];
+              const usedLength = cuts.reduce((sum, cut) => sum + (Number(cut.length)||0), 0);
+              const kerfLength = cuts.length > 0 ? (cuts.length - 1) * sawThickness : 0;
+              const waste = (Number(bin.length)||0) - usedLength - kerfLength;
+              const wasteSafe = (waste < 0 ? 0 : waste);
+              const wastePercentage = (bin.length>0) ? ((wasteSafe / bin.length) * 100).toFixed(1) : '0.0';
+
+              let h = `
+                <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9; border: 1px solid var(--ag-outline);">
+                  <div style="font-weight: bold; margin-bottom: 8px; color: #333;">
+                    ${_rLang==='zh'?'原料':'Bar'} #${binIndex + 1} - ${formatLengthForDisplay(bin.length, unit)}
+                    ${bin.autoAdded ? ' <span style="color: #f57c00; font-size: 0.9em;">['+(_rLang==='zh'?'自動添加':'Auto Added')+']</span>' : ''}
+                  </div>
+                  <div style="display: flex; height: 50px; border: 1px solid var(--ag-outline); border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: white;">`;
+
+              for (let ci=0; ci<cuts.length; ci++){
+                const cut = cuts[ci];
+                const roundedLength = Math.round((Number(cut.length)||0) * 10) / 10;
+                const percentage = (bin.length>0) ? ((Number(cut.length)||0) / bin.length) * 100 : 0;
+                const color = lengthColorMap[roundedLength];
+                const label = lengthLabelMap[roundedLength];
+                h += `
+                    <div style="width: ${percentage.toFixed(1)}%; background: ${(window.__agPartFill ? window.__agPartFill(color) : color)}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);"
+                         title="${formatLengthForDisplay(cut.length, unit)}">${label}</div>`;
+              }
+
+              if (wasteSafe > 0) {
+                const wastePercentageVisual = (bin.length>0) ? (wasteSafe / bin.length) * 100 : 0;
+                h += `
+                    <div style="width: ${wastePercentageVisual.toFixed(1)}%; background: repeating-linear-gradient(45deg, #ffcccc 0px, #ffcccc 5px, #ff9999 5px, #ff9999 10px); display: flex; align-items: center; justify-content: center; color: #a00; font-weight: bold; font-size: 11px; border-left: 1px solid var(--ag-outline); padding: 0 4px;">${_rLang==='zh'?'餘料':'Waste'}</div>`;
+              }
+
+              h += `
+                  </div>
+                  <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                    <strong>${_rLang==='zh'?'使用長度':'Used Length'}：</strong> ${formatLengthForDisplay(usedLength + kerfLength, unit)} |
+                    <strong>${_rLang==='zh'?'餘料':'Waste'}：</strong> ${formatLengthForDisplay(wasteSafe, unit)} (${wastePercentage}%)
+                  </div>
+                  <div style="font-size: 11px; color: #666;">
+                    <strong>${_rLang==='zh'?'切割順序':'Cut Order'}：</strong>
+                    ${cuts.map(cut => formatLengthForDisplay(Math.round((Number(cut.length)||0) * 10) / 10, unit)).join(' → ')}
+                  </div>
+                </div>`;
+
+              return h;
+            }
+
+            // 取消舊渲染（例如用家連續按計算 / 自動重算）
+            try{ window.__agRenderToken = (window.__agRenderToken||0) + 1; }catch(e){}
+            const __myToken = window.__agRenderToken || 0;
+
+            function __renderLegendDeferred(){
+              try {
+                // 統計每個尺寸出現件數（每一刀 = 一件）
+                const lengthCountMap = {};
+                bins.forEach(bin => {
+                  (bin.cuts||[]).forEach(cut => {
+                    const roundedLength = Math.round((Number(cut.length)||0) * 10) / 10;
                     lengthCountMap[roundedLength] = (lengthCountMap[roundedLength] || 0) + 1;
+                  });
                 });
-            });
 
-            let legendHtml = `
-                <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid var(--ag-outline); border-radius: 6px; width: 100%; box-sizing: border-box;">
+                let legendHtml = `
+                  <div style="margin-top: 20px; padding: 15px; background: white; border: 1px solid var(--ag-outline); border-radius: 6px; width: 100%; box-sizing: border-box;">
                     <h5 style="margin: 0 0 12px 0; color: #000; font-size: 16px;">${_rLang==='zh'?'📋 切割件尺寸圖例':'📋 Cut Size Legend'}</h5>
-
                     <div style="display:grid; grid-template-columns: 20px 44px 110px 1fr; gap: 10px 12px; align-items:center;">
                       <div></div>
                       <div style="font-weight:800; color:#000;">${_rLang==='zh'?'代號':'Label'}</div>
                       <div style="font-weight:800; color:#000;">${_rLang==='zh'?'長度':'Length'}</div>
-                      <div style="font-weight:800; color:#000;">${_rLang==='zh'?'件數':'Qty'}</div>
-            `;
+                      <div style="font-weight:800; color:#000;">${_rLang==='zh'?'件數':'Qty'}</div>`;
 
-            uniqueLengths.forEach(length => {
-                const qty = lengthCountMap[length] || 0;
-                legendHtml += `
-                      <div style="width: 20px; height: 20px; background: ${ (window.__agPartFill ? window.__agPartFill(lengthColorMap[length]) : lengthColorMap[length]) }; border: 1px solid var(--ag-outline); border-radius: 3px;"></div>
+                uniqueLengths.forEach(length => {
+                  const qty = lengthCountMap[length] || 0;
+                  legendHtml += `
+                      <div style="width: 20px; height: 20px; background: ${(window.__agPartFill ? window.__agPartFill(lengthColorMap[length]) : lengthColorMap[length])}; border: 1px solid var(--ag-outline); border-radius: 3px;"></div>
                       <div><strong style="color: #000;">${lengthLabelMap[length]}</strong></div>
                       <div style="color:#000;">${formatLengthForDisplay(length, unit)}</div>
-                      <div style="color:#000;">${qty} ${_rLang==='zh'?'件':'pcs'}</div>
-                `;
-            });
+                      <div style="color:#000;">${qty} ${_rLang==='zh'?'件':'pcs'}</div>`;
+                });
 
-            legendHtml += `
-                    </div>
-                </div>
-            `;
+                legendHtml += `</div></div>`;
 
-            document.getElementById("colorLegendItems").innerHTML = legendHtml;
-            document.getElementById("colorLegend").style.display = "block";
-            document.getElementById("printOptionsButton").style.display = "inline-block";
-            document.getElementById("printButton").style.display = "inline-block";
+                const ci = document.getElementById('colorLegendItems');
+                const cl = document.getElementById('colorLegend');
+                if (ci) ci.innerHTML = legendHtml;
+                if (cl) cl.style.display = 'block';
+              } catch(e) {}
+            }
+
+            function __finishAfterBinsRendered(){
+              // 圖例放到下一個 event loop，避免『最後一下』卡住
+              try { setTimeout(__renderLegendDeferred, 0); } catch(e) { __renderLegendDeferred(); }
+
+              try{ document.getElementById('printOptionsButton').style.display = 'inline-block'; }catch(e){}
+              try{ document.getElementById('printButton').style.display = 'inline-block'; }catch(e){}
+            }
+
+            if (!__needProgressive) {
+              // 小結果：一次過砌晒（最快）
+              let chunkHtml = '';
+              for (let i=0; i<bins.length; i++) chunkHtml += __renderOneBin(bins[i], i);
+              __container.innerHTML = chunkHtml;
+              __finishAfterBinsRendered();
+              return;
+            }
+
+            // 中/大結果：分批
+            __container.innerHTML = `
+              <div style="margin: 8px 0 14px 0; padding: 10px; background:#eef2ff; border:1px solid #c7d2fe; border-radius:8px; color:#1e3a8a;">
+                <strong>${_rLang==='zh'?'正在生成排版圖（分批渲染，避免卡死）…':'Rendering layout (chunked to keep UI responsive)…'}</strong>
+                <div id="agRenderProgress" style="margin-top:6px; font-size:12px; opacity:.85;">0 / ${bins.length}</div>
+              </div>`;
+
+            const __progEl = document.getElementById('agRenderProgress');
+            const __CHUNK = 10; // 每幀渲染幾支料（可按需要再微調）
+            let __i = 0;
+
+            function __step(){
+              if ((window.__agRenderToken||0) !== __myToken) return; // 已被新一次 render 取代
+
+              let h = '';
+              let n = 0;
+              while (__i < bins.length && n < __CHUNK) {
+                h += __renderOneBin(bins[__i], __i);
+                __i++; n++;
+              }
+
+              __container.insertAdjacentHTML('beforeend', h);
+              if (__progEl) __progEl.textContent = `${__i} / ${bins.length}`;
+
+              if (__i < bins.length) {
+                requestAnimationFrame(__step);
+              } else {
+                try{ if(__progEl) __progEl.textContent = (_rLang==='zh'?'完成':'Done') + ` (${bins.length}/${bins.length})`; }catch(e){}
+                __finishAfterBinsRendered();
+              }
+            }
+
+            requestAnimationFrame(__step);
         }
 
         function saveScheme() {
@@ -8889,8 +10233,7 @@ function calculate() {
                 }
             });
         });
-    </script>
-<script>
+    </script><script>
 
 window.forceUpdateUI = function(selectElement) {
     if (!selectElement) return;
@@ -8980,8 +10323,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-</script>
-<script>
+</script><script>
 (function(){
   const createOptimizer = (algoType) => {
     return function(cuts, materials, sawThickness) {
@@ -9279,8 +10621,7 @@ document.addEventListener("DOMContentLoaded", function() {
     } catch(e) {}
   };
 })();
-</script>
-<script>
+</script><script>
 (function(){
   const selectors = [
     '.cutQty',
@@ -9340,8 +10681,7 @@ document.addEventListener("DOMContentLoaded", function() {
     init();
   }
 })();
-</script>
-<script>
+</script><script>
 (function(){
   function isImperialContext(el){
     const group = el.closest('.length-input-group') || el.closest('.saw-thickness-input') || document;
@@ -9376,8 +10716,7 @@ document.addEventListener("DOMContentLoaded", function() {
     init();
   }
 })();
-</script>
-<script>
+</script><script>
 (function(){
   function autoRecalc(){
     try {
@@ -9393,8 +10732,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (!window.__suppressAutoRecalc) setTimeout(autoRecalc, 50);
   }
 })();
-</script>
-<script>
+</script><script>
 // 自動捲動到輸入卡片（避免手機鍵盤遮住輸入框）
 document.addEventListener('DOMContentLoaded', function() {
   const cuttingScrollInputs = document.querySelectorAll('.auto-scroll-cutting');
@@ -9429,8 +10767,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-</script>
-<script>
+</script><script>
     function updateCuttingUnitOnly() {
         const cutUnit = document.getElementById('globalCutUnit');
         if (!cutUnit) return;
@@ -9551,8 +10888,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, true);
 
 })();
-</script>
-<script>
+</script><script>
     (function(){
       // 目標：一旦任何輸入/設定有變動，就「清走舊結果」
       // - 只 hide 唔夠：舊 HTML/banner/canvas 會殘留，下一次 render 可能重疊
@@ -9665,8 +11001,7 @@ document.addEventListener('DOMContentLoaded', function() {
         attachAutoHide();
       }
     })();
-    </script>
-<script>
+    </script><script>
     (function(){
       function applyOptionalNote(){
         try {
@@ -9698,11 +11033,14 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       window.applyOptionalPurposeNote = applyOptionalNote;
     })();
-  </script>
-
-  <script>
+  </script><script>
   (function(){
     function initTitleNut(){
+      // Low-perf / reduced-motion：唔起 WebGL（手機會順好多）
+      try{
+        if (document.documentElement.classList.contains('ag-low-perf')) return;
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      }catch(e){}
       if (typeof THREE === 'undefined') return;
       var container = document.getElementById('titleNut');
       if (!container || container.dataset.inited) return;
@@ -9773,8 +11111,17 @@ document.addEventListener('DOMContentLoaded', function() {
       var __nutRunning = true;
       function __nutFrame(){
         if (!__nutRunning) return;
+        // v4 perf: only keep RAF running when the canvas container is actually visible
+        try{
+          if (document.hidden || !container.isConnected) throw 0;
+          var r = container.getBoundingClientRect();
+          if (!r || r.width < 2 || r.height < 2) throw 0;
+        }catch(e){
+          __nutRaf = null;
+          setTimeout(__nutFrame, 250);
+          return;
+        }
         __nutRaf = requestAnimationFrame(__nutFrame);
-        if (document.hidden || !container.isConnected) return;
 
         // 效能優化：降到約 30fps（減少 GPU/CPU 壓力）
         var now = performance.now();
@@ -9834,12 +11181,15 @@ document.addEventListener('DOMContentLoaded', function() {
       __scheduleNut();
     }
   })();
-  </script>
-
-  <script>
+  </script><script>
   (function(){
     // 右側大標題圖示：3D 曲尺（盡量貼近 3D曲尺.html：雙面刻度 + 可拖曳翻轉）
     function initTitleRuler(){
+      // Low-perf / reduced-motion：唔起 WebGL（手機會順好多）
+      try{
+        if (document.documentElement.classList.contains('ag-low-perf')) return;
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      }catch(e){}
       if (typeof THREE === 'undefined') return;
       var container = document.getElementById('titleRuler');
       if (!container || container.dataset.inited) return;
@@ -10029,8 +11379,17 @@ document.addEventListener('DOMContentLoaded', function() {
       var __rulerRunning = true;
       function __rulerFrame(){
         if (!__rulerRunning) return;
+        // v4 perf: only keep RAF running when the canvas container is actually visible
+        try{
+          if (document.hidden || !container.isConnected) throw 0;
+          var r = container.getBoundingClientRect();
+          if (!r || r.width < 2 || r.height < 2) throw 0;
+        }catch(e){
+          __rulerRaf = null;
+          setTimeout(__rulerFrame, 250);
+          return;
+        }
         __rulerRaf = requestAnimationFrame(__rulerFrame);
-        if (document.hidden || !container.isConnected) return;
 
         // 效能優化：降到約 30fps（減少 GPU/CPU 壓力）
         var now = performance.now();
@@ -10100,9 +11459,7 @@ document.addEventListener('DOMContentLoaded', function() {
       __scheduleRuler();
     }
   })();
-  </script>
-
-<script>
+  </script><script>
 (function(){
   const STORAGE_KEY = 'aluminum_cut_user_prefs_v1';
   let isRestoring = false;
@@ -10667,9 +12024,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
-</script>
-
-<script>
+</script><script>
 // === AnyGen patch: ensure blur triggers with Bootstrap modal events ===
 (function(){
   function on(){
@@ -10683,9 +12038,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('shown.bs.modal', on);
   document.addEventListener('hidden.bs.modal', off);
 })();
-</script>
-
-<script>
+</script><script>
 // === AnyGen patch: bootstrap modal 防殘留（避免 modal-backdrop / modal-open 卡住） ===
 (function(){
   function cleanup(){
@@ -10703,74 +12056,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   document.addEventListener('hidden.bs.modal', function(){ setTimeout(cleanup, 0); });
 })();
-</script>
-
-<!-- Auto-Replenish length picker modal -->
-<div class="modal fade" id="autoReplenishModal" tabindex="-1" aria-labelledby="autoReplenishModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="autoReplenishModalLabel">自動補料：選擇補料長度</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="small text-muted mb-2 ag-ar-hint">提示：揀任何長度即代表開啟；揀 OFF 會關閉（但會保留你上次揀嘅長度，下次再開唔使再揀）。</div>
-        <div class="d-grid gap-2" id="autoReplenishOptions">
-          <button type="button" class="ag-ar-off-btn btn btn-outline-secondary" data-ar-len="0" data-ar-label-zh="OFF（關閉自動補料）" data-ar-label-en="OFF (Disable Auto-Replenish)">OFF（關閉自動補料）</button>
-
-          <div class="small text-muted mt-2"><span class="ag-ar-custom-title">自訂</span></div>
-          <div class="input-group">
-            <input type="text" inputmode="text" class="form-control" id="autoReplenishCustomLen" placeholder="e.g., 6 ft / 68 in / 2.5 m / 1500 mm">
-            <button type="button" class="btn btn-outline-dark" id="autoReplenishCustomApply">套用</button>
-          </div>
-          <div class="small text-muted" id="autoReplenishCustomHint">支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。</div>
-
-          <div class="small text-muted mt-2"><span class="ag-ar-common-mm">常用（mm）</span></div>
-          <button type="button" class="btn btn-outline-success" data-ar-len="6000" data-ar-label-zh="6000 mm" data-ar-label-en="6000 mm">6000 mm</button>
-          <button type="button" class="btn btn-outline-success" data-ar-len="5000" data-ar-label-zh="5000 mm" data-ar-label-en="5000 mm">5000 mm</button>
-          <button type="button" class="btn btn-outline-success" data-ar-len="4000" data-ar-label-zh="4000 mm" data-ar-label-en="4000 mm">4000 mm</button>
-          <button type="button" class="btn btn-outline-success" data-ar-len="3000" data-ar-label-zh="3000 mm" data-ar-label-en="3000 mm">3000 mm</button>
-          <button type="button" class="btn btn-outline-success" data-ar-len="2000" data-ar-label-zh="2000 mm" data-ar-label-en="2000 mm">2000 mm</button>
-
-          <div class="small text-muted mt-2"><span class="ag-ar-common-ft">常用（英尺）</span></div>
-          <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="2438.4" data-ar-label-zh="8 ft" data-ar-label-en="8 ft">8 ft</button>
-          <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="1828.8" data-ar-label-zh="6 ft" data-ar-label-en="6 ft">6 ft</button>
-          <button type="button" class="btn btn-outline-primary" data-ar-display="ft" data-ar-len="1219.2" data-ar-label-zh="4 ft" data-ar-label-en="4 ft">4 ft</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Unit picker modal (replaces native <select> popup so we can show descriptions) -->
-<div class="modal fade" id="unitPickerModal" tabindex="-1" aria-labelledby="unitPickerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="unitPickerModalLabel">Select display unit</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="d-grid gap-2">
-          <button type="button" class="btn btn-outline-success" data-unit-value="metric">
-            <span style="font-size:1.1rem;font-weight:800;">公</span>
-            <span class="small text-muted">Metric</span>
-          </button>
-          <button type="button" class="btn btn-outline-primary" data-unit-value="imperial">
-            <span style="font-size:1.1rem;font-weight:800;">英</span>
-            <span class="small text-muted">Imperial</span>
-          </button>
-          <button type="button" class="btn btn-outline-primary" id="unitPickDecimal" data-unit-value="imperial_decimal">
-            <span style="font-size:1.1rem;font-weight:800;">英(D)</span>
-            <span class="small text-muted">Imperial decimal display</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
+</script><script>
 // === AnyGen patch: unit picker wiring (multi-target) ===
 (function(){
   const modal = document.getElementById('unitPickerModal');
@@ -10854,9 +12140,7 @@ document.addEventListener('DOMContentLoaded', function() {
     syncTriggerLabel();
   });
 })();
-</script>
-
-<script>
+</script><script>
 // === AnyGen patch: native select blur (mobile system pickers) v3 ===
 // 目的：手機開啟系統 SELECT picker 時，都令背景模糊。
 (function(){
@@ -10928,9 +12212,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   mo.observe(document.body, { childList: true, subtree: true });
 })();
-</script>
-
-<script>
+</script><script>
 (function(){
   function getLang(){
     var el = document.getElementById('language');
@@ -11016,8 +12298,7 @@ document.addEventListener('DOMContentLoaded', function() {
   var langSel = document.getElementById('language');
   if (langSel) langSel.addEventListener('change', runAll);
 })();
-</script>
-<script>
+</script><script>
 (function(){
   function bind(){
     document.addEventListener('DOMContentLoaded', function(){ updateInputLabels(); });
@@ -11029,8 +12310,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   bind();
 })();
-</script>
-<script>
+</script><script>
 (function(){
   function getUnit(){
     var u = document.getElementById('unit');
@@ -11071,58 +12351,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   bind();
 })();
-</script>
-<style>
-#cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.25rem; padding-bottom: 1.5rem; }
-
-#cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1rem; }
-#cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 0.75rem; }
-#cuttingItems .controls-row { margin-top: 0.75rem; margin-bottom: 1.25rem; }
-@media (max-width: 767.98px) {
-  #cutting-items-card .card-body, #materials-card .card-body { padding-top: 1.5rem; padding-bottom: 2rem; }
-  
-  
-  #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.25rem; }
-}
-</style>
-<style>
-#cutting-items-card .card-body, #materials-card .card-body { padding-top: 2rem !important; padding-bottom: 2.5rem !important; }
-
-#cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.5rem !important; }
-#cutting-items-card .row.g-2, #materials-card .row.g-2 { margin-bottom: 1.25rem !important; }
-#cuttingItems .controls-row { margin-top: 1rem !important; margin-bottom: 1.75rem !important; }
-@media (max-width: 767.98px) {
-  #cutting-items-card .card-body, #materials-card .card-body { padding-top: 2.25rem !important; padding-bottom: 3rem !important; }
-  
-  
-  #cutting-items-card .row.g-3, #materials-card .row.g-3 { margin-bottom: 1.75rem !important; }
-}
-</style>
-<style>
-#cutting-items-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
-#cutting-items-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
-
-#materials-card .row.g-2.length-input-group { margin-bottom: 1.25rem !important; }
-#materials-card .row.g-2.mt-2 { margin-top: 1.25rem !important; }
-
-#cutting-items-card .card-body, #materials-card .card-body { padding-bottom: 0.25rem !important; }
-
-#cuttingItems .controls-row { margin-bottom: 0.5rem !important; }
-
-@media (max-width: 767.98px) {
-}
-
-        #calculateButton {
-            background-color: #198754;
-            border-color: #198754;
-            color: #fff;
-        }
-        #calculateButton:hover {
-            background-color: #157347;
-            border-color: #146c43;
-        }
-</style>
-<script>
+</script><script>
 (function(){
   function selectSmallestAdequate(availableMaterials, requiredLen){
     for(var i=0;i<availableMaterials.length;i++){
@@ -11238,742 +12467,7 @@ document.addEventListener('DOMContentLoaded', function() {
   window.optimizeCutsBFD = createOptimizerFixed('BFD');
   window.optimizeCutsSizeGrouping = createOptimizerFixed('SizeGrouping');
 })();
-</script>
-<style>
-button, .btn {
-    /* 保留文字邊線設定；唔再全局清除 text-shadow（會蓋過白字陰影效果） */
-    -webkit-text-stroke: 0 !important;
-}
-
-#fontIncBtn, #fontDecBtn,
-button[onclick*="toggleTheme"],
-button[onclick*="showHelp"],
-#qrBtn {
-    width: 32px !important;
-    height: 32px !important;
-    min-width: 32px !important;
-    min-height: 32px !important;
-    border-radius: 50% !important;
-    padding: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-body:not(.sepia-mode) .card {
-    /* 舊書淺黃底色（紅圈） */
-    background-color: #faf6ed !important;
-    border: 1px solid #c9a876 !important;
-    color: #212529 !important;
-}
-
-body:not(.sepia-mode) .card-body-light {
-    /* 舊書淺黃底色（紅圈） */
-    background-color: #f5ead5 !important;
-    color: #212529 !important;
-}
-
-.btn-3d,
-#globalCutUnit,
-#globalMaterialUnit {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
-    transition: all 0.2s ease !important;
-    border: 1px solid #dee2e6 !important;
-}
-
-.btn-3d:hover,
-#globalCutUnit:hover,
-#globalMaterialUnit:hover {
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2) !important;
-    transform: translateY(-1px) !important;
-}
-
-.btn-3d:active,
-#globalCutUnit:active,
-#globalMaterialUnit:active {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
-    transform: translateY(0px) !important;
-}
-
-body:not(.sepia-mode) .card-body-light #colorLegend,
-body:not(.sepia-mode) .card-body-light .color-legend {
-    color: #212529 !important;
-}
-
-body:not(.sepia-mode) .card-body:not(.card-body-light) #colorLegend,
-body:not(.sepia-mode) .card-body:not(.card-body-light) .color-legend {
-    color: #ffffff !important;
-}
-
-/* === 計算按鈕：光明/黑暗兩套 + 呼吸動畫（2026-04-02） === */
-
-/* 色票：計算按鈕（光明/黑暗用同一套） */
-body{
-  --ag-calc-bg: linear-gradient(135deg, #00ff48 0%, #006400 100%) !important; /* 跟你提供的之前黑暗版參考 */
-  --ag-calc-border: rgba(0,0,0,0.18);
-  --ag-calc-icon-shadow: 0 3px 8px rgba(0,0,0,0.45);
-  --ag-calc-icon-color: #ffcc33; /* 橙黃色 */
-}
-
-#calculateButton.ag-calc-btn{
-  background: var(--ag-calc-bg) !important;
-  border: 1px solid var(--ag-calc-border) !important;
-  color: #fff !important;
-
-  position: relative;
-  overflow: hidden;
-
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: .85rem !important; /* 加大圖示與文字距離 */
-
-  /* keep 3D depth + hard shadow system */
-  box-shadow:
-    0 -1px 0 rgba(255,255,255,0.50) inset,
-    0 1px 0 rgba(0,0,0,0.28) inset,
-    -1px 0 0 rgba(255,255,255,0.22) inset,
-    1px 0 0 rgba(0,0,0,0.18) inset,
-    0 2px 8px rgba(0,0,0,0.22) !important;
-}
-
-#calculateButton.ag-calc-btn:hover{
-  box-shadow:
-    0 -2px 0 rgba(255,255,255,0.60) inset,
-    0 2px 0 rgba(0,0,0,0.28) inset,
-    -2px 0 0 rgba(255,255,255,0.30) inset,
-    2px 0 0 rgba(0,0,0,0.18) inset,
-    0 3px 10px rgba(0,0,0,0.26) !important;
-  transform: translateY(-1px);
-}
-
-#calculateButton.ag-calc-btn:active{
-  box-shadow:
-    0 1px 0 rgba(0,0,0,0.40) inset,
-    0 -1px 0 rgba(255,255,255,0.20) inset,
-    0 1px 4px rgba(0,0,0,0.22) !important;
-  transform: translateY(1px);
-}
-
-/* 右上高光 */
-#calculateButton.ag-calc-btn::before{
-  content: "";
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 52%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.55), rgba(255,255,255,0.08));
-  border-radius: inherit;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* 走光 */
-#calculateButton.ag-calc-btn::after{
-  content: "";
-  position: absolute;
-  top: -50%; left: -120%;
-  width: 34%; height: 210%;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.92), transparent);
-  transform: rotate(25deg);
-  animation: shine 8s infinite ease-in-out;
-  pointer-events: none;
-  z-index: 3;
-}
-
-@keyframes shine{
-  0% { left: -120%; opacity: 0; }
-  10% { opacity: 1; }
-  40% { left: 220%; opacity: 0; }
-  100% { left: 220%; }
-}
-
-/* 圖示：加大 + 搶眼陰影 */
-#calculateButton .ag-calc-icon{
-  color: var(--ag-calc-icon-color) !important;
-  font-size: 1.55em !important;
-  line-height: 1 !important;
-  margin-right: 0 !important; /* 覆蓋 me-2 */
-  filter: drop-shadow(var(--ag-calc-icon-shadow));
-}
-
-/* 文字：呼吸效果靠 scale + 字距 + 陰影強弱（唔依賴可變字重） */
-#calculateButton .ag-calc-label{
-  font-weight: 900;
-  letter-spacing: 0;
-  display: inline-block;
-  transform-origin: 50% 60%;
-}
-
-/* 呼吸（效能優化 v5）：
-   - 開機唔再無限循環（避免手機長期 repaint）
-   - 改為「只有 hover 才播」（手機基本唔會 hover，即等於默認無動畫）
-*/
-#calculateButton.ag-calc-btn .ag-calc-label{
-  animation: none !important;
-}
-#calculateButton.ag-calc-btn .ag-calc-icon{
-  animation: none !important;
-}
-#calculateButton.ag-calc-btn:hover .ag-calc-icon{
-  animation: agCalcIconBreathe 1.65s ease-in-out infinite;
-}
-
-@keyframes agCalcTextBreathe{
-  0%,100%{ transform: scale(1); letter-spacing: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.28); }
-  50%{ transform: scale(1.06); letter-spacing: .85px; text-shadow: 0 2px 8px rgba(0,0,0,0.42); }
-}
-
-@keyframes agCalcIconBreathe{
-  /* 效能優化：動畫期間唔再改 filter（filter 會令部分裝置重繪/卡頓） */
-  0%,100%{ transform: scale(1); }
-  50%{ transform: scale(1.18); }
-}
-
-@media (prefers-reduced-motion: reduce){
-  #calculateButton.ag-calc-btn .ag-calc-label,
-  #calculateButton.ag-calc-btn .ag-calc-icon,
-  #calculateButton.ag-calc-btn::after{
-    animation: none !important;
-  }
-}
-
-
-#helpButton, #printButton { display: none !important; }
-
-#resetButton,
-body:not(.sepia-mode) #resetButton,
-body:not(.sepia-mode) .btn-danger {
-    background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
-    border: 1px solid #ff5500 !important;
-    color: #ffffff !important;
-    box-shadow: 0 2px 6px rgba(255, 85, 0, 0.30) !important;
-    text-shadow: none !important;
-    -webkit-text-stroke: 0 !important;
-    font-weight: 600 !important;
-}
-body:not(.sepia-mode) #resetButton:hover,
-body:not(.sepia-mode) .btn-danger:hover {
-    background: linear-gradient(135deg, #ffc78f 0%, #ff7733 50%, #ffa8a8 100%) !important;
-    transform: translateY(-1px);
-}
-
-body.sepia-mode * {
-    /* sepia-mode 唔再全局清除 text-shadow（會蓋過白字陰影效果） */
-    -webkit-text-stroke: 0 !important;
-}
-
-body.sepia-mode {
-    background-color: var(--ag-sepia-bg-fallback) !important;
-    background: var(--ag-sepia-bg-main) fixed !important;
-    background-image:
-      /* 主漸變：上淺下深（可一鍵換色） */
-      var(--ag-sepia-bg-main),
-      /* 第二色調：淡淡青綠陰影 */
-      radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
-      /* 微細紋理：紙張/金屬質感（細紋） */
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.065) 0px, rgba(255,255,255,0.065) 1px, rgba(0,0,0,0.040) 2px, rgba(255,255,255,0.000) 4px),
-      repeating-linear-gradient(0deg,  rgba(255,255,255,0.040) 0px, rgba(255,255,255,0.040) 1px, rgba(0,0,0,0.022) 2px, rgba(255,255,255,0.000) 6px) !important;
-    background-size: 100% 100%, auto, 7px 7px, 9px 9px !important;
-    background-attachment: fixed !important;
-    color: #4a3a2a !important;
-}
-
-body.sepia-mode .card {
-    background: #faf6ed !important;
-    border: 1px solid #c9a876 !important;
-    box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2) !important;
-}
-
-body.sepia-mode .card-header,
-body.sepia-mode .section-header {
-    /* Light Mode（sepia）標題條：左深右淺（取消灰色、深啡唔好太深） */
-    background: linear-gradient(90deg,
-      #6f5a4a 0%,
-      #7c604e 24%,
-      #8a6a50 55%,
-      #ad8a6b 80%,
-      #dccbb7 100%
-    ) !important;
-    border-bottom: 2px solid #8b6f47 !important;
-}
-
-/* 只針對「設定」卡：左深右淺（取消灰色、深啡唔好太深） */
-body.sepia-mode #settings-card .section-header{
-    background: linear-gradient(90deg,
-      #6b5748 0%,
-      #7a5f4d 22%,
-      #8a6a50 55%,
-      #a8876a 78%,
-      #dccbb7 100%
-    ) !important;
-}
-
-body.sepia-mode .card-body,
-body.sepia-mode .card-body-light {
-    background-color: #f5ead5 !important;
-    background-image:
-      repeating-linear-gradient(
-        90deg,
-        rgba(255,255,255,0.60) 0px,
-        rgba(255,255,255,0.60) 1px,
-        rgba(101,67,33,0.15) 2px,
-        rgba(255,255,255,0.30) 4px,
-        rgba(101,67,33,0.10) 6px
-      ),
-      linear-gradient(
-        180deg,
-        rgba(255,255,255,0.60) 0%,
-        rgba(255,255,255,0.00) 25%,
-        rgba(101,67,33,0.08) 60%,
-        rgba(255,255,255,0.30) 100%
-      ) !important;
-    background-size: auto, 100% 100% !important;
-    background-attachment: local !important;
-}
-
-body.sepia-mode h1,
-body.sepia-mode #titleText,
-body.sepia-mode .section-title,
-body.sepia-mode .card-header *,
-body.sepia-mode .section-header * {
-    color: #ffffff !important;
-}
-
-/* 例外：步驟徽章數字要啡色（避免被上面白字規則蓋過） */
-body.sepia-mode .section-header .step-indicator{
-    color: #6a5040 !important;
-}
-
-body.sepia-mode h2, body.sepia-mode h3,
-body.sepia-mode h4, body.sepia-mode h5, body.sepia-mode h6 {
-    color: #5a4030 !important;
-}
-
-body.sepia-mode .form-control,
-body.sepia-mode .form-select {
-    background: #fffbf5 !important;
-    border: 1px solid #c9a876 !important;
-    color: #4a3a2a !important;
-}
-
-body.sepia-mode .table {
-    color: #4a3a2a !important;
-    border-color: #c9a876 !important;
-    background: #faf6ed !important;
-}
-
-body.sepia-mode .table thead,
-body.sepia-mode .table-active {
-    background: #e8dcc4 !important;
-}
-
-body.sepia-mode [class*="bg-light"],
-body.sepia-mode .bg-secondary {
-    background: #f0e6d2 !important;
-}
-
-/* 光明版：按鈕分層配色（避免所有掣一樣色） */
-body.sepia-mode .btn-primary {
-    /* 主操作：偏青綠（同背景第二色調呼應） */
-    background: linear-gradient(135deg, #2f6f63 0%, #22524b 100%) !important;
-    border: 1px solid #1b3f3a !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
-}
-
-body.sepia-mode .btn-success {
-    /* 成功/新增：偏綠 */
-    background: linear-gradient(135deg, #3f7a3a 0%, #2f5f2b 100%) !important;
-    border: 1px solid #284e25 !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
-}
-
-body.sepia-mode .btn-secondary,
-body.sepia-mode .btn-outline-secondary {
-    /* 次要/取消：暖灰啡 */
-    background: linear-gradient(135deg, #b79a72 0%, #8f7756 100%) !important;
-    border: 1px solid #6f5a42 !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.40) !important;
-}
-
-body.sepia-mode .btn-warning {
-    /* 編輯/提示：琥珀金 */
-    background: linear-gradient(135deg, #e0b15a 0%, #b97b2f 100%) !important;
-    border: 1px solid #8d5c20 !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.40) !important;
-}
-
-body.sepia-mode #resetButton,
-body.sepia-mode .btn-danger {
-    /* 危險/清除：紅橙（最突出） */
-    background: linear-gradient(135deg, #ffb36b 0%, #ff5500 50%, #ff8f8f 100%) !important;
-    border: 1px solid #ff5500 !important;
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
-}
-
-/* 重要：光明模式入面如果掣底色偏深，一律強制白字（包括 icon/span），避免『深色底 + 深色字』睇唔到 */
-body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark),
-body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark) *{
-  color: #ffffff !important;
-}
-
-/* 光明版：只係「冇語意 class」嗰類普通掣先用素色底
-   （否則會蓋過 btn-primary/success/... 令全部一樣色） */
-body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark):not([class*="btn-outline"]) {
-    background:
-        linear-gradient(45deg, rgba(255,255,255,0.22) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(255,255,255,0.22) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
-        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.18) 75%),
-        #ead9bf !important;
-    background-size: 20px 20px !important;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
-    border: 1px solid #b8956a !important;
-    color: #4a3a2a !important;
-    text-shadow: none !important;
-}
-
-/* 光明版（sepia）：深色文字一律唔做陰影
-   注意：白字按鈕（btn-primary/success/...）需要陰影提升可讀性，唔應該被取消。
-*/
-body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark) *,
-body.sepia-mode label,
-body.sepia-mode .form-label,
-body.sepia-mode .small-hint{
-  text-shadow: none !important;
-}
-
-/* 白色字按鈕：統一保留細陰影（最幼，但有效果） */
-body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark),
-body.sepia-mode :is(.btn-primary,.btn-success,.btn-secondary,.btn-warning,.btn-danger,.btn-info,.btn-dark) *{
-  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
-}
-
-/* 光明版：切割項目 / 材料 兩組 action 按鈕：移除高光/shine，改用純投影（參考其它按鈕投影） */
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn::before,
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn::after,
-body.sepia-mode #materialItems .controls-row .ag-action-btn::before,
-body.sepia-mode #materialItems .controls-row .ag-action-btn::after{
-  content: none !important;
-  display: none !important;
-}
-
-/* v21: 光明版同樣要按鈕漸變由左至右（只調整高光方向，不改底色） */
-body.sepia-mode .btn:not(.btn-close):not(.tool-btn):not(.ag-ar-len-warning)::before{
-  background: linear-gradient(to right, rgba(255,255,255,0.42), rgba(255,255,255,0.08)) !important;
-}
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
-body.sepia-mode #materialItems .controls-row .ag-action-btn{
-  filter: none !important;
-  transform: none !important;
-  box-shadow: 0 3px 10px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.14) !important;
-}
-
-/* 光明版：7個圓形功能鍵（tool-btn）移除文字陰影，保留投影 */
-body.sepia-mode .top-tools .tool-btn,
-body.sepia-mode .top-tools .tool-btn *{
-  text-shadow: none !important;
-}
-
-body.sepia-mode .btn:not(.btn-primary):not(.btn-success):not(.btn-secondary):not(.btn-warning):not(.btn-danger):not(.btn-info):not(.btn-dark):not([class*="btn-outline"]):hover {
-    background:
-        linear-gradient(45deg, rgba(255,255,255,0.26) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(255,255,255,0.26) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.22) 75%),
-        linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.22) 75%),
-        #dcc9a5 !important;
-    background-size: 20px 20px !important;
-    background-position: 0 0, 0 10px, 10px -10px, -10px 0px !important;
-}
-
-body.sepia-mode .btn-outline-warning {
-    background: linear-gradient(to bottom, #d4a574, #c9956a) !important;
-    border: 1px solid #a0826d !important;
-    color: #3a2a1a !important;
-}
-
-body.sepia-mode .btn-outline-danger {
-    background: linear-gradient(to bottom, #b8714a, #a0522d) !important;
-    border: 1px solid #8b4513 !important;
-    color: #1f2d2a !important;
-}
-
-/* 表格「垃圾桶」掣：改淺粉紅（避免太深色） */
-.action-buttons .btn-outline-danger{
-  background: linear-gradient(to bottom, #f8c9d9, #e7a7bd) !important;
-  border: 1px solid #c98aa2 !important;
-  color: #4a1f2d !important;
-}
-.action-buttons .btn-outline-danger i{ color: #4a1f2d !important; }
-.action-buttons .btn-outline-danger:hover{
-  filter: brightness(1.03) saturate(1.05);
-}
-
-/* 光明模式下避免被其它 btn-outline-danger 規則蓋過 */
-body.sepia-mode .action-buttons .btn-outline-danger{
-  background: linear-gradient(to bottom, #f8c9d9, #e7a7bd) !important;
-  border: 1px solid #c98aa2 !important;
-  color: #4a1f2d !important;
-}
-body.sepia-mode .action-buttons .btn-outline-danger i{ color: #4a1f2d !important; }
-
-body.sepia-mode .modal-content {
-    background: #faf6ed !important;
-    border: 1px solid #c9a876 !important;
-    color: #4a3a2a !important;
-}
-
-body.sepia-mode label {
-    color: #5a4030 !important;
-}
-
-body.sepia-mode .text-muted,
-body.sepia-mode .small-hint {
-    color: #8b7355 !important;
-}
-
-body.sepia-mode #colorLegend,
-body.sepia-mode .color-legend,
-body.sepia-mode [id*="colorLegend"] {
-    color: #3a2a1a !important;
-}
-
-body.sepia-mode .btn-3d,
-body.sepia-mode #globalCutUnit,
-body.sepia-mode #globalMaterialUnit {
-    box-shadow: 0 2px 4px rgba(107, 85, 51, 0.2) !important;
-}
-
-body.sepia-mode select.form-select:not(.unit-select),
-body.sepia-mode select.form-select-sm:not(.unit-select) {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%235a4030' d='M4.2 6.2a1 1 0 0 1 1.4 0L8 8.6l2.4-2.4a1 1 0 1 1 1.4 1.4l-3.1 3.1a1 1 0 0 1-1.4 0L4.2 7.6a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E") !important;
-  background-repeat: no-repeat !important;
-  background-position: right .55rem center !important;
-  background-size: .8rem .8rem !important;
-  padding-right: 1.9rem !important;
-}
-
-body.sepia-mode select.unit-select,
-body.sepia-mode #unit,
-body.sepia-mode #globalCutUnit,
-body.sepia-mode #globalMaterialUnit {
-  background-image: none !important;
-  padding-right: 0 !important;
-}
-
-/* 光明版：公制/英制按鈕（unit-select）要清晰分色：公制=綠、英制=藍 */
-body.sepia-mode .unit-select.metric-active,
-body.sepia-mode select.unit-select.metric-active{
-  background: linear-gradient(135deg, #2fb344 0%, #1f7a34 100%) !important;
-  border-color: #19652b !important;
-  color: #ffffff !important;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
-}
-
-body.sepia-mode .unit-select.imperial-active,
-body.sepia-mode select.unit-select.imperial-active{
-  /* 英制：藍色要夠「藍」同綠色拉開距離（隔遠都分到） */
-  /* 改淺少少 + 偏天藍，隔遠更易同綠色分辨 */
-  background: linear-gradient(135deg, #6fd3ff 0%, #2f7bff 100%) !important;
-  border-color: #1f5fd6 !important;
-  color: #ffffff !important;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
-  /* 加少少內光邊，提升對比（唔影響暗色模式） */
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.35),
-    0 1px 0 rgba(0,0,0,.08) !important;
-}
-
-/* 重要：光明版入面「公/英」其實係用按鈕顯示（唔係 <select> 本身），
-   而 JS 會用 btn-success / btn-primary 去標記狀態。
-   但光明版全局 btn-primary 會被調成偏青綠，令英制睇落去好似綠色。
-   所以要針對呢幾粒 unit picker 按鈕強制改返做清晰藍色。 */
-body.sepia-mode #unitPickerBtn.btn-primary,
-body.sepia-mode #globalCutUnitBtn.btn-primary,
-body.sepia-mode #globalMaterialUnitBtn.btn-primary{
-  background: linear-gradient(135deg, #6fd3ff 0%, #2f7bff 100%) !important;
-  border: 1px solid #1f5fd6 !important;
-  color: #ffffff !important;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.45) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.35),
-    0 1px 0 rgba(0,0,0,.08) !important;
-}
-
-body.sepia-mode #unitPickerBtn.btn-success,
-body.sepia-mode #globalCutUnitBtn.btn-success,
-body.sepia-mode #globalMaterialUnitBtn.btn-success{
-  background: linear-gradient(135deg, #2fb344 0%, #1f7a34 100%) !important;
-  border: 1px solid #19652b !important;
-  color: #ffffff !important;
-  text-shadow: 0 1px 2px rgba(0,0,0,.25) !important;
-}
-
-.form-control,
-.form-select,
-textarea {
-  /* 輸入欄位：加返最幼輪廓線 + 少少立體感（比之前清晰，但唔誇張） */
-  border: 1px solid var(--ag-outline, #b8956a) !important;
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.70),
-    0 3px 8px rgba(0,0,0,.12) !important;
-  transition: box-shadow .15s ease, border-color .15s ease !important;
-}
-.form-control:focus,
-.form-select:focus,
-textarea:focus {
-  /* focus：保持輕微光暈 + 少少投影 + 保留輪廓線 */
-  border-color: var(--ag-outline, #8f7756) !important;
-  box-shadow:
-    0 0 0 .12rem rgba(0,0,0,.06),
-    0 4px 10px rgba(0,0,0,.14) !important;
-}
-
-/* === Fix (2026-04-03): 強制所有輸入欄保持淺色底 ===
-   目標：同舊版（021）一樣，無論瀏覽器深色模式 / 自動配色 / 擴充套件點搞，
-   input 都要保持淺色底 + 淺色框線。
-
-   關鍵：
-   - 同時寫死 background-color + background-image（只寫 background 有時會畀插件蓋過）
-   - 加 color-scheme: light（避免 UA 以深色控件渲染）
-   - 補埋 webkit autofill（Chrome 自動填充會變黃/變深）
-*/
-body:not(.sepia-mode){
-  color-scheme: light;
-}
-body:not(.sepia-mode) :is(
-  .form-control,
-  .form-select,
-  textarea,
-  input[type="text"],
-  input[type="number"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="search"],
-  input[type="url"],
-  input[type="password"]
-){
-  background-color: #ffffff !important;
-  background-image: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.90)) !important;
-  color: #111827 !important;
-  -webkit-text-fill-color: #111827 !important;
-  border-color: rgba(0,0,0,.18) !important; /* 跟舊檔 light-mode 接近 */
-}
-body:not(.sepia-mode) :is(.form-control,.form-select,textarea)::placeholder{
-  color: rgba(17,24,39,.45) !important;
-  -webkit-text-fill-color: rgba(17,24,39,.45) !important;
-}
-body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill,
-body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill:hover,
-body:not(.sepia-mode) :is(input, textarea, select):-webkit-autofill:focus{
-  -webkit-text-fill-color: #111827 !important;
-  transition: background-color 999999s ease-out 0s;
-  box-shadow: 0 0 0 1000px #ffffff inset !important;
-}
-
-.btn,
-.top-tools .tool-btn {
-  box-shadow: 0 3px 10px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.14) !important;
-  transition: box-shadow .12s ease, transform .08s ease !important;
-}
-.btn:hover,
-.top-tools .tool-btn:hover {
-  box-shadow: 0 6px 18px rgba(0,0,0,.28), 0 2px 6px rgba(0,0,0,.16) !important;
-  transform: translateY(-1px) !important;
-}
-.btn:active,
-.top-tools .tool-btn:active {
-  box-shadow: 0 2px 6px rgba(0,0,0,.20) !important;
-  transform: translateY(0) !important;
-}
-
-/* 全局按鈕：字體放大時可換行，按鈕高度自動加高 */
-button.btn,
-.btn{
-  white-space: normal !important;
-  height: auto !important;
-  min-height: 38px;
-  line-height: 1.15;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  text-align: center;
-  word-break: break-word;
-}
-
-/* 有啲掣入面包咗 span / i / small，佢哋自己可能仍然 nowrap，強制繼承換行 */
-.btn *{ white-space: inherit !important; }
-
-/* 注意：頂部工具列係固定圓形掣，唔應該因為字體放大而變形 */
-.top-tools .tool-btn{
-  width: 32px !important;
-  height: 32px !important;
-  min-height: 0 !important;
-  padding: 0 !important;
-  white-space: nowrap !important;
-  flex-wrap: nowrap !important;
-  line-height: 1 !important;
-}
-
-/* 彈窗背景模糊：改用 JS inline filter（見 ag-global-blur-helper） */
-
-body.sepia-mode #resetButton {
-  box-shadow: 0 4px 12px rgba(0,0,0,.26) !important;
-}
-
-/* === 2026-03-28 Fix: 光明版紅圈兩組按鈕（切割項目/材料） ===
-   目標：
-   - 字色深啡（跟其他深色字一致）
-   - 深色字/圖示一律無陰影
-   - 移除「陰影/立體內陰影」效果，只保留外投影
-*/
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
-body.sepia-mode #materialItems .controls-row .ag-action-btn{
-  color: rgba(62,42,16,.92) !important; /* 深啡色 */
-  text-shadow: none !important;
-  box-shadow: 0 6px 14px rgba(0,0,0,.18) !important; /* 純投影 */
-}
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn *,
-body.sepia-mode #materialItems .controls-row .ag-action-btn *{
-  color: inherit !important;
-  text-shadow: none !important;
-}
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn:hover,
-body.sepia-mode #materialItems .controls-row .ag-action-btn:hover{
-  transform: none !important;
-  box-shadow: 0 8px 18px rgba(0,0,0,.20) !important;
-}
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn:active,
-body.sepia-mode #materialItems .controls-row .ag-action-btn:active{
-  transform: none !important;
-  box-shadow: 0 4px 10px rgba(0,0,0,.16) !important;
-}
-
-/* 光明版：7個圓形功能鍵（頂部工具列）深色字一律無陰影 */
-
-/* 光明版：覆蓋『白字加陰影』全局規則（避免 btn-success/secondary 仍被加 text-shadow） */
-body.sepia-mode :is(.btn-primary,.btn-success,.btn-danger,.btn-info,.btn-dark,.btn-secondary,
-  .save-scheme-btn,.load-scheme-btn,.help-btn,#calculateButton,.unit-select.metric-active,.unit-select.imperial-active,
-  .tool-btn, .tool-text){
-  text-shadow: none !important;
-}
-
-/* 光明版：確保紅圈兩組按鈕只用外投影（禁止 inset/立體陰影） */
-body.sepia-mode #cuttingItems .controls-row .ag-action-btn,
-body.sepia-mode #materialItems .controls-row .ag-action-btn{
-  box-shadow: 0 6px 14px rgba(0,0,0,.18) !important; /* only drop shadow */
-}
-
-</style>
-
-<script>
+</script><script>
 (function() {
     document.body.classList.remove('sepia-mode', 'light-mode', 'dark-mode', 'dark-beauty-mode');
 
@@ -12058,9 +12552,7 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
         }
     }, 1000);
 })();
-</script>
-
-<script>
+</script><script>
 // 材料類別下拉：依選擇自動套用顏色（碎料=橙紅，原裝=綠色）
 (function(){
   function apply(el){
@@ -12079,9 +12571,7 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
   else bind();
 })();
 
-</script>
-
-<script>
+</script><script>
 // === 浮動中/英 + 顯示調校（鋁材版，已移除浮動 QR）===
 (function(){
   function getLang(){
@@ -12383,120 +12873,7 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 })();
-</script>
-
-<style id="ag-shadow-final-v3">
-/* === AnyGen patch: 按鈕硬邊投影（全檔最終覆寫 v3 / 2026-03-28） ===
-   原因：此檔案在 <body> 內仍有多段 <style>（含 !important）會覆蓋 <head> 的設定。
-   做法：把最終覆寫放到 
-<!-- AnyGen patch: 最終覆寫兩粒重置掣（白字 + 最幼邊線） -->
-<style id="ag-reset-white-final">
-  /* 需求修正：你講「白色」係指字體。
-     所以：保留原本底色（橙/黃漸變），只改：
-     - 字色：白
-     - 輪廓線：最幼
-  */
-
-  /* 結果區大粒重置 */
-  #resetButton,
-  body:not(.sepia-mode) #resetButton,
-  body.sepia-mode #resetButton,
-  #resetButton.btn-danger{
-    color: #fff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.55) !important;
-    border: 0.5px solid #ff5500 !important;
-  }
-
-  /* 顯示微調彈窗重置 */
-  #displayTuneModal #tuneReset.btn-warning,
-  #tuneReset{
-    color: #fff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.55) !important;
-    border: 0.5px solid rgba(0,0,0,0.22) !important;
-  }
-</style>
-
-<!-- AnyGen patch: 只為4粒按鈕鎖定硬邊投影（避免再被其他CSS蓋走） -->
-<style id="ag-btn-radius-final">
-/* === AnyGen patch: buttons radius slightly rounder ===
-   需求：所有按鈕圓角再圓少少，但唔好太圓。
-   做法：集中用一個變數，並對常見按鈕 class/元件做最終覆寫。
-*/
-:root{ --ag-btn-radius: 14px; }
-
-/* Bootstrap buttons + 站內主要按鈕 */
-button.btn,
-.btn,
-.ag-action-btn,
-#calculateButton,
-#resetButton,
-.save-scheme-btn,
-.load-scheme-btn,
-.help-btn,
-.unit-select,
-.tool-btn{
-  border-radius: var(--ag-btn-radius) !important;
-}
-
-/* 小型按鈕保持唔好過份圓：比主按鈕略細 */
-.btn-sm,
-button.btn-sm{
-  border-radius: 12px !important;
-}
-
-/* 圓形功能鍵（頂部工具列 / 浮動語言鍵）維持圓形，不受上面影響 */
-.top-tools .tool-btn,
-#languageToggle.language-toggle{
-  border-radius: 999px !important;
-}
-</style>
-
-<style id="ag-four-btn-shadow-final">
-  /* 重要：sepia-mode 內有較高 specificity + !important 會蓋走投影
-     所以呢度用更高 specificity（帶埋 #cuttingItems/#materialItems）強制四粒掣有硬邊投影。
-     同時：唔改任何底色（保持原本格仔色）。
-  */
-
-  /* 切割項目兩粒 */
-  body.sepia-mode #cuttingItems .controls-row #addCuttingButton,
-  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton,
-  /* 材料兩粒 */
-  body.sepia-mode #materialItems .controls-row #addMaterialButton,
-  body.sepia-mode #materialItems .controls-row #clearMaterialButton,
-  /* 其他模式（保險） */
-  #addCuttingButton,
-  #clearCuttingButton,
-  #addMaterialButton,
-  #clearMaterialButton{
-    box-shadow: var(--ag-btn-inset-hi), var(--ag-btn-inset-lo), var(--ag-btn-drop-hard) !important;
-
-    /* 重要：呢幾粒掣底色偏深，強制白字（避免被其他規則蓋走） */
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.50) !important;
-  }
-
-  body.sepia-mode #cuttingItems .controls-row #addCuttingButton *,
-  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton *,
-  body.sepia-mode #materialItems .controls-row #addMaterialButton *,
-  body.sepia-mode #materialItems .controls-row #clearMaterialButton *{
-    color: #ffffff !important;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.50) !important;
-  }
-
-  body.sepia-mode #cuttingItems .controls-row #addCuttingButton:active,
-  body.sepia-mode #cuttingItems .controls-row #clearCuttingButton:active,
-  body.sepia-mode #materialItems .controls-row #addMaterialButton:active,
-  body.sepia-mode #materialItems .controls-row #clearMaterialButton:active,
-  #addCuttingButton:active,
-  #clearCuttingButton:active,
-  #addMaterialButton:active,
-  #clearMaterialButton:active{
-    box-shadow: var(--ag-btn-inset-hi), var(--ag-btn-inset-lo), var(--ag-btn-drop-press) !important;
-    transform: translateY(1px) !important;
-  }
-</style>
-
-<script id="ag-text-shadow-audit-fix">
+</script><script id="ag-text-shadow-audit-fix">
 (function(){
   function isWhiteColor(colorStr){
     if(!colorStr) return false;
@@ -12554,41 +12931,7 @@ button.btn-sm{
     obs.observe(document.body, { subtree:true, childList:true, characterData:true, attributes:true });
   }catch(e){}
 })();
-</script>
-
-<!-- AnyGen patch: Custom alert/confirm (for background blur) -->
-<div class="modal fade" id="agAlertModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="agAlertTitle">提示</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="agAlertBody"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="agAlertOk">確定</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="agConfirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="agConfirmTitle">確認</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body" id="agConfirmBody"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-ag-confirm="0" id="agConfirmCancel">取消</button>
-        <button type="button" class="btn btn-primary" data-ag-confirm="1" id="agConfirmOk">確定</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
+</script><script>
 // Custom alert/confirm: 用 Bootstrap modal 代替瀏覽器原生彈窗，先可以做到背景 blur
 (function(){
   const langSel = () => document.getElementById('language');
@@ -12659,108 +13002,7 @@ button.btn-sm{
     window.alert = function(msg){ window.agAlert(msg); };
   }catch(e){}
 })();
-</script>
-
-<!-- AnyGen: 底部資訊欄（參考 index_宿舍：結構/字體/顏色） -->
-<style id="ag-bottom-infobar-style">
-  :root{ --ag-infobar-h: 46px; }
-
-  /* 參考宿舍：半透明黑底 + 小 blur + 黃色字（常駐，冇隱藏掣） */
-  #ag-info-bar{
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 8px 20px calc(8px + env(safe-area-inset-bottom));
-    display: flex;
-    align-items: center;
-    background: rgba(32, 32, 32, 0.78);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 9999;
-  }
-
-  /* 內容唔畀 bar 遮 */
-  body{ padding-bottom: calc(var(--ag-infobar-h) + env(safe-area-inset-bottom)); }
-
-  #ag-info-message{
-    display:flex;
-    align-items:center;
-    min-width: 0;
-    width: 100%;
-    font-size: 0.95rem; /* 跟宿舍 */
-    color: yellow !important;
-    gap: 8px;
-  }
-
-  #ag-info-message span,
-  #ag-statusText{ color: yellow !important; }
-
-  #ag-statusIcon{ margin-right: 2px; font-size: 1.05rem; line-height: 1; flex: 0 0 auto; }
-
-  /* 單行：太長就可以橫向拉；同時保留省略（未拉之前） */
-  #ag-statusText{
-    min-width: 0;
-    flex: 1 1 auto;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    text-shadow: 0 1px 0 rgba(0,0,0,.65);
-    padding-bottom: 2px; /* 比少少位俾 scrollbar */
-  }
-  /* 狀態文字如果可橫向滑動：將 scrollbar 改到好幼，唔礙眼 */
-  #ag-statusText{ scrollbar-width: thin; scrollbar-color: rgba(255,255,0,.22) transparent; }
-  #ag-statusText::-webkit-scrollbar{ height: 2px; }
-  #ag-statusText::-webkit-scrollbar-thumb{ background: rgba(255,255,0,.22); border-radius: 999px; }
-
-  /* 點擊提示：用家知可以撳/拉 */
-  #ag-info-bar{ cursor: pointer; }
-
-  /* 彈出全文（輕量 overlay） */
-  #ag-info-overlay{ position: fixed; inset: 0; z-index: 10000; display:none; }
-  #ag-info-overlay[data-open="true"]{ display:block; }
-  #ag-info-backdrop{ position:absolute; inset:0; background: rgba(32,32,32,.78); }
-  #ag-info-modal{
-    position:absolute;
-    left: 50%;
-    bottom: calc(var(--ag-infobar-h) + 18px + env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    width: min(820px, calc(100vw - 24px));
-    background: rgba(18,22,28,.92);
-    border: 1px solid rgba(255,255,255,.14);
-    border-radius: 16px;
-    padding: 14px 14px;
-    color: #fff;
-    backdrop-filter: blur(14px) saturate(1.1);
-    -webkit-backdrop-filter: blur(14px) saturate(1.1);
-  }
-  #ag-info-modal h3{ margin: 0 0 8px 0; font-size: 14px; font-weight: 900; }
-  #ag-info-full{ margin:0; font-size: 14px; line-height: 1.35; color: rgba(255,255,255,.92); white-space: pre-wrap; word-break: break-word; }
-  #ag-info-closeHint{ margin-top: 10px; font-size: 12px; color: rgba(255,255,255,.70); }
-
-  @media (max-width: 980px){
-    :root{ --ag-infobar-h: 50px; }
-  }
-</style>
-
-<div id="ag-info-bar" role="status" aria-live="polite" aria-label="Status" data-kind="doing">
-  <div id="ag-info-message" class="status-message">
-    <span id="ag-statusIcon" class="status-icon" aria-hidden="true">ℹ️</span>
-    <span id="ag-statusText"></span>
-  </div>
-</div>
-
-<div id="ag-info-overlay" aria-hidden="true">
-  <a id="ag-info-backdrop" href="#" aria-label="Close"></a>
-  <div id="ag-info-modal" role="dialog" aria-modal="true" aria-label="Message">
-    <h3 id="ag-info-modal-title">訊息</h3>
-    <p id="ag-info-full"></p>
-    <div id="ag-info-closeHint">（點擊背景關閉）</div>
-  </div>
-</div>
-
-<script id="ag-bottom-infobar-script">
+</script><script id="ag-bottom-infobar-script">
 (function(){
   const bar = document.getElementById('ag-info-bar');
   const textEl = document.getElementById('ag-statusText');
@@ -12891,10 +13133,7 @@ button.btn-sm{
 
   render();
 })();
-</script>
-
-<!-- AnyGen add: 統一即時狀態列 API（帶時間戳，避免停留舊狀態） -->
-<script id="ag-status-helper">
+</script><script id="ag-status-helper">
 (function(){
   // 目標：
   // 1) 所有狀態訊息都帶時間戳（避免停留舊狀態）
@@ -13077,11 +13316,7 @@ button.btn-sm{
     }, 30);
   }catch(e){}
 })();
-</script>
-
-
-<!-- AnyGen add: 主要操作即時狀態列提示（中英文） -->
-<script id="ag-status-bindings-v2">
+</script><script id="ag-status-bindings-v2">
 (function(){
   function bindOnce(el, ev, fn){
     try{
@@ -13360,11 +13595,7 @@ button.btn-sm{
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bind);
   else bind();
 })();
-</script>
-
-
-<!-- AnyGen fix: 讓自製彈窗可用的背景模糊（由 openTune/closeTune 呼叫） -->
-<script id="ag-global-blur-helper-live">
+</script><script id="ag-global-blur-helper-live">
 (function(){
   // 目標：就算 bootstrap modal / 自製 overlay 事件漏咗，都唔會卡住 blur。
   // 做法：以「畫面上實際有冇遮罩/彈窗」去決定需唔需要 blur。
@@ -13397,7 +13628,7 @@ button.btn-sm{
     const root = document.getElementById('contentRoot');
     if(!root) return;
     if(on){
-      root.style.setProperty('filter', 'var(--display-filter) blur(38px) saturate(.70) contrast(.95) brightness(.75)', 'important');
+      root.style.setProperty('filter', 'var(--display-filter) blur(16px) saturate(.70) contrast(.95) brightness(.75)', 'important');
       root.style.setProperty('transform', 'translateZ(0)', '');
     }else{
       root.style.removeProperty('filter');
@@ -13414,136 +13645,22 @@ button.btn-sm{
   };
 
   // watchdog：避免任何情況卡住
-  try{ setInterval(function(){ window.agRefreshContentBlur && window.agRefreshContentBlur(); }, 400); }catch(e){}
+  try{
+    // Performance: avoid 400ms polling; react to actual DOM/class changes instead
+    var mo = new MutationObserver(function(){
+      try{ window.agRefreshContentBlur && window.agRefreshContentBlur(); }catch(e){}
+    });
+    mo.observe(document.documentElement, {attributes:true, attributeFilter:['class']});
+    if(document.body) mo.observe(document.body, {attributes:true, attributeFilter:['class']});
+    mo.observe(document.body || document.documentElement, {childList:true, subtree:true});
+
+    // Bootstrap modal events (if present)
+    document.addEventListener('shown.bs.modal', function(){ try{ window.agRefreshContentBlur && window.agRefreshContentBlur(); }catch(e){} }, true);
+    document.addEventListener('hidden.bs.modal', function(){ try{ window.agRefreshContentBlur && window.agRefreshContentBlur(); }catch(e){} }, true);
+  }catch(e){}
 
   // 首次
   try{ apply(shouldBlur()); }catch(e){}
 })();
-</script>
-
-<!-- AnyGen patch v2: 強制頂部7鍵兩模式同色（最後覆寫，確保贏晒） -->
-<style id="ag-top-tools-unified-colors-v2">
-  body .top-tools button.tool-btn,
-  body .top-tools .btn.tool-btn{
-    background: #ffffff !important;
-    border: 1px solid rgba(15,23,42,.22) !important;
-    color: #0f172a !important;
-    text-shadow: none !important;
-    filter: none !important;
-  }
-  body .top-tools button.tool-btn *,
-  body .top-tools .btn.tool-btn *{
-    color: #0f172a !important;
-    text-shadow: none !important;
-    filter: none !important;
-  }
-  body .top-tools button.tool-btn:hover,
-  body .top-tools .btn.tool-btn:hover{
-    background: #f8fafc !important;
-    border-color: rgba(15,23,42,.30) !important;
-  }
-  body .top-tools button.tool-btn:active,
-  body .top-tools .btn.tool-btn:active{
-    background: #f1f5f9 !important;
-  }
-</style>
-
-<!-- AnyGen patch v3: 統一「頂部7鍵彈出內容」配色（所有模式同一套） -->
-<style id="ag-unify-top-tools-content-colors-v3">
-  :root{
-    --ag-modal-bg: #ffffff;
-    --ag-modal-bg-2: #f6f7fb;
-    --ag-modal-text: #0f172a;
-    --ag-modal-muted: rgba(15,23,42,.72);
-    --ag-modal-border: rgba(15,23,42,.16);
-    --ag-modal-header-bg: linear-gradient(135deg, #1f3b73, #3b82f6);
-    --ag-modal-header-text: #ffffff;
-  }
-
-  /* 1) Bootstrap modals：Help / QR / 其他（儲存/載入/列印/單位選擇等） */
-  body :is(.modal-content){
-    background: var(--ag-modal-bg) !important;
-    color: var(--ag-modal-text) !important;
-    border-color: var(--ag-modal-border) !important;
-  }
-  body :is(.modal-content) :is(.text-muted, .small, .small-hint){
-    color: var(--ag-modal-muted) !important;
-  }
-  body :is(.modal-content) :is(label, .form-label){
-    color: var(--ag-modal-text) !important;
-  }
-
-  /* Help modal：固定 header/body */
-  body #helpModal .modal-header{
-    background: var(--ag-modal-header-bg) !important;
-    color: var(--ag-modal-header-text) !important;
-    border-bottom: none !important;
-  }
-  body #helpModal .modal-title,
-  body #helpModal .modal-header *{ color: var(--ag-modal-header-text) !important; text-shadow:none !important; }
-  body #helpModal .modal-body{
-    background: linear-gradient(180deg, var(--ag-modal-bg) 0%, var(--ag-modal-bg-2) 100%) !important;
-    color: var(--ag-modal-text) !important;
-  }
-
-  /* QR modal：header/body（若存在） */
-  body #qrModal .modal-header{
-    background: var(--ag-modal-header-bg) !important;
-    color: var(--ag-modal-header-text) !important;
-  }
-  body #qrModal .modal-header *{ color: var(--ag-modal-header-text) !important; }
-  body #qrModal .modal-body{
-    background: linear-gradient(180deg, var(--ag-modal-bg) 0%, var(--ag-modal-bg-2) 100%) !important;
-    color: var(--ag-modal-text) !important;
-  }
-
-  /* 2) 自製「顯示調校」面板（#displayTuneModal） */
-  body #displayTuneModal .tune-modal{
-    background: var(--ag-modal-bg) !important;
-    color: var(--ag-modal-text) !important;
-    border-color: var(--ag-modal-border) !important;
-  }
-  body #displayTuneModal .tune-header{
-    background: var(--ag-modal-header-bg) !important;
-    color: var(--ag-modal-header-text) !important;
-    border-bottom: none !important;
-  }
-  body #displayTuneModal .tune-title,
-  body #displayTuneModal .tune-header *{ color: var(--ag-modal-header-text) !important; text-shadow:none !important; }
-  body #displayTuneModal .tune-body,
-  body #displayTuneModal .tune-row label,
-  body #displayTuneModal .tune-val,
-  body #displayTuneModal .tune-hint{
-    color: var(--ag-modal-text) !important;
-    text-shadow:none !important;
-  }
-  body #displayTuneModal .tune-hint{ color: var(--ag-modal-muted) !important; }
-
-  /* 3) 自製「例／案例」彈窗（#ag-case-help-...） */
-  body #ag-case-help-modal{
-    background: var(--ag-modal-bg) !important;
-    color: var(--ag-modal-text) !important;
-    border-color: var(--ag-modal-border) !important;
-  }
-  body #ag-case-help-header{
-    background: var(--ag-modal-header-bg) !important;
-    color: var(--ag-modal-header-text) !important;
-  }
-  body #ag-case-help-title,
-  body #ag-case-help-header *{ color: var(--ag-modal-header-text) !important; }
-  body #ag-case-help-body{ color: var(--ag-modal-text) !important; }
-  body #ag-case-help-body :is(p, li){ color: var(--ag-modal-text) !important; }
-  body #ag-case-help-body .ag-case-sub{ background: rgba(59,130,246,.08) !important; border-color: rgba(59,130,246,.20) !important; }
-  body #ag-case-help-close{ background: rgba(255,255,255,.92) !important; border-color: rgba(255,255,255,.35) !important; }
-  body #ag-case-help-close{ color: #0f172a !important; }
-
-  /* 4) 強制無視 sepia-mode 對彈窗配色嘅覆寫（用同一套） */
-  body.sepia-mode :is(.modal-content, #displayTuneModal .tune-modal, #ag-case-help-modal){
-    background: var(--ag-modal-bg) !important;
-    color: var(--ag-modal-text) !important;
-    border-color: var(--ag-modal-border) !important;
-  }
-</style>
-
-</body>
+</script></body>
 </html>
