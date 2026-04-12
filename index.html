@@ -13662,5 +13662,135 @@ document.addEventListener('DOMContentLoaded', function() {
   // 首次
   try{ apply(shouldBlur()); }catch(e){}
 })();
-</script></body>
+</script>
+
+  <!-- 2026-04-11：右下角「返頂／到底」浮動掣（參考：index_宿舍 右下角上下箭嘴） -->
+  <style id="scrollNavButtons">
+    .scroll-nav{
+      position: fixed;
+      right: calc(10px + env(safe-area-inset-right, 0px));
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      display:flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 10000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    /*
+      依你講嘅「原型」：右下 ▲/▼ 外觀要 100% 跟右上 #languageToggle 圓形浮動掣
+      （圓形 / 大細 / 投影方向與力度 / 高光位置一致）。
+
+      注意：呢度只改外觀，功能（返頂/到底 + 滾動後顯示）保持不變。
+    */
+
+    button#btnToTop.scroll-btn,
+    button#btnToBottom.scroll-btn{
+      /* 同右上 languageToggle：44x44 圓形 */
+      width: 44px !important;
+      height: 44px !important;
+      border-radius: 50% !important;
+      position: relative !important;
+      overflow: hidden !important;
+
+      display:flex !important;
+      align-items:center !important;
+      justify-content:center !important;
+      padding: 0 !important;
+      font-size: 0.92rem !important;
+      font-weight: 800 !important;
+      cursor: pointer !important;
+      text-shadow: none !important;
+      transition: none !important;
+
+      /* 你揀咗「2」：保持主程式原本配色（唔用綠色原型）
+         - 但保留：圓形/尺寸/投影方向與力度/高光結構（立體感、光位） */
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%) !important;
+      color: #0f172a !important;
+      border: 1px solid rgba(15,23,42,0.22) !important;
+      box-shadow:
+        inset -2px 2px 4px rgba(255,255,255,0.75),
+        inset 3px -4px 7px rgba(0,0,0,0.10),
+        inset 0 0 0 1px rgba(255,255,255,0.35),
+        -8px 11px 0 1px rgba(0,0,0,0.22) !important;
+    }
+
+    /* 同右上 languageToggle：右上反光 */
+    button#btnToTop.scroll-btn::before,
+    button#btnToBottom.scroll-btn::before{
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 78% 20%, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.65) 10%, rgba(255,255,255,0.18) 22%, rgba(255,255,255,0.00) 45%),
+        radial-gradient(circle at 66% 14%, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.00) 14%);
+      pointer-events: none;
+      mix-blend-mode: screen;
+    }
+
+    /* 同右上 languageToggle：微細外圈高光邊 */
+    button#btnToTop.scroll-btn::after,
+    button#btnToBottom.scroll-btn::after{
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.20);
+      pointer-events: none;
+    }
+
+    /* hover/active：禁止漂移（同右上） */
+    button#btnToTop.scroll-btn:hover,
+    button#btnToBottom.scroll-btn:hover,
+    button#btnToTop.scroll-btn:active,
+    button#btnToBottom.scroll-btn:active{
+      transform: none !important;
+      filter: none !important;
+      color: inherit !important;
+    }
+
+    @media (max-width: 600px){
+      button#btnToTop.scroll-btn,
+      button#btnToBottom.scroll-btn{ width: 38px !important; height: 38px !important; font-size: 0.86rem !important; }
+    }
+  </style>
+
+  <div class="scroll-nav" aria-label="頁面快速導航">
+    <button class="scroll-btn" id="btnToTop" aria-label="返回頂部" type="button">▲</button>
+    <button class="scroll-btn" id="btnToBottom" aria-label="前往底部" type="button">▼</button>
+  </div>
+
+  <script>
+    (function(){
+      const btnToTop = document.getElementById('btnToTop');
+      const btnToBottom = document.getElementById('btnToBottom');
+      const scrollNav = document.querySelector('.scroll-nav');
+
+      btnToTop?.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      btnToBottom?.addEventListener('click', () => {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      });
+
+      function syncScrollNav(){
+        if (!scrollNav) return;
+        const show = window.scrollY > 200;
+        scrollNav.style.opacity = show ? '1' : '0';
+        scrollNav.style.pointerEvents = show ? 'auto' : 'none';
+      }
+
+      window.addEventListener('scroll', syncScrollNav, { passive: true });
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncScrollNav, { once: true });
+      } else {
+        syncScrollNav();
+      }
+    })();
+  </script>
+</body>
 </html>
