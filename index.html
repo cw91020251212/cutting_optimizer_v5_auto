@@ -13812,16 +13812,18 @@ document.addEventListener('DOMContentLoaded', function() {
     })();
   </script>
 
-<footer id="ag-app-footer" style="text-align:center;padding:14px 12px 24px;font-size:12px;line-height:1.6;color:#6b5b47;opacity:0.9;">
-  <p id="ag-copyright-line" style="margin:0;">
-    &copy; 2026 <span>Wong wai</span> ·
+<footer id="ag-app-footer" style="margin:22px auto 0;max-width:820px;padding:14px 16px 18px;font-size:12.5px;line-height:1.75;color:#2a2620;background:rgba(245,234,213,0.94);border:1px solid rgba(0,0,0,0.08);border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.10);text-align:center;">
+  <p id="ag-copyright-line" style="margin:0;color:#2a2620;">
+    &copy; 2026 <strong style="color:#111827;">Wong wai</strong> ·
     Licensed under
-    <a href="https://github.com/cw91020251212/cutting_optimizer_v5_auto/blob/main/LICENSE" target="_blank" rel="license noopener" style="color:#1d4ed8;">Apache License 2.0</a> ·
-    <a href="https://github.com/cw91020251212/cutting_optimizer_v5_auto" target="_blank" rel="noopener" style="color:#1d4ed8;">Source on GitHub</a>
+    <a href="https://github.com/cw91020251212/cutting_optimizer_v5_auto/blob/main/LICENSE" target="_blank" rel="license noopener" style="color:#1d4ed8;text-decoration:underline;">Apache License 2.0</a> ·
+    <a href="https://github.com/cw91020251212/cutting_optimizer_v5_auto" target="_blank" rel="noopener" style="color:#1d4ed8;text-decoration:underline;">Source on GitHub</a> ·
+    <a href="#" id="ag-share-link" style="color:#1d4ed8;text-decoration:underline;cursor:pointer;">🔗 分享此工具</a>
   </p>
-  <p style="margin:6px 0 0;opacity:0.75;">此工具僅供參考；結果不保證準確；本工具不對使用後果負責。</p>
+  <p style="margin:6px 0 0;color:#5a4d3d;font-size:11.5px;">此工具僅供參考；結果不保證準確；本工具不對使用後果負責。</p>
 </footer>
 <script>
+/* PWA: register service worker (scope-safe, silent-fail) */
 (function registerSW(){
   if (!('serviceWorker' in navigator)) return;
   var scope = new URL('./', location.href).pathname;
@@ -13830,14 +13832,8 @@ document.addEventListener('DOMContentLoaded', function() {
     navigator.serviceWorker.register(swUrl, { scope: scope }).catch(function(){});
   });
 })();
-(function initShare(){
-  var btn = document.createElement('button');
-  btn.id = 'ag-share-btn';
-  btn.type = 'button';
-  btn.title = '分享此工具 / Share';
-  btn.setAttribute('aria-label','分享');
-  btn.innerHTML = '<span style="font-size:16px;line-height:1;">🔗</span><span style="margin-left:6px;">分享</span>';
-  btn.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9998;padding:10px 14px;background:#1d4ed8;color:#fff;border:none;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-family:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;';
+/* Share via footer text link (no floating button — avoids covering scroll arrows) */
+(function initShareLink(){
   function toast(msg){
     var t=document.createElement('div');
     t.textContent=msg;
@@ -13854,7 +13850,8 @@ document.addEventListener('DOMContentLoaded', function() {
       toast('已複製連結');
     }catch(e){ toast('請自行複製連結'); }
   }
-  btn.addEventListener('click', function(){
+  function doShare(e){
+    if(e){ e.preventDefault(); }
     var url = 'https://cw91020251212.github.io/cutting_optimizer_v5_auto/';
     var shareData = { title:'鋁材切割排版 · Cutting Optimizer', text:'精準下料，減少廢料，一鍵排版。', url: url };
     if (navigator.share){
@@ -13864,9 +13861,13 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       fallbackCopy(url);
     }
-  });
-  if (document.body) document.body.appendChild(btn);
-  else document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+  }
+  function bind(){
+    var el = document.getElementById('ag-share-link');
+    if (el) el.addEventListener('click', doShare);
+  }
+  if (document.readyState !== 'loading') bind();
+  else document.addEventListener('DOMContentLoaded', bind);
 })();
 </script>
 </body>
