@@ -934,7 +934,26 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
 </style>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>鋁材切割排版</title>
+<title>鋁材切割排版 · Cutting Optimizer</title>
+<meta name="description" content="鋁材切割排版計算器 · Aluminum cutting layout optimizer. 精準下料，減少廢料。">
+<meta name="theme-color" content="#1d4ed8">
+<meta name="author" content="Wong wai">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<link rel="manifest" href="assets/manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:title" content="鋁材切割排版 · Cutting Optimizer">
+<meta property="og:description" content="精準下料，減少廢料，一鍵排版。">
+<meta property="og:url" content="https://cw91020251212.github.io/cutting_optimizer_v5_auto/">
+<meta property="og:image" content="https://cw91020251212.github.io/cutting_optimizer_v5_auto/assets/og-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="鋁材切割排版 · Cutting Optimizer">
+<meta name="twitter:description" content="精準下料，減少廢料，一鍵排版。">
+<meta name="twitter:image" content="https://cw91020251212.github.io/cutting_optimizer_v5_auto/assets/og-preview.png">
 <!-- Critical button radius: prevent startup flash (FOUC) before Bootstrap loads -->
 <style id="critical-btn-radius">
   :root{ --bs-border-radius: 14px; }
@@ -13792,5 +13811,63 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     })();
   </script>
+
+<footer id="ag-app-footer" style="text-align:center;padding:14px 12px 24px;font-size:12px;line-height:1.6;color:#6b5b47;opacity:0.9;">
+  <p id="ag-copyright-line" style="margin:0;">
+    &copy; 2026 <span>Wong wai</span> ·
+    Licensed under
+    <a href="https://github.com/cw91020251212/cutting_optimizer_v5_auto/blob/main/LICENSE" target="_blank" rel="license noopener" style="color:#1d4ed8;">Apache License 2.0</a> ·
+    <a href="https://github.com/cw91020251212/cutting_optimizer_v5_auto" target="_blank" rel="noopener" style="color:#1d4ed8;">Source on GitHub</a>
+  </p>
+  <p style="margin:6px 0 0;opacity:0.75;">此工具僅供參考；結果不保證準確；本工具不對使用後果負責。</p>
+</footer>
+<script>
+(function registerSW(){
+  if (!('serviceWorker' in navigator)) return;
+  var scope = new URL('./', location.href).pathname;
+  var swUrl = new URL('sw.js', location.href).href;
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register(swUrl, { scope: scope }).catch(function(){});
+  });
+})();
+(function initShare(){
+  var btn = document.createElement('button');
+  btn.id = 'ag-share-btn';
+  btn.type = 'button';
+  btn.title = '分享此工具 / Share';
+  btn.setAttribute('aria-label','分享');
+  btn.innerHTML = '<span style="font-size:16px;line-height:1;">🔗</span><span style="margin-left:6px;">分享</span>';
+  btn.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9998;padding:10px 14px;background:#1d4ed8;color:#fff;border:none;border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,0.25);font-family:inherit;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;';
+  function toast(msg){
+    var t=document.createElement('div');
+    t.textContent=msg;
+    t.style.cssText='position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(0,0,0,0.82);color:#fff;padding:8px 14px;border-radius:8px;z-index:10000;font-size:13px;';
+    document.body.appendChild(t);
+    setTimeout(function(){t.remove();},1800);
+  }
+  function fallbackCopy(text){
+    try{
+      var ta=document.createElement('textarea');
+      ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+      toast('已複製連結');
+    }catch(e){ toast('請自行複製連結'); }
+  }
+  btn.addEventListener('click', function(){
+    var url = 'https://cw91020251212.github.io/cutting_optimizer_v5_auto/';
+    var shareData = { title:'鋁材切割排版 · Cutting Optimizer', text:'精準下料，減少廢料，一鍵排版。', url: url };
+    if (navigator.share){
+      navigator.share(shareData).catch(function(){});
+    } else if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){ toast('已複製連結'); }, function(){ fallbackCopy(url); });
+    } else {
+      fallbackCopy(url);
+    }
+  });
+  if (document.body) document.body.appendChild(btn);
+  else document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(btn); });
+})();
+</script>
 </body>
 </html>
