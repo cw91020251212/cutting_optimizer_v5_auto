@@ -14070,5 +14070,25 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   body #stage1HeaderToolsButton{right:10px!important;top:calc(48px + env(safe-area-inset-top,0px))!important;left:auto!important;}
 }
 </style>
+
+<style id="scheme-button-consistency-fix">
+@media (max-width: 767.98px){
+  /* The two scheme actions share one layout contract: equal height, horizontal icon+label. */
+  body .scheme-actions-row .scheme-left{
+    display:flex!important;align-items:stretch!important;gap:8px!important;
+    flex:1 1 auto!important;min-width:0!important;
+  }
+  body .scheme-actions-row .scheme-left .ag-action-btn{
+    flex:1 1 0!important;min-width:0!important;width:auto!important;height:48px!important;
+    display:inline-flex!important;flex-direction:row!important;align-items:center!important;
+    justify-content:center!important;gap:6px!important;padding:0 8px!important;
+    white-space:nowrap!important;line-height:1!important;
+  }
+  body .scheme-actions-row .scheme-left .ag-action-btn i{
+    display:inline-block!important;margin:0!important;line-height:1!important;
+    flex:0 0 auto!important;
+  }
+}
+</style>
 </body>
 </html>
