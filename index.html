@@ -13874,6 +13874,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <script id="mobile-first-layout-draft-js">
 (function(){
   function initMobileFirstDraft(){
+    if(!window.matchMedia('(max-width: 767.98px)').matches) return;
     if(document.getElementById('mobileSettingsDrawer')) return;
     const title=document.getElementById('pageTitle');
     const settings=document.getElementById('settings-card');
@@ -13882,18 +13883,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const gear=document.createElement('button');
     gear.id='mobileSettingsToggle'; gear.type='button'; gear.setAttribute('aria-label','開啟設定'); gear.setAttribute('aria-controls','mobileSettingsDrawer'); gear.setAttribute('aria-expanded','false');
-    gear.innerHTML='<i class="fa-solid fa-gear" aria-hidden="true"></i>';
+    gear.textContent='⚙';
     title.appendChild(gear);
 
     const backdrop=document.createElement('div'); backdrop.className='mobile-settings-backdrop'; backdrop.id='mobileSettingsBackdrop';
     const drawer=document.createElement('aside'); drawer.className='mobile-settings-drawer'; drawer.id='mobileSettingsDrawer'; drawer.setAttribute('aria-label','設定'); drawer.setAttribute('aria-hidden','true');
-    drawer.innerHTML='<div class="mobile-settings-header"><h2><i class="fa-solid fa-gear me-2"></i><span>設定</span></h2><button type="button" class="mobile-settings-close" aria-label="關閉設定"><i class="fa-solid fa-xmark"></i></button></div>';
+    drawer.innerHTML='<div class="mobile-settings-header"><h2>設定</h2><button type="button" class="mobile-settings-close" aria-label="關閉設定">×</button></div>';
     document.body.append(backdrop,drawer);
 
     const header=drawer.querySelector('.mobile-settings-header');
     // Move existing controls instead of cloning, so current event handlers and IDs remain intact.
     drawer.appendChild(tools);
     const lang=document.getElementById('languageToggle'); if(lang) drawer.appendChild(lang);
+    const theme=document.getElementById('themeToggleBtn'); if(theme) theme.textContent='深淺';
+    const tune=document.getElementById('displayTuneBtn'); if(tune) tune.textContent='調';
     const body=settings.querySelector('.card-body-light');
     const topRow=body && body.querySelector('.settings-top-row');
     const schemeRow=body && body.querySelector('.row.g-3.mt-0');
@@ -13915,81 +13918,99 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style id="mobile-first-clean-final">
-/* Clean mobile-first presentation layer: one override only */
+/* Mobile workbench v3: a deliberately new, flat layout rather than a patch on the old card skin. */
 @media (max-width: 767.98px){
-  body{padding:4px}
-  #pageTitle,body h2#pageTitle{position:relative;display:grid!important;grid-template-columns:1fr!important;grid-template-rows:1fr!important;width:100%;height:50px!important;min-height:50px!important;margin:0 0 8px!important;padding:6px 58px 6px 12px!important;overflow:visible!important;box-sizing:border-box}
+  :root{--mw-ink:#172033;--mw-muted:#667085;--mw-line:#e4e7ec;--mw-surface:#ffffff;--mw-bg:#f5f7fb;--mw-blue:#246bfe;--mw-blue-deep:#154dcc;--mw-soft:#eef3ff;--mw-danger:#e5484d}
+  html,body{background:var(--mw-bg)!important;background-image:none!important;color:var(--mw-ink)!important}
+  body{padding:0!important;min-width:320px}
+  body::before,body::after,#contentRoot::before,#contentRoot::after{display:none!important;background:none!important}
+  .container-fluid,#contentRoot{max-width:620px!important;margin:0 auto!important;padding:0 12px 92px!important;background:transparent!important}
+
+  /* Compact top app bar */
+  #pageTitle,body h2#pageTitle{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:56px!important;min-height:56px!important;margin:0 0 14px!important;padding:0 58px 0 16px!important;border:0!important;border-radius:0 0 18px 18px!important;background:linear-gradient(135deg,#14213d,#243b64)!important;background-image:linear-gradient(135deg,#14213d,#243b64)!important;box-shadow:0 3px 12px rgba(24,39,75,.18)!important;box-sizing:border-box!important;overflow:visible!important}
   #pageTitle .title-nut,#pageTitle .title-ruler{display:none!important}
-  #pageTitle #titleText,body.lang-en h2#pageTitle #titleText,body.lang-zh h2#pageTitle #titleText{display:block!important;width:100%!important;max-width:none!important;align-self:center!important;justify-self:center!important;font-size:clamp(.88rem,3.8vw,1rem)!important;line-height:1!important;white-space:nowrap!important;letter-spacing:-.15px!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:center!important}
-  #mobileSettingsToggle{position:absolute!important;right:8px!important;left:auto!important;top:50%!important;width:38px!important;height:38px!important;transform:translateY(-50%)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border-radius:10px!important;background:#e2e8f0!important;color:#0f172a!important;border:1px solid #94a3b8!important;box-shadow:0 1px 2px rgba(15,23,42,.16)!important;text-shadow:none!important;filter:none!important}
+  #pageTitle #titleText,body.lang-en h2#pageTitle #titleText,body.lang-zh h2#pageTitle #titleText{display:block!important;width:100%!important;max-width:none!important;margin:0!important;font-size:1rem!important;line-height:1!important;font-weight:750!important;letter-spacing:.01em!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;text-align:center!important;color:#fff!important;text-shadow:none!important}
+  #mobileSettingsToggle{position:absolute!important;right:12px!important;left:auto!important;top:50%!important;width:36px!important;height:36px!important;transform:translateY(-50%)!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;border:0!important;border-radius:12px!important;background:#fff!important;color:#172033!important;box-shadow:0 2px 6px rgba(0,0,0,.2)!important;text-shadow:none!important;filter:none!important}
   #mobileSettingsToggle::before,#mobileSettingsToggle::after{display:none!important;content:none!important}
-  #settings-card{display:none!important}
-  .top-tools,#languageToggle{display:none!important}
-  .container-fluid{padding-left:4px!important;padding-right:4px!important}
-  .card{border-radius:14px;margin-bottom:8px;box-shadow:0 2px 0 rgba(0,0,0,.14)}
-  .section-header{min-height:42px;margin-bottom:0;padding:8px 12px;border-radius:12px 12px 0 0;font-size:1.05rem}
-  .card-body,#cutting-items-card .card-body,#materials-card .card-body,#results-card .card-body{padding:10px!important}
-  .ag-main-cards-row{margin-top:0!important;--bs-gutter-y:8px}
-  .ag-main-cards-row>.col-md-6{padding-left:4px;padding-right:4px}
+
+  /* Hide the original desktop settings region only in the mobile workbench. */
+  #settings-card,.top-tools,#languageToggle{display:none!important}
+
+  /* Flat task sections */
+  .ag-main-cards-row{display:block!important;margin:0!important;--bs-gutter-x:0!important;--bs-gutter-y:0!important}
+  .ag-main-cards-row>.col-md-6{width:100%!important;padding:0!important}
+  .card,#cutting-items-card,#materials-card,#results-card{margin:0 0 12px!important;border:1px solid var(--mw-line)!important;border-radius:16px!important;background:var(--mw-surface)!important;background-image:none!important;box-shadow:0 1px 2px rgba(16,24,40,.04)!important;overflow:hidden!important}
+  .card::before,.card::after,.card-body-light::before,.card-body-light::after{display:none!important;content:none!important;background:none!important}
+  .section-header{min-height:46px!important;margin:0!important;padding:0 14px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;border:0!important;border-bottom:1px solid var(--mw-line)!important;border-radius:0!important;background:var(--mw-surface)!important;background-image:none!important;box-shadow:none!important;color:var(--mw-ink)!important}
+  .section-header .section-title{display:flex!important;align-items:center!important;gap:8px!important;font-size:.93rem!important;font-weight:760!important;letter-spacing:.01em!important;color:var(--mw-ink)!important}
+  .section-header .section-title i{margin:0!important;color:var(--mw-blue)!important;font-size:1rem!important}
+  .section-header .step-indicator{padding:4px 8px!important;border:0!important;border-radius:999px!important;background:var(--mw-soft)!important;color:var(--mw-blue-deep)!important;font-size:.72rem!important;font-weight:800!important}
+  .card-body,.card-body-light,#cutting-items-card .card-body,#materials-card .card-body{padding:14px!important;background:var(--mw-surface)!important;background-image:none!important;color:var(--mw-ink)!important}
   .ag-items-section .row.g-3,.ag-items-section .row.g-2{margin-bottom:0!important}
-  .ag-items-section .row.g-2.mt-2{margin-top:8px!important}
-  .ag-items-section .controls-row{margin-top:8px!important;margin-bottom:2px!important}
-  .ag-items-section + .table-responsive{margin-top:4px!important}
-  .form-label{font-size:.92rem;margin-bottom:3px}
-  .form-control,.form-select{min-height:38px}
-  .form-control.form-control-lg{min-height:42px}
-  .small-hint{font-size:.76rem;margin-top:2px}
-  .controls-row .ag-action-btn{min-height:40px!important;font-size:.88rem!important;padding:.35rem .45rem!important}
-  #globalCutUnitBtn,#globalMaterialUnitBtn{min-height:40px!important}
-  #results-card{margin-top:2px}
-  #results-card .button-group{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  #results-card .button-group #calculateButton{grid-column:1/-1;min-height:48px;font-size:1.08rem}
-  #results-card .button-group .btn{min-height:42px;margin:0!important;font-size:.9rem}
+  .ag-items-section .row.g-2.mt-2{margin-top:12px!important}
+  .form-label{display:block!important;margin:0 0 5px!important;color:var(--mw-ink)!important;font-size:.78rem!important;font-weight:700!important;letter-spacing:.01em!important}
+  .small-hint{display:block!important;margin:4px 0 0!important;color:var(--mw-muted)!important;font-size:.7rem!important;line-height:1.1!important}
+  .form-control,.form-select,.form-control.form-control-lg{min-height:42px!important;height:42px!important;padding:.45rem .6rem!important;border:1px solid #d7dce5!important;border-radius:10px!important;background:#f9fafc!important;color:var(--mw-ink)!important;box-shadow:none!important;font-size:.92rem!important}
+  .form-control:focus,.form-select:focus{border-color:var(--mw-blue)!important;background:#fff!important;box-shadow:0 0 0 3px rgba(36,107,254,.12)!important}
+  .length-input-group{gap:6px!important;--bs-gutter-x:0!important}
+  .length-input-group>.col{padding:0!important}
+  .cut-qtypurpose-row,.material-qtytype-row{--bs-gutter-x:8px!important}
+  .cut-qtypurpose-row>.col-6,.material-qtytype-row>.col-6{padding-left:4px!important;padding-right:4px!important}
+
+  /* Action row reads as a workbench footer, instead of legacy green pills. */
+  .ag-items-section .controls-row{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 50px!important;gap:8px!important;align-items:stretch!important;margin:14px 0 10px!important}
+  .controls-row .ag-action-btn,#globalCutUnitBtn,#globalMaterialUnitBtn{display:flex!important;align-items:center!important;justify-content:center!important;min-height:42px!important;height:42px!important;margin:0!important;padding:0 8px!important;border-radius:10px!important;box-shadow:none!important;font-size:.78rem!important;font-weight:740!important;white-space:nowrap!important;text-shadow:none!important}
+  #addCuttingButton,#addMaterialButton{border:0!important;background:var(--mw-blue)!important;color:#fff!important}
+  #clearCuttingButton,#clearMaterialButton{border:1px solid #cfd6e4!important;background:#fff!important;color:#344054!important}
+  #globalCutUnitBtn,#globalMaterialUnitBtn{border:1px solid #cfd6e4!important;background:var(--mw-soft)!important;color:var(--mw-blue-deep)!important}
+  .ag-items-section + .table-responsive{margin:0!important;border:1px solid var(--mw-line)!important;border-radius:10px!important;background:#fff!important}
+  .table-responsive .table{margin:0!important;font-size:.75rem!important;color:var(--mw-ink)!important}
+  .table-responsive .table th{padding:.55rem .4rem!important;border:0!important;background:#f7f8fb!important;color:#475467!important;font-weight:750!important;white-space:nowrap!important}
+  .table-responsive .table td{padding:.55rem .4rem!important;border-color:#eef0f4!important}
+
+  /* Clear bottom action panel */
+  #results-card{border-color:#cddcff!important;background:#fff!important}
+  #results-card .section-header{display:none!important}
+  #results-card .card-body{padding:12px!important;text-align:initial!important}
+  #results-card .button-group{display:grid!important;grid-template-columns:1fr 96px!important;gap:8px!important}
+  #results-card .button-group .btn{min-height:46px!important;height:46px!important;margin:0!important;border-radius:11px!important;box-shadow:none!important;font-size:.88rem!important;font-weight:760!important}
+  #calculateButton{grid-column:1!important;border:0!important;background:var(--mw-blue)!important;color:#fff!important}
+  #resetButton{grid-column:2!important;border:1px solid #f1b1b5!important;background:#fff!important;color:var(--mw-danger)!important}
+  #results-card .button-group .help-btn{display:none!important}
+  #ag-info-bar{background:#172033!important;color:#fff!important;box-shadow:0 -2px 10px rgba(16,24,40,.18)!important}
 }
-/* Drawer structure: fixed right-side panel, not part of page flow */
-.mobile-settings-backdrop{position:fixed;inset:0;z-index:11000;background:rgba(2,6,23,.48);opacity:0;pointer-events:none;transition:opacity .18s ease}
-.mobile-settings-backdrop.is-open{opacity:1;pointer-events:auto}
-.mobile-settings-drawer{position:fixed;z-index:11001;top:0;right:0;width:min(360px,92vw);height:100dvh;overflow:auto;transform:translateX(102%);transition:transform .22s ease;padding:0 14px 24px;box-shadow:-12px 0 32px rgba(0,0,0,.28)}
-.mobile-settings-drawer.is-open{transform:translateX(0)}
-.mobile-settings-header{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;margin:0 -14px 12px;padding:14px}
-.mobile-settings-header h2{font-size:1.1rem;margin:0;font-weight:800}
-.mobile-settings-close{width:38px;height:38px;border:0;border-radius:10px;font-size:1.1rem}
-body.mobile-settings-open{overflow:hidden}
-/* Scheme row: separate save/load actions from auto-replenish controls */
-.mobile-settings-drawer .scheme-actions-row{display:block!important;width:100%!important}
-.mobile-settings-drawer .scheme-left{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;margin-bottom:10px!important}
-.mobile-settings-drawer .scheme-left button{min-width:0!important;width:100%!important;white-space:nowrap!important}
-.mobile-settings-drawer .scheme-right{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;width:100%!important;align-items:center!important}
-.mobile-settings-drawer .auto-replenish-title{min-width:0!important;line-height:1.1!important}
-.mobile-settings-drawer #autoReplenishPickerBtn{width:72px!important;min-width:72px!important}
-/* Drawer form grid: labels and controls have deterministic columns */
-.mobile-settings-drawer .settings-top-row{display:block!important;margin:0!important}
-.mobile-settings-drawer .settings-top-row>.col-md-3,.mobile-settings-drawer .settings-top-row>.col-12{width:100%!important;max-width:none!important;margin:0 0 10px!important;padding:0!important}
-.mobile-settings-drawer .algo-saw-grid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px!important;align-items:center!important}
-.mobile-settings-drawer .algo-label{grid-column:1;grid-row:1;margin:0!important}
-.mobile-settings-drawer .saw-label{grid-column:2;grid-row:1;margin:0!important}
-.mobile-settings-drawer .algo-control{grid-column:1;grid-row:2;width:100%!important;min-width:0!important}
-.mobile-settings-drawer .saw-control{grid-column:2;grid-row:2;width:100%!important;min-width:0!important}
-.mobile-settings-drawer .saw-control input{width:calc(100% - 30px)!important;min-width:0!important}
-.mobile-settings-drawer .algo-hint,.mobile-settings-drawer .saw-hint-wrap{grid-column:1/-1;grid-row:3;margin:0!important}
-.mobile-settings-drawer .scheme-settings-row{margin:0!important}
-.mobile-settings-drawer .scheme-actions-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
-.mobile-settings-drawer .scheme-left{display:contents!important}
-.mobile-settings-drawer .scheme-left button{width:100%!important}
-.mobile-settings-drawer .scheme-right{grid-column:1/-1!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
-/* Drawer: deliberately flat, opaque, and high-contrast */
-.mobile-settings-drawer{background:#f1f5f9!important;color:#0f172a!important;opacity:1!important;filter:none!important;isolation:isolate!important}
-.mobile-settings-drawer::before,.mobile-settings-drawer::after,.mobile-settings-drawer *::before,.mobile-settings-drawer *::after{display:none!important;content:none!important;animation:none!important}
-.mobile-settings-drawer *{filter:none!important;text-shadow:none!important}
-.mobile-settings-drawer .top-tools{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 12px;padding:0}
-.mobile-settings-drawer .top-tools .tool-btn,.mobile-settings-drawer #languageToggle,.mobile-settings-drawer button{display:inline-flex!important;position:static!important;align-items:center!important;justify-content:center!important;min-width:0!important;width:100%!important;height:42px!important;min-height:42px!important;padding:6px!important;overflow:visible!important;transform:none!important;animation:none!important;background:#e2e8f0!important;color:#0f172a!important;border:1px solid #94a3b8!important;border-radius:10px!important;box-shadow:0 1px 2px rgba(15,23,42,.16)!important;text-shadow:none!important}
-.mobile-settings-drawer .mobile-settings-header,.mobile-settings-drawer .mobile-settings-header *{color:#fff!important;background:linear-gradient(135deg,#1d4ed8,#0ea5e9)!important;border-color:transparent!important}
-.mobile-settings-drawer .mobile-settings-header button{width:38px!important;background:rgba(255,255,255,.18)!important;color:#fff!important;border-color:rgba(255,255,255,.45)!important;box-shadow:none!important}
-.mobile-settings-drawer .mobile-settings-section{display:block!important;background:#fff!important;color:#0f172a!important;border:1px solid #cbd5e1!important;border-radius:12px!important;box-shadow:0 1px 2px rgba(15,23,42,.08)!important}
-.mobile-settings-drawer input,.mobile-settings-drawer select{opacity:1!important;filter:none!important;color:#0f172a!important;background:#fff!important;border:1px solid #94a3b8!important;box-shadow:none!important}
-.mobile-settings-drawer label,.mobile-settings-drawer .form-label,.mobile-settings-drawer .small-hint{color:#334155!important;opacity:1!important}
+
+/* Drawer uses its own visual system and never inherits legacy card/glow effects. */
+@media (max-width: 767.98px){
+  .mobile-settings-backdrop{position:fixed;inset:0;z-index:11000;background:rgba(15,23,42,.52);opacity:0;pointer-events:none;transition:opacity .2s ease}
+  .mobile-settings-backdrop.is-open{opacity:1;pointer-events:auto}
+  .mobile-settings-drawer{position:fixed;z-index:11001;top:0;right:0;width:min(348px,92vw);height:100dvh;overflow-y:auto;transform:translateX(105%);transition:transform .22s ease;padding:0 14px 28px!important;background:#f6f8fc!important;color:var(--mw-ink)!important;box-shadow:-12px 0 30px rgba(15,23,42,.22)!important;isolation:isolate!important}
+  .mobile-settings-drawer.is-open{transform:translateX(0)}
+  body.mobile-settings-open{overflow:hidden}
+  .mobile-settings-drawer,.mobile-settings-drawer *{filter:none!important;text-shadow:none!important}
+  .mobile-settings-drawer::before,.mobile-settings-drawer::after,.mobile-settings-drawer *::before,.mobile-settings-drawer *::after{display:none!important;content:none!important;animation:none!important}
+  .mobile-settings-header{position:sticky!important;top:0!important;z-index:3!important;display:flex!important;align-items:center!important;justify-content:space-between!important;margin:0 -14px 14px!important;padding:16px 14px!important;background:#172033!important;color:#fff!important}
+  .mobile-settings-header h2{margin:0!important;color:#fff!important;font-size:1rem!important;font-weight:760!important}
+  .mobile-settings-close{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:34px!important;height:34px!important;border:1px solid rgba(255,255,255,.24)!important;border-radius:9px!important;background:rgba(255,255,255,.12)!important;color:#fff!important;font-size:1rem!important}
+  .mobile-settings-drawer .top-tools{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin:0 0 14px!important;padding:0!important}
+  .mobile-settings-drawer .top-tools .tool-btn,.mobile-settings-drawer #languageToggle{position:static!important;display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;height:40px!important;margin:0!important;padding:0!important;border:1px solid #d7dce5!important;border-radius:10px!important;background:#fff!important;color:#344054!important;box-shadow:none!important}
+  .mobile-settings-section{display:block!important;margin:0 0 12px!important;padding:12px!important;border:1px solid var(--mw-line)!important;border-radius:14px!important;background:#fff!important;box-shadow:none!important}
+  .mobile-settings-drawer .settings-top-row{display:block!important;margin:0!important}
+  .mobile-settings-drawer .settings-top-row>.col-md-3,.mobile-settings-drawer .settings-top-row>.col-12{width:100%!important;max-width:none!important;margin:0 0 12px!important;padding:0!important}
+  .mobile-settings-drawer .algo-saw-grid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:6px 8px!important;align-items:center!important}
+  .mobile-settings-drawer .algo-label{grid-column:1;grid-row:1;margin:0!important}.mobile-settings-drawer .saw-label{grid-column:2;grid-row:1;margin:0!important}
+  .mobile-settings-drawer .algo-control{grid-column:1;grid-row:2;width:100%!important;min-width:0!important}.mobile-settings-drawer .saw-control{grid-column:2;grid-row:2;width:100%!important;min-width:0!important}
+  .mobile-settings-drawer .saw-control input{width:calc(100% - 30px)!important;min-width:0!important}.mobile-settings-drawer .algo-hint,.mobile-settings-drawer .saw-hint-wrap{grid-column:1/-1;grid-row:3;margin:0!important}
+  .mobile-settings-drawer .scheme-settings-row{margin:0!important}.mobile-settings-drawer .scheme-settings-row>.col-md-12{padding:0!important}
+  .mobile-settings-drawer .scheme-actions-row{display:block!important;width:100%!important}.mobile-settings-drawer .scheme-left{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-bottom:10px!important}
+  .mobile-settings-drawer .scheme-left button{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;height:40px!important;min-width:0!important;margin:0!important;padding:0 6px!important;border:1px solid #d7dce5!important;border-radius:10px!important;background:#fff!important;color:#344054!important;box-shadow:none!important;font-size:.75rem!important;white-space:nowrap!important}
+  .mobile-settings-drawer .scheme-right{display:grid!important;grid-template-columns:minmax(0,1fr) 72px!important;gap:8px!important;align-items:center!important;width:100%!important}.mobile-settings-drawer .auto-replenish-title{line-height:1.15!important;color:#344054!important}.mobile-settings-drawer #autoReplenishPickerBtn{width:72px!important;min-width:72px!important;height:40px!important;margin:0!important;border:0!important;border-radius:10px!important;background:var(--mw-blue)!important;color:#fff!important;box-shadow:none!important}
+  .mobile-settings-drawer .form-label,.mobile-settings-drawer label,.mobile-settings-drawer .small-hint{color:#667085!important}.mobile-settings-drawer input,.mobile-settings-drawer select{background:#f9fafc!important;border-color:#d7dce5!important;color:#172033!important;box-shadow:none!important}
+  /* Restore actual Font Awesome glyphs; only legacy decorative effects stay suppressed. */
+  .mobile-settings-drawer i.fa-solid::before,.mobile-settings-drawer i.fa-regular::before,.mobile-settings-drawer i.fas::before,.mobile-settings-drawer i.far::before{display:inline-block!important;animation:none!important}
+  .mobile-settings-drawer #unitPickerBtn{display:flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;height:42px!important;margin:0!important;padding:0 10px!important;border:1px solid #d7dce5!important;border-radius:10px!important;background:var(--mw-soft)!important;color:var(--mw-blue-deep)!important;box-shadow:none!important;white-space:nowrap!important;font-size:.9rem!important;font-weight:750!important}
+}
 </style>
 <script id="mobile-first-clean-title-fix">(function(){function fix(){var t=document.getElementById('titleText');if(t){t.textContent=t.innerHTML.replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').replace(/CuttingOptimization/g,'Cutting Optimization').trim();}}fix();setTimeout(fix,80);})();</script>
-<style id="mobile-first-global-cleanup">#settings-card{display:none!important}</style>
 </body>
 </html>
