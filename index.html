@@ -14035,5 +14035,32 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   body #stage1HeaderToolsButton i{color:#fff!important;opacity:1!important;}
 }
 </style>
+
+<style id="stage1-arrow-shadow-match">
+@media (max-width: 767.98px){
+  /* Exact compact mobile arrow projection, shared by both independent header floats. */
+  body #languageToggle.language-toggle,
+  body #stage1HeaderToolsButton{
+    box-shadow:
+      inset -1px 1px 3px rgba(255,255,255,.75),
+      inset 2px -3px 5px rgba(0,0,0,.10),
+      inset 0 0 0 1px rgba(255,255,255,.35),
+      -4px 6px 0 1px rgba(0,0,0,.20)!important;
+  }
+}
+</style>
+
+<style id="stage1-exact-computed-arrow-shadow">
+@media (max-width: 767.98px){
+  /* Exact computed box-shadow copied from #btnToTop/#btnToBottom. */
+  body #languageToggle.language-toggle,
+  body #stage1HeaderToolsButton{
+    box-shadow:
+      inset 1px 1px 0 rgba(255,255,255,.55),
+      inset -1px -2px 0 rgba(0,0,0,.12),
+      -3px 4px 0 rgba(0,0,0,.22)!important;
+  }
+}
+</style>
 </body>
 </html>
