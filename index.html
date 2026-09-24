@@ -14124,5 +14124,23 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="scheme-buttons-vertical-consistent-fix">
+@media (max-width: 767.98px){
+  /* Both scheme buttons use the same Chinese mobile pattern: icon above label. */
+  body #settings-card .scheme-actions-row .scheme-left{
+    display:flex!important;align-items:stretch!important;gap:8px!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    flex:1 1 0!important;width:auto!important;height:64px!important;min-height:64px!important;
+    display:inline-flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:4px!important;padding:5px 8px!important;
+    white-space:nowrap!important;line-height:1.05!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn i{
+    display:block!important;margin:0!important;line-height:1!important;flex:0 0 auto!important;
+  }
+}
+</style>
 </body>
 </html>
