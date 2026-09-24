@@ -14090,5 +14090,39 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="settings-spacing-replenish-alignment-fix">
+@media (max-width: 767.98px){
+  /* Give the settings form breathing room now that the utility row is collapsed. */
+  body #settings-card .settings-top-row{row-gap:22px!important;margin-bottom:18px!important;}
+  body #settings-card > .card-body > .row.g-3.mt-0{margin-top:18px!important;}
+  body #settings-card .scheme-actions-row{
+    display:flex!important;align-items:flex-start!important;gap:8px!important;
+    padding-right:0!important;width:100%!important;
+  }
+  /* Save and load share the available space; replenish is the third equal-height control. */
+  body #settings-card .scheme-actions-row .scheme-left{
+    display:flex!important;flex:1 1 auto!important;align-items:stretch!important;
+    gap:8px!important;min-width:0!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    flex:1 1 0!important;width:auto!important;height:48px!important;min-height:48px!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-right{
+    position:relative!important;display:flex!important;flex:0 0 58px!important;
+    width:58px!important;height:48px!important;min-height:48px!important;
+    align-self:flex-start!important;align-items:stretch!important;
+  }
+  body #settings-card #autoReplenishBtnTitle{
+    position:absolute!important;left:50%!important;bottom:calc(100% + 2px)!important;
+    transform:translateX(-50%)!important;width:78px!important;margin:0!important;
+    line-height:1.05!important;text-align:center!important;white-space:normal!important;
+  }
+  body #settings-card #autoReplenishPickerBtn{
+    width:58px!important;height:48px!important;min-height:48px!important;
+    align-self:stretch!important;margin:0!important;
+  }
+}
+</style>
 </body>
 </html>
