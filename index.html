@@ -2879,7 +2879,7 @@ html.no-transitions, html.no-transitions * {
 #contentRoot{ filter: var(--display-filter); transition: filter 180ms ease; }
 
 /* 顯示調校彈窗（modal） */
-.tune-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 5000; display: none; align-items: center; justify-content: center; padding: 18px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.tune-backdrop { position: fixed; inset: 0; background: transparent; z-index: 5000; display: none; align-items: center; justify-content: center; padding: 18px; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .tune-modal { width: min(520px, 92vw); background: rgba(25,25,25,0.92); border: 1px solid rgba(255,255,255,0.18); border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,0.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); overflow: hidden; color: #f2f5f9; }
 
 /* 光明版（sepia-mode）：顯示調校視窗改為淺米黃色底 */
@@ -13596,12 +13596,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // 1) Bootstrap modal
       if(document.querySelector('.modal.show')) return true;
 
-      // 2) 顯示調校（自製）
-      var tune = document.getElementById('displayTuneModal');
-      if(tune){
-        var disp = (tune.style && tune.style.display) ? tune.style.display : '';
-        if(disp && disp !== 'none' && tune.getAttribute('aria-hidden') !== 'true') return true;
-      }
+      // 2) 顯示調校（自製）：自身已有獨立視窗層，唔可以再 blur 整個頁面。
+      // 否則擷取畫面時，浮動視窗底下的內容會變成蒙、暗或偏色。
 
       // 3) 案例教學 overlay（自製）
       // 注意：案例彈窗自己用 backdrop-filter 做模糊，唔應該再 blur 全頁（否則彈窗內容會一齊變模糊）
