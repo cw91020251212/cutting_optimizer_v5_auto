@@ -14335,5 +14335,19 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="scheme-diagonal-shine-fix">
+@media (max-width: 767.98px){
+  /* Remove the moving diagonal streak; keep the button fill, highlight, and shadow. */
+  body #settings-card #saveSchemeButton::before,
+  body #settings-card #loadSchemeButton::before,
+  body #settings-card #autoReplenishPickerBtn::before,
+  body #settings-card #saveSchemeButton::after,
+  body #settings-card #loadSchemeButton::after,
+  body #settings-card #autoReplenishPickerBtn::after{
+    content:none!important;display:none!important;animation:none!important;
+  }
+}
+</style>
 </body>
 </html>
