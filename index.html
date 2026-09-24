@@ -13908,7 +13908,7 @@ window.__agScrollTo = window.__agScrollTo || function(el){
     button.setAttribute('aria-label','開啟工具');
     button.setAttribute('aria-expanded','false');
     button.innerHTML = '<i class="fa-solid fa-gear" aria-hidden="true"></i>';
-    title.appendChild(button);
+    document.body.appendChild(button);
 
     const backdrop = document.createElement('div');
     backdrop.id = 'stage1ToolsBackdrop';
@@ -13992,6 +13992,47 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   body #languageToggle.language-toggle{
     top:calc(6px + env(safe-area-inset-top,0px))!important;
   }
+}
+</style>
+
+<style id="stage1-side-by-side-fix">
+@media (max-width: 767.98px){
+  /* Both controls are independent viewport floats: same row, no title/layout dependency. */
+  body #languageToggle.language-toggle,
+  body #contentRoot #pageTitle #stage1HeaderToolsButton{
+    position:fixed!important;
+    top:calc(10px + env(safe-area-inset-top,0px))!important;
+    width:32px!important;height:32px!important;
+    margin:0!important;padding:0!important;
+    bottom:auto!important;
+    transform:none!important;
+    border-radius:50%!important;
+    box-shadow:0 2px 4px rgba(0,0,0,.28)!important;
+    z-index:10002!important;
+  }
+  body #languageToggle.language-toggle{right:10px!important;}
+  body #contentRoot #pageTitle #stage1HeaderToolsButton{
+    right:48px!important;left:auto!important;
+    background:#24354d!important;color:#fff!important;
+    border:1px solid rgba(255,255,255,.78)!important;
+    opacity:1!important;
+  }
+  body #contentRoot #pageTitle #stage1HeaderToolsButton i{color:#fff!important;opacity:1!important;}
+}
+</style>
+
+<style id="stage1-gear-body-level-cascade">
+@media (max-width: 767.98px){
+  body #stage1HeaderToolsButton{
+    position:fixed!important;left:auto!important;right:48px!important;
+    top:calc(10px + env(safe-area-inset-top,0px))!important;bottom:auto!important;
+    width:32px!important;height:32px!important;margin:0!important;padding:0!important;
+    transform:none!important;border-radius:50%!important;
+    background:#24354d!important;color:#fff!important;opacity:1!important;
+    border:1px solid rgba(255,255,255,.78)!important;
+    box-shadow:0 2px 4px rgba(0,0,0,.28)!important;z-index:10002!important;
+  }
+  body #stage1HeaderToolsButton i{color:#fff!important;opacity:1!important;}
 }
 </style>
 </body>
