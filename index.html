@@ -14229,5 +14229,47 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="shared-three-column-grid-fix">
+@media (max-width: 767.98px){
+  /* Upper scheme row and lower cutting/material rows share one geometry:
+     two equal wide controls plus the same narrow unit/replenish control. */
+  body #settings-card .scheme-actions-row{
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 48px!important;
+    gap:8px!important;align-items:stretch!important;width:100%!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left{display:contents!important;}
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    width:auto!important;min-width:0!important;height:48px!important;min-height:48px!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-right{
+    grid-column:3!important;position:relative!important;display:flex!important;
+    width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;
+    align-self:stretch!important;align-items:stretch!important;
+  }
+  body #settings-card #autoReplenishPickerBtn{
+    width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;
+    margin:0!important;align-self:stretch!important;
+  }
+  body #settings-card #autoReplenishBtnTitle{
+    width:68px!important;left:50%!important;right:auto!important;
+    transform:translateX(-50%)!important;bottom:calc(100% + 2px)!important;
+  }
+  body #cuttingItems .controls-row,
+  body #materialItems .controls-row{
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 48px!important;
+    gap:8px!important;align-items:stretch!important;width:100%!important;
+  }
+  body #cuttingItems .controls-row .ag-action-btn,
+  body #materialItems .controls-row .ag-action-btn{
+    width:auto!important;min-width:0!important;height:48px!important;min-height:48px!important;
+  }
+  body #cuttingItems .controls-row #globalCutUnitBtn,
+  body #materialItems .controls-row #globalMaterialUnitBtn{
+    width:48px!important;min-width:48px!important;height:48px!important;min-height:48px!important;
+    margin:0!important;align-self:stretch!important;
+  }
+}
+</style>
 </body>
 </html>
