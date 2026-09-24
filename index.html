@@ -5835,6 +5835,18 @@ button.btn-sm{
             document.title = (lang === 'zh') ? '鋁材切割排版' : 'Aluminum Cutting Optimization';
             document.body.classList.toggle("lang-en", lang === "en");
             document.body.classList.toggle("lang-zh", lang === "zh");
+            // Mobile Chinese title uses the freed decorative-icon space; English keeps its existing size.
+            const titleTextEl = document.getElementById("titleText");
+            if (titleTextEl) {
+                const largeChineseTitle = lang === 'zh' && window.matchMedia('(max-width: 767.98px)').matches;
+                if (largeChineseTitle) {
+                    titleTextEl.style.setProperty('font-size', '3rem', 'important');
+                    titleTextEl.style.setProperty('line-height', '1.05', 'important');
+                } else {
+                    titleTextEl.style.removeProperty('font-size');
+                    titleTextEl.style.removeProperty('line-height');
+                }
+            }
             // Case / Examples button + modal
             if (window.updateCaseHelpLanguage) window.updateCaseHelpLanguage(lang);
 
@@ -14346,5 +14358,6 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
 </body>
 </html>
