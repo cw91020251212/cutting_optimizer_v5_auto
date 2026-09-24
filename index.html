@@ -14062,5 +14062,13 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="stage1-vertical-float-correction">
+@media (max-width: 767.98px){
+  /* Independent vertical floats: language above, gear below. */
+  body #languageToggle.language-toggle{right:10px!important;top:calc(10px + env(safe-area-inset-top,0px))!important;}
+  body #stage1HeaderToolsButton{right:10px!important;top:calc(48px + env(safe-area-inset-top,0px))!important;left:auto!important;}
+}
+</style>
 </body>
 </html>
