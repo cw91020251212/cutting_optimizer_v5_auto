@@ -14271,5 +14271,69 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="settings-large-text-flex-fix">
+@media (max-width: 767.98px){
+  /* Large-text mode: let the row height grow and keep icon+label in-flow. */
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    height:auto!important;min-height:48px!important;overflow:visible!important;
+    padding:6px 8px 6px 34px!important;line-height:1.15!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon{
+    position:absolute!important;top:50%!important;transform:translateY(-50%)!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-label{
+    line-height:1.15!important;white-space:normal!important;overflow-wrap:anywhere!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-right,
+  body #settings-card #autoReplenishPickerBtn{
+    height:auto!important;min-height:48px!important;overflow:visible!important;
+  }
+  body #settings-card #autoReplenishPickerBtn{white-space:normal!important;line-height:1.1!important;}
+}
+</style>
+
+
+
+<style id="settings-same-internal-layout-fix">
+@media (max-width: 767.98px){
+  /* Same internal contract as lower controls: normal flex flow, icon then label. */
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    position:static!important;display:inline-flex!important;flex-direction:row!important;
+    align-items:center!important;justify-content:center!important;gap:6px!important;
+    height:auto!important;min-height:48px!important;padding:6px 8px!important;
+    text-align:center!important;white-space:normal!important;line-height:1.15!important;
+    overflow:visible!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon{
+    position:static!important;display:inline-flex!important;transform:none!important;
+    width:auto!important;height:auto!important;line-height:1!important;flex:0 0 auto!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon i{
+    display:inline-block!important;margin:0!important;line-height:1!important;flex:0 0 auto!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-label{
+    position:static!important;display:inline!important;line-height:1.15!important;
+    white-space:normal!important;overflow-wrap:anywhere!important;
+  }
+}
+</style>
+
+<style id="settings-label-wrap-final-fix">
+@media (max-width: 767.98px){
+  body #settings-card .scheme-actions-row{
+    grid-auto-rows:max-content!important;align-items:stretch!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    flex-wrap:nowrap!important;align-items:center!important;height:auto!important;
+    min-height:48px!important;overflow:visible!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-label{
+    display:block!important;min-width:0!important;max-width:100%!important;
+    white-space:normal!important;overflow-wrap:anywhere!important;
+    word-break:break-word!important;line-height:1.1!important;text-align:left!important;
+  }
+}
+</style>
 </body>
 </html>
