@@ -3767,10 +3767,10 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="d-flex align-items-center gap-2 scheme-actions-row" style="overflow: visible; width:100%;">
 <div class="scheme-left">
 <button class="btn btn-sm save-scheme-btn ag-action-btn" id="saveSchemeButton" onclick="saveScheme()">
-<i class="fas fa-save me-1"></i>儲存方案
+<span class="action-icon" aria-hidden="true"><i class="fas fa-save"></i></span><span class="action-label">儲存方案</span>
     </button>
 <button class="btn btn-sm load-scheme-btn ag-action-btn" id="loadSchemeButton" onclick="openSchemeHub()">
-<i class="fas fa-folder-open me-1"></i>方案
+<span class="action-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span><span class="action-label">方案</span>
     </button>
 </div>
 <!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
@@ -5712,12 +5712,12 @@ button.btn-sm{
                 en: "Scheme Management:"
             },
             saveSchemeButton: {
-                zh: '<i class="fas fa-save me-1"></i>儲存方案',
-                en: '<i class="fas fa-save me-1"></i>Save Scheme'
+                zh: '<span class="action-icon" aria-hidden="true"><i class="fas fa-save"></i></span><span class="action-label">儲存方案</span>',
+                en: '<span class="action-icon" aria-hidden="true"><i class="fas fa-save"></i></span><span class="action-label">Save Scheme</span>'
             },
             loadSchemeButton: {
-                zh: '<i class="fas fa-folder-open me-1"></i>載入方案',
-                en: '<i class="fas fa-folder-open me-1"></i>Load Scheme'
+                zh: '<span class="action-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span><span class="action-label">載入方案</span>',
+                en: '<span class="action-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span><span class="action-label">Load Scheme</span>'
             },
             cuttingItemsTitle: {
                 zh: "切割項目",
@@ -14189,6 +14189,20 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   body #addMaterialButton i,
   body #clearMaterialButton i{
     display:inline-block!important;margin:0!important;line-height:1!important;flex:0 0 auto!important;
+  }
+}
+</style>
+
+<style id="translation-safe-scheme-buttons">
+@media (max-width: 767.98px){
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    flex-direction:row!important;align-items:center!important;justify-content:center!important;
+    gap:6px!important;white-space:nowrap!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon,
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-label{
+    display:inline-flex!important;align-items:center!important;line-height:1!important;
+    flex:0 0 auto!important;
   }
 }
 </style>
