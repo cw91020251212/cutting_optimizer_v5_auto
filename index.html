@@ -14170,5 +14170,27 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="action-buttons-horizontal-preferred-fix">
+@media (max-width: 767.98px){
+  /* Prefer icon+Chinese label in one row whenever the button has enough width. */
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn,
+  body #addCuttingButton,
+  body #clearCuttingButton,
+  body #addMaterialButton,
+  body #clearMaterialButton{
+    display:inline-flex!important;flex-direction:row!important;align-items:center!important;
+    justify-content:center!important;gap:6px!important;height:48px!important;min-height:48px!important;
+    padding:0 8px!important;white-space:nowrap!important;line-height:1!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn i,
+  body #addCuttingButton i,
+  body #clearCuttingButton i,
+  body #addMaterialButton i,
+  body #clearMaterialButton i{
+    display:inline-block!important;margin:0!important;line-height:1!important;flex:0 0 auto!important;
+  }
+}
+</style>
 </body>
 </html>
