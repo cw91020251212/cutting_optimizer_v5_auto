@@ -14206,5 +14206,28 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+
+<style id="scheme-buttons-absolute-layout-fix">
+@media (max-width: 767.98px){
+  /* Lock both icon+label pairs to the same horizontal coordinates even if a
+     translation layer inserts extra nodes around the label text. */
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn{
+    position:relative!important;display:block!important;flex-direction:initial!important;
+    padding:0 8px 0 34px!important;text-align:left!important;white-space:nowrap!important;
+    height:48px!important;min-height:48px!important;line-height:1!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon{
+    position:absolute!important;left:12px!important;top:50%!important;transform:translateY(-50%)!important;
+    display:block!important;width:18px!important;height:18px!important;line-height:18px!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon i{
+    display:block!important;margin:0!important;line-height:18px!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-label{
+    position:static!important;display:inline!important;line-height:48px!important;
+    white-space:nowrap!important;
+  }
+}
+</style>
 </body>
 </html>
