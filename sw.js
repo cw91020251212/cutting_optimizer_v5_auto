@@ -1,9 +1,11 @@
-/* Cutting Optimizer — service worker
- * 目的：滿足 PWA 安裝條件，順便離線用得。
- * 策略：network-first + cache fallback (same-origin only)
+/* Cutting Optimizer service worker
+ * Internal reliability only: network-first HTML/assets with a versioned offline cache.
+ * The version is intentionally changed whenever the application bundle changes so
+ * installed PWA clients do not keep an old index.html after a release.
  */
-const CACHE = 'cutting-optimizer-v1';
-const CORE = [
+const APP_VERSION = '2026-09-24-internal-1';
+const CACHE_NAME = `cutting-optimizer-${APP_VERSION}`;
+const CORE_ASSETS = [
   './',
   './index.html',
   './assets/manifest.webmanifest',
@@ -16,37 +18,57 @@ const CORE = [
   './assets/og-preview.png'
 ];
 
+function isSameOriginGet(request) {
+  return request.method === 'GET' && new URL(request.url).origin === self.location.origin;
+}
+
+async function cacheCoreAssets() {
+  const cache = await caches.open(CACHE_NAME);
+  await Promise.all(CORE_ASSETS.map(async (asset) => {
+    try {
+      await cache.add(asset);
+    } catch (_) {
+      // Optional PWA assets should never prevent installation of the app shell.
+    }
+  }));
+}
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE)
-      .then((c) => c.addAll(CORE).catch(() => {}))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(cacheCoreAssets().then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(
+        keys
+          .filter((key) => key.startsWith('cutting-optimizer-') && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  if (url.origin !== self.location.origin) return;
+  const request = event.request;
+  if (!isSameOriginGet(request)) return;
 
-  event.respondWith(
-    fetch(req)
-      .then((res) => {
-        if (res && res.status === 200 && res.type === 'basic') {
-          const copy = res.clone();
-          caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
-        }
-        return res;
-      })
-      .catch(() => caches.match(req).then((c) => c || caches.match('./index.html')))
-  );
+  event.respondWith((async () => {
+    try {
+      const response = await fetch(request);
+      if (response && response.status === 200 && response.type === 'basic') {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, response.clone());
+      }
+      return response;
+    } catch (_) {
+      const cached = await caches.match(request);
+      if (cached) return cached;
+      if (request.mode === 'navigate') {
+        const shell = await caches.match('./index.html');
+        if (shell) return shell;
+      }
+      return Response.error();
+    }
+  })());
 });
