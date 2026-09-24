@@ -3448,8 +3448,111 @@ body.mobile-settings-open{overflow:hidden}
   .length-input-group{--bs-gutter-x:.4rem}
   .controls-row .ag-action-btn{font-size:.8rem!important}
 }
+
+/* v2 repair: flat high-contrast settings drawer + compact title */
+#pageTitle{
+  height:50px!important;
+  min-height:50px!important;
+  margin-bottom:8px!important;
+  padding:6px 58px 6px 12px!important;
+  grid-template-columns:1fr!important;
+}
+#pageTitle #titleText{
+  font-size:clamp(1rem,4.8vw,1.35rem)!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#pageTitle .title-nut,#pageTitle .title-ruler{display:none!important}
+.mobile-settings-drawer,
+.mobile-settings-drawer *{
+  filter:none!important;
+  text-shadow:none!important;
+}
+.mobile-settings-drawer{
+  background:#f1f5f9!important;
+  color:#0f172a!important;
+  opacity:1!important;
+  mix-blend-mode:normal!important;
+  isolation:isolate!important;
+}
+.mobile-settings-drawer::before,
+.mobile-settings-drawer::after,
+.mobile-settings-drawer *::before,
+.mobile-settings-drawer *::after{
+  display:none!important;
+  content:none!important;
+  animation:none!important;
+}
+.mobile-settings-drawer .top-tools,
+.mobile-settings-drawer .top-tools .tool-btn,
+.mobile-settings-drawer #languageToggle,
+.mobile-settings-drawer .btn,
+.mobile-settings-drawer button{
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  animation:none!important;
+  overflow:visible!important;
+  color:#0f172a!important;
+  text-shadow:none!important;
+  background:#e2e8f0!important;
+  border:1px solid #94a3b8!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.16)!important;
+}
+.mobile-settings-drawer .mobile-settings-header,
+.mobile-settings-drawer .mobile-settings-header *{
+  color:#fff!important;
+  background:linear-gradient(135deg,#1d4ed8,#0ea5e9)!important;
+  border-color:transparent!important;
+}
+.mobile-settings-drawer .mobile-settings-header button{
+  color:#fff!important;
+  background:rgba(255,255,255,.18)!important;
+  border-color:rgba(255,255,255,.45)!important;
+  box-shadow:none!important;
+}
+.mobile-settings-drawer .mobile-settings-section{
+  background:#fff!important;
+  color:#0f172a!important;
+  opacity:1!important;
+  border:1px solid #cbd5e1!important;
+  box-shadow:0 1px 2px rgba(15,23,42,.08)!important;
+}
+.mobile-settings-drawer input,
+.mobile-settings-drawer select{
+  opacity:1!important;
+  filter:none!important;
+  color:#0f172a!important;
+  background:#fff!important;
+  border:1px solid #94a3b8!important;
+  box-shadow:none!important;
+}
+.mobile-settings-drawer .small-hint,
+.mobile-settings-drawer .form-label,
+.mobile-settings-drawer label{
+  color:#334155!important;
+  opacity:1!important;
+}
+
 </style>
 
+
+<style id="mobile-first-final-override">
+#pageTitle{height:50px!important;min-height:50px!important;margin-bottom:8px!important;padding:6px 58px 6px 12px!important;grid-template-columns:1fr!important}
+#pageTitle #titleText{font-size:clamp(1rem,4.8vw,1.35rem)!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#pageTitle .title-nut,#pageTitle .title-ruler{display:none!important}
+.mobile-settings-drawer,.mobile-settings-drawer *{filter:none!important;text-shadow:none!important}
+.mobile-settings-drawer{background:#f1f5f9!important;color:#0f172a!important;opacity:1!important;mix-blend-mode:normal!important;isolation:isolate!important}
+.mobile-settings-drawer::before,.mobile-settings-drawer::after,.mobile-settings-drawer *::before,.mobile-settings-drawer *::after{display:none!important;content:none!important;animation:none!important}
+.mobile-settings-drawer .top-tools,.mobile-settings-drawer .top-tools .tool-btn,.mobile-settings-drawer #languageToggle,.mobile-settings-drawer .btn,.mobile-settings-drawer button{opacity:1!important;filter:none!important;transform:none!important;animation:none!important;overflow:visible!important;color:#0f172a!important;text-shadow:none!important;background:#e2e8f0!important;border:1px solid #94a3b8!important;box-shadow:0 1px 2px rgba(15,23,42,.16)!important}
+.mobile-settings-drawer .mobile-settings-header,.mobile-settings-drawer .mobile-settings-header *{color:#fff!important;background:linear-gradient(135deg,#1d4ed8,#0ea5e9)!important;border-color:transparent!important}
+.mobile-settings-drawer .mobile-settings-header button{color:#fff!important;background:rgba(255,255,255,.18)!important;border-color:rgba(255,255,255,.45)!important;box-shadow:none!important}
+.mobile-settings-drawer .mobile-settings-section{background:#fff!important;color:#0f172a!important;opacity:1!important;border:1px solid #cbd5e1!important;box-shadow:0 1px 2px rgba(15,23,42,.08)!important}
+.mobile-settings-drawer input,.mobile-settings-drawer select{opacity:1!important;filter:none!important;color:#0f172a!important;background:#fff!important;border:1px solid #94a3b8!important;box-shadow:none!important}
+.mobile-settings-drawer .small-hint,.mobile-settings-drawer .form-label,.mobile-settings-drawer label{color:#334155!important;opacity:1!important}
+</style>
 </head>
 <body>
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
@@ -13961,6 +14064,7 @@ document.addEventListener('DOMContentLoaded', function() {
     gear.id='mobileSettingsToggle'; gear.type='button'; gear.setAttribute('aria-label','開啟設定'); gear.setAttribute('aria-controls','mobileSettingsDrawer'); gear.setAttribute('aria-expanded','false');
     gear.innerHTML='<i class="fa-solid fa-gear" aria-hidden="true"></i>';
     title.appendChild(gear);
+    const titleText=document.getElementById('titleText'); if(titleText) titleText.textContent=titleText.textContent.replace(/\s+/g,' ').trim();
 
     const backdrop=document.createElement('div'); backdrop.className='mobile-settings-backdrop'; backdrop.id='mobileSettingsBackdrop';
     const drawer=document.createElement('aside'); drawer.className='mobile-settings-drawer'; drawer.id='mobileSettingsDrawer'; drawer.setAttribute('aria-label','設定'); drawer.setAttribute('aria-hidden','true');
@@ -13991,5 +14095,21 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 </script>
 
+<style id="mobile-first-endbody-override">
+body h2#pageTitle{height:50px!important;min-height:50px!important;margin-bottom:8px!important;padding:6px 58px 6px 12px!important;grid-template-columns:1fr!important}
+body h2#pageTitle #titleText,body.lang-en h2#pageTitle #titleText,body.lang-zh h2#pageTitle #titleText{font-size:clamp(1rem,4.8vw,1.35rem)!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;display:block!important;width:100%!important;max-width:none!important}
+#pageTitle .title-nut,#pageTitle .title-ruler{display:none!important}
+.mobile-settings-drawer,.mobile-settings-drawer *{filter:none!important;text-shadow:none!important}
+.mobile-settings-drawer{background:#f1f5f9!important;color:#0f172a!important;opacity:1!important;mix-blend-mode:normal!important;isolation:isolate!important}
+.mobile-settings-drawer::before,.mobile-settings-drawer::after,.mobile-settings-drawer *::before,.mobile-settings-drawer *::after{display:none!important;content:none!important;animation:none!important}
+.mobile-settings-drawer .top-tools,.mobile-settings-drawer .top-tools .tool-btn,.mobile-settings-drawer #languageToggle,.mobile-settings-drawer .btn,.mobile-settings-drawer button{opacity:1!important;filter:none!important;transform:none!important;animation:none!important;overflow:visible!important;color:#0f172a!important;text-shadow:none!important;background:#e2e8f0!important;border:1px solid #94a3b8!important;box-shadow:0 1px 2px rgba(15,23,42,.16)!important}
+.mobile-settings-drawer .mobile-settings-header,.mobile-settings-drawer .mobile-settings-header *{color:#fff!important;background:linear-gradient(135deg,#1d4ed8,#0ea5e9)!important;border-color:transparent!important}
+.mobile-settings-drawer .mobile-settings-header button{color:#fff!important;background:rgba(255,255,255,.18)!important;border-color:rgba(255,255,255,.45)!important;box-shadow:none!important}
+.mobile-settings-drawer .mobile-settings-section{background:#fff!important;color:#0f172a!important;opacity:1!important;border:1px solid #cbd5e1!important;box-shadow:0 1px 2px rgba(15,23,42,.08)!important}
+.mobile-settings-drawer input,.mobile-settings-drawer select{opacity:1!important;filter:none!important;color:#0f172a!important;background:#fff!important;border:1px solid #94a3b8!important;box-shadow:none!important}
+.mobile-settings-drawer .small-hint,.mobile-settings-drawer .form-label,.mobile-settings-drawer label{color:#334155!important;opacity:1!important}
+#mobileSettingsToggle{background:#e2e8f0!important;color:#0f172a!important;border:1px solid #94a3b8!important;box-shadow:0 1px 2px rgba(15,23,42,.16)!important;text-shadow:none!important;filter:none!important}
+</style>
+<script id="mobile-first-endbody-title-fix">(function(){function fix(){var t=document.getElementById('titleText');if(t){t.textContent=t.innerHTML.replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').replace(/CuttingOptimization/g,'Cutting Optimization').trim();}}fix();setTimeout(fix,50);})();</script>
 </body>
 </html>
