@@ -14355,5 +14355,40 @@ window.__agScrollTo = window.__agScrollTo || function(el){
 }
 </style>
 
+<style id="scalable-font-button-layout-v1">
+/* Font-size control: action controls scale with the root text size instead of staying at 48px. */
+@media (max-width: 767.98px){
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn,
+  body #cuttingItems .controls-row .ag-action-btn,
+  body #materialItems .controls-row .ag-action-btn{
+    height:3rem!important;
+    min-height:3rem!important;
+    padding:.375rem .5rem!important;
+    gap:.375rem!important;
+    line-height:1.1!important;
+    font-size:1rem!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-right,
+  body #settings-card #autoReplenishPickerBtn,
+  body #cuttingItems .controls-row #globalCutUnitBtn,
+  body #materialItems .controls-row #globalMaterialUnitBtn{
+    width:3rem!important;
+    min-width:3rem!important;
+    height:3rem!important;
+    min-height:3rem!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon,
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn .action-icon i,
+  body #cuttingItems .controls-row .ag-action-btn i,
+  body #materialItems .controls-row .ag-action-btn i{
+    line-height:1!important;
+    font-size:1em!important;
+  }
+  body #settings-card #autoReplenishBtnTitle{
+    width:4.25rem!important;
+    font-size:.9rem!important;
+  }
+}
+</style>
 </body>
 </html>
