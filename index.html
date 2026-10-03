@@ -3399,11 +3399,10 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   })();
 </script>
 </head>
-<body autocomplete="off">
+<body>
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
 <button aria-label="Language" class="language-toggle fixed-btn" id="languageToggle" type="button">EN</button>
-<form id="appInputForm" autocomplete="off" novalidate onsubmit="return false;">
-<div id="contentRoot" autocomplete="off">
+<div id="contentRoot">
 <div class="container-fluid">
 <h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
 <span aria-hidden="true" class="title-nut" id="titleNut"></span>
@@ -3831,16 +3830,16 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label cutLengthLabel">長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="text"/>
 <label class="small-hint cutLengthHint">米</label>
 <div class="error-message cutLengthError"></div>
 </div>
 <div class="col">
-<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="text"/>
 <label class="small-hint cutLengthHint">厘米</label>
 </div>
 <div class="col">
-<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="text"/>
 <label class="small-hint cutLengthHint">毫米</label>
 </div>
 </div>
@@ -3848,7 +3847,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="row g-2 mt-2 cut-qtypurpose-row">
 <div class="col-6">
 <label class="form-label cutQtyLabel">數量:</label>
-<input autocomplete="off" autocorrect="off" class="cutQty form-control form-control-sm" inputmode="numeric" min="0" placeholder="0" spellcheck="false" type="number"/>
+<input autocomplete="off" autocorrect="off" class="cutQty form-control form-control-sm" inputmode="numeric" min="0" placeholder="0" spellcheck="false" type="text"/>
 <div class="small-hint cutQtyHint">例如：5</div>
 </div>
 <div class="col-6">
@@ -3912,23 +3911,23 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label materialLengthLabel">材料長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="text"/>
 <label class="small-hint materialLengthHint">米</label>
 <div class="error-message materialLengthError"></div>
 </div>
 <div class="col">
-<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="text"/>
 <label class="small-hint materialLengthHint">厘米</label>
 </div>
 <div class="col">
-<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="text"/>
 <label class="small-hint materialLengthHint">毫米</label>
 </div>
 </div>
 <div class="row g-2 mt-2 material-qtytype-row">
 <div class="col-6 material-qty-col">
 <label class="form-label materialQtyLabel">數量:</label>
-<input autocomplete="off" autocorrect="off" class="materialQty form-control form-control-sm" inputmode="numeric" min="1" spellcheck="false" type="number" value="1"/>
+<input autocomplete="off" autocorrect="off" class="materialQty form-control form-control-sm" inputmode="numeric" min="1" spellcheck="false" type="text" value="1"/>
 <div class="small-hint materialQtyHint">10</div>
 </div>
 <div class="col-6 material-type-col">
@@ -4029,7 +4028,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 </div>
 </div><!-- /contentRoot -->
-</form><!-- /appInputForm -->
 <!-- 顯示調校（由「宿舍」移植） -->
 <div aria-hidden="true" class="tune-backdrop" id="displayTuneModal" onclick="try{ if(event.target===this){window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}}catch(e){}">
 <div aria-label="顯示調校" aria-modal="true" class="tune-modal" role="dialog">
