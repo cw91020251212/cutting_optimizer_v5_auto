@@ -93,6 +93,7 @@
   let focusedEditor = null;
   let scrollTimers = [];
   let alignmentInterval = null;
+  const normalVisualHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
   let originalBodyPaddingBottom = null;
   function setKeyboardScrollSpace(active) {
     if (active) {
@@ -152,6 +153,17 @@
       }
     }, 2300));
   }
+  function stopEditorAlignment() {
+    scrollTimers.forEach(clearTimeout);
+    scrollTimers = [];
+    if (alignmentInterval) {
+      clearInterval(alignmentInterval);
+      alignmentInterval = null;
+    }
+    focusedEditor = null;
+    setKeyboardScrollSpace(false);
+    document.body.classList.remove('ag-editable-keyboard-open');
+  }
   function focusAfterPreScroll(event) {
     const editor = event.currentTarget;
     if (!editor || document.activeElement === editor || editor.__preScrollFocus) return;
@@ -183,19 +195,18 @@
       syncKeyboardChrome();
       if (!document.activeElement || !document.activeElement.classList ||
           !document.activeElement.classList.contains('ag-numeric-editor')) {
-        focusedEditor = null;
-        setKeyboardScrollSpace(false);
-        scrollTimers.forEach(clearTimeout);
-        scrollTimers = [];
-        if (alignmentInterval) {
-          clearInterval(alignmentInterval);
-          alignmentInterval = null;
-        }
+        stopEditorAlignment();
       }
     }, 80);
   });
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', function () {
+      // When the IME closes, the visual viewport returns to its normal height.
+      // Stop before the user's next swipe so no timer competes with scrolling.
+      if (focusedEditor && window.visualViewport.height >= normalVisualHeight - 40) {
+        stopEditorAlignment();
+        return;
+      }
       if (focusedEditor) scheduleEditorAlignment(focusedEditor);
     }, { passive: true });
   }
