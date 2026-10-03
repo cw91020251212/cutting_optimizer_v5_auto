@@ -89,10 +89,66 @@
       document.activeElement.classList.contains('ag-numeric-editor');
     document.body.classList.toggle('ag-editable-keyboard-open', !!focused);
   }
+
+  let focusedEditor = null;
+  let scrollTimers = [];
+  let originalBodyPaddingBottom = null;
+  function setKeyboardScrollSpace(active) {
+    if (active) {
+      if (originalBodyPaddingBottom === null) {
+        originalBodyPaddingBottom = document.body.style.paddingBottom;
+      }
+      const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.body.style.setProperty('padding-bottom', `${Math.max(480, Math.round(viewportHeight * 0.9))}px`, 'important');
+    } else if (originalBodyPaddingBottom !== null) {
+      if (originalBodyPaddingBottom) {
+        document.body.style.setProperty('padding-bottom', originalBodyPaddingBottom);
+      } else {
+        document.body.style.removeProperty('padding-bottom');
+      }
+      originalBodyPaddingBottom = null;
+    }
+  }
+  function alignFocusedEditor() {
+    if (!focusedEditor || !document.body.contains(focusedEditor) ||
+        document.activeElement !== focusedEditor) return;
+    const rect = focusedEditor.getBoundingClientRect();
+    const viewportTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
+    const targetY = Math.max(0, (window.pageYOffset || 0) + rect.top - viewportTop - 8);
+    window.scrollTo({ top: targetY, behavior: 'auto' });
+  }
+  function scheduleEditorAlignment(editor) {
+    focusedEditor = editor;
+    setKeyboardScrollSpace(true);
+    scrollTimers.forEach(clearTimeout);
+    scrollTimers = [0, 100, 260, 520, 850].map(function (delay) {
+      return setTimeout(alignFocusedEditor, delay);
+    });
+  }
   document.addEventListener('focusin', syncKeyboardChrome);
-  document.addEventListener('focusout', function () {
-    setTimeout(syncKeyboardChrome, 80);
+  document.addEventListener('focusin', function (event) {
+    if (event.target && event.target.classList &&
+        event.target.classList.contains('ag-numeric-editor')) {
+      scheduleEditorAlignment(event.target);
+    }
   });
+  document.addEventListener('focusout', function () {
+    setTimeout(function () {
+      syncKeyboardChrome();
+      if (!document.activeElement || !document.activeElement.classList ||
+          !document.activeElement.classList.contains('ag-numeric-editor')) {
+        focusedEditor = null;
+        setKeyboardScrollSpace(false);
+        scrollTimers.forEach(clearTimeout);
+        scrollTimers = [];
+      }
+    }, 80);
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', function () {
+      if (focusedEditor) scheduleEditorAlignment(focusedEditor);
+    }, { passive: true });
+  }
   syncKeyboardChrome();
 
   window.__editableNumericProbe = { active: true, fields: sources.length };
