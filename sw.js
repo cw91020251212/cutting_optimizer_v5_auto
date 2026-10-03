@@ -3,7 +3,7 @@
  * The version is intentionally changed whenever the application bundle changes so
  * installed PWA clients do not keep an old index.html after a release.
  */
-const APP_VERSION = '2026-10-03-native-number-input-2';
+const APP_VERSION = '2026-10-03-native-number-input-3';
 const CACHE_NAME = `cutting-optimizer-${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
@@ -55,19 +55,25 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith((async () => {
     try {
-      const response = await fetch(request);
+      // Navigations must bypass the browser HTTP cache. Otherwise an older
+      // HTML shell can survive even after the app bundle has been updated.
+      const networkRequest = request.mode === 'navigate'
+        ? new Request(request, { cache: 'no-store' })
+        : request;
+      const response = await fetch(networkRequest);
       if (response && response.status === 200 && response.type === 'basic') {
-        const cache = await caches.open(CACHE_NAME);
-        await cache.put(request, response.clone());
+        // Do not cache HTML navigations; stale app shells are worse than a
+        // temporary offline error and can restore removed controls.
+        if (request.mode !== 'navigate') {
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(request, response.clone());
+        }
       }
       return response;
     } catch (_) {
+      if (request.mode === 'navigate') return Response.error();
       const cached = await caches.match(request);
       if (cached) return cached;
-      if (request.mode === 'navigate') {
-        const shell = await caches.match('./index.html');
-        if (shell) return shell;
-      }
       return Response.error();
     }
   })());
