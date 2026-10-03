@@ -3804,16 +3804,16 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label cutLengthLabel">長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number">
+<input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" autocomplete="off" placeholder="0" type="text">
 <label class="small-hint cutLengthHint">米</label>
 <div class="error-message cutLengthError"></div>
 </div>
 <div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number">
+<input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" autocomplete="off" placeholder="0" type="text">
 <label class="small-hint cutLengthHint">厘米</label>
 </div>
 <div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number">
+<input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" autocomplete="off" placeholder="0" type="text">
 <label class="small-hint cutLengthHint">毫米</label>
 </div>
 </div>
@@ -3821,7 +3821,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="row g-2 mt-2 cut-qtypurpose-row">
 <div class="col-6">
 <label class="form-label cutQtyLabel">數量:</label>
-<input class="cutQty form-control form-control-sm" inputmode="numeric" min="0" placeholder="0" type="number">
+<input class="cutQty form-control form-control-sm" inputmode="numeric" autocomplete="off" placeholder="0" type="text">
 <div class="small-hint cutQtyHint">例如：5</div>
 </div>
 <div class="col-6">
@@ -3885,23 +3885,23 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label materialLengthLabel">材料長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number">
+<input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" autocomplete="off" placeholder="0" type="text">
 <label class="small-hint materialLengthHint">米</label>
 <div class="error-message materialLengthError"></div>
 </div>
 <div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number">
+<input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" autocomplete="off" placeholder="0" type="text">
 <label class="small-hint materialLengthHint">厘米</label>
 </div>
 <div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number">
+<input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" autocomplete="off" placeholder="0" type="text">
 <label class="small-hint materialLengthHint">毫米</label>
 </div>
 </div>
 <div class="row g-2 mt-2 material-qtytype-row">
 <div class="col-6 material-qty-col">
 <label class="form-label materialQtyLabel">數量:</label>
-<input class="materialQty form-control form-control-sm" inputmode="numeric" min="1" type="number" value="1">
+<input class="materialQty form-control form-control-sm" inputmode="numeric" autocomplete="off" type="text" value="1">
 <div class="small-hint materialQtyHint">10</div>
 </div>
 <div class="col-6 material-type-col">
@@ -6370,29 +6370,38 @@ button.btn-sm{
             const unit = unitSelect ? unitSelect.value : 'metric';
             const inputs = lengthInputGroup.querySelectorAll('.form-control');
             const lang = document.getElementById('language')?.value || 'zh';
-            let totalMM = 0, formatHint = 'standard';
+            // Keep the numeric keyboard hint without using native number inputs;
+            // validate the entire text value before converting.
+            const parts = Array.from(inputs).map(input => {
+                const raw = input.value.trim();
+                if (!raw) return 0;
+                if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(raw)) return NaN;
+                return Number(raw);
+            });
+            if (parts.some(value => !Number.isFinite(value))) {
+                return { value: 0, error: (lang === 'zh' ? '長度無效，請檢查' : 'Invalid length, please check') };
+            }
+            let totalMM = 0;
             if (unit === 'imperial') {
-                const ft = parseFloat(inputs[0].value) || 0;
-                const inch = parseFloat(inputs[1].value) || 0;
-                const eighth = parseFloat(inputs[2].value) || 0;
-                if (isNaN(ft) && isNaN(inch) && isNaN(eighth)) {
-                    return { value: 0, error: (lang === 'zh' ? '長度無效，請檢查' : 'Invalid length, please check') };
-                }
-                totalMM = ft * FT_TO_MM + inch * INCH_TO_MM + eighth * (INCH_TO_MM / 8);
+                totalMM = parts[0] * FT_TO_MM + parts[1] * INCH_TO_MM + parts[2] * (INCH_TO_MM / 8);
             } else {
-                const m = parseFloat(inputs[0].value) || 0;
-                const cm = parseFloat(inputs[1].value) || 0;
-                const mm = parseFloat(inputs[2].value) || 0;
-                if (isNaN(m) && isNaN(cm) && isNaN(mm)) {
-                    return { value: 0, error: (lang === 'zh' ? '長度無效，請檢查' : 'Invalid length, please check') };
-                }
-                totalMM = m * M_TO_MM + cm * CM_TO_MM + mm;
+                totalMM = parts[0] * M_TO_MM + parts[1] * CM_TO_MM + parts[2];
+            }
+            if (!Number.isFinite(totalMM)) {
+                return { value: 0, error: (lang === 'zh' ? '長度無效，請檢查' : 'Invalid length, please check') };
             }
             if (totalMM < 0) {
                 return { value: 0, error: (lang === 'zh' ? '長度不能為負' : 'Length cannot be negative') };
             }
             return { value: totalMM, error: '' };
         };
+
+        function parsePositiveQuantity(input) {
+            const raw = input.value.trim();
+            if (!/^\d+$/.test(raw)) return 0;
+            const quantity = Number(raw);
+            return Number.isSafeInteger(quantity) ? quantity : 0;
+        }
 
         function validateInput(inputGroup, errorElement) {
             const result = window.parseLength(inputGroup);
@@ -6615,7 +6624,7 @@ button.btn-sm{
                 return;
             }
 
-            const quantity = parseInt(template.querySelector(".cutQty").value) || 0;
+            const quantity = parsePositiveQuantity(template.querySelector(".cutQty"));
             if (quantity <= 0) {
                 alert((document.getElementById('language')?document.getElementById('language').value:'zh')==="zh"?"數量必須大於 0":"Quantity must be greater than 0.");
                 return;
@@ -6702,7 +6711,7 @@ button.btn-sm{
                 return;
             }
 
-            const quantity = parseInt(template.querySelector(".cutQty").value) || 0;
+            const quantity = parsePositiveQuantity(template.querySelector(".cutQty"));
             if (quantity <= 0) {
                 alert((document.getElementById('language')?document.getElementById('language').value:'zh')==="zh"?"數量必須大於 0":"Quantity must be greater than 0.");
                 return;
@@ -6780,7 +6789,7 @@ button.btn-sm{
                 return;
             }
 
-            const quantity = parseInt(template.querySelector(".materialQty").value) || 0;
+            const quantity = parsePositiveQuantity(template.querySelector(".materialQty"));
             if (quantity <= 0) {
                 alert((document.getElementById('language')?document.getElementById('language').value:'zh')==="zh"?"數量必須大於 0":"Quantity must be greater than 0.");
                 return;
@@ -6868,7 +6877,7 @@ button.btn-sm{
                 return;
             }
 
-            const quantity = parseInt(template.querySelector(".materialQty").value) || 0;
+            const quantity = parsePositiveQuantity(template.querySelector(".materialQty"));
             if (quantity <= 0) {
                 alert((document.getElementById('language')?document.getElementById('language').value:'zh')==="zh"?"數量必須大於 0":"Quantity must be greater than 0.");
                 return;
@@ -14504,51 +14513,5 @@ window.__agScrollTo = window.__agScrollTo || function(el){
 }
 </style>
 
-<script id="numeric-keyboard-probe">
-/* Opt-in Android Chrome experiment: focus a text field first, then switch it
-   back to a native number field. Browsers own the keyboard/autofill toolbar;
-   changing the input type is not guaranteed to change either on every device.
-   Remove ?keyboard_probe=1 to use the unchanged native numeric controls. */
-(function(){
-  if (new URLSearchParams(location.search).get('keyboard_probe') !== '1') return;
-
-  var fields = document.querySelectorAll(
-    '.cutLengthPart, .materialLengthPart, .cutQty, .materialQty'
-  );
-  var originalModes = new WeakMap();
-  var timers = new WeakMap();
-
-  fields.forEach(function(field){
-    originalModes.set(field, field.getAttribute('inputmode'));
-    field.type = 'text';
-    field.inputMode = 'text';
-  });
-
-  document.addEventListener('focusin', function(event){
-    var field = event.target;
-    if (!originalModes.has(field)) return;
-    clearTimeout(timers.get(field));
-    if (field.type === 'number') return;
-    timers.set(field, setTimeout(function(){
-      if (document.activeElement !== field) return;
-      field.type = 'number';
-      field.inputMode = originalModes.get(field);
-      // Some mobile browsers drop focus when a focused input changes type.
-      if (document.activeElement !== field) field.focus({preventScroll:true});
-    }, 120));
-  });
-
-  document.addEventListener('focusout', function(event){
-    var field = event.target;
-    if (!originalModes.has(field)) return;
-    clearTimeout(timers.get(field));
-    requestAnimationFrame(function(){
-      if (document.activeElement === field) return;
-      field.type = 'text';
-      field.inputMode = 'text';
-    });
-  });
-})();
-</script>
 </body>
 </html>
