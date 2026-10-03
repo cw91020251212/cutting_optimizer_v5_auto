@@ -1,7 +1,9 @@
-/* Optional full-app keyboard test. The default app never replaces its inputs.
- * Try only with ?keyboard_mode=editable; no data is saved by this module. */
+/* Full-app keyboard fix: use contenteditable fields by default so Android
+ * Chrome does not show its autofill accessory icons. Add
+ * ?keyboard_mode=legacy to temporarily restore the native text inputs. */
 (function () {
-  if (new URLSearchParams(location.search).get('keyboard_mode') !== 'editable') return;
+  const keyboardMode = new URLSearchParams(location.search).get('keyboard_mode');
+  if (keyboardMode === 'legacy') return;
 
   const sources = document.querySelectorAll(
     '#cuttingItems .cutLengthPart, #cuttingItems .cutQty, ' +
@@ -53,7 +55,7 @@
         (isMaterial ? '材料' : '切割') + (isQuantity ? '數量' : '長度')));
 
     // Existing calculation, edit, reset and unit-conversion code reads/writes
-    // .value on the eight controls. Preserve that interface on the div.
+    // .value on these controls. Preserve that interface on the div.
     Object.defineProperty(editor, 'value', {
       configurable: true,
       get: function () { return this.textContent || ''; },
