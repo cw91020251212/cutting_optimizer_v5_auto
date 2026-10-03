@@ -14504,5 +14504,51 @@ window.__agScrollTo = window.__agScrollTo || function(el){
 }
 </style>
 
+<script id="numeric-keyboard-probe">
+/* Opt-in Android Chrome experiment: focus a text field first, then switch it
+   back to a native number field. Browsers own the keyboard/autofill toolbar;
+   changing the input type is not guaranteed to change either on every device.
+   Remove ?keyboard_probe=1 to use the unchanged native numeric controls. */
+(function(){
+  if (new URLSearchParams(location.search).get('keyboard_probe') !== '1') return;
+
+  var fields = document.querySelectorAll(
+    '.cutLengthPart, .materialLengthPart, .cutQty, .materialQty'
+  );
+  var originalModes = new WeakMap();
+  var timers = new WeakMap();
+
+  fields.forEach(function(field){
+    originalModes.set(field, field.getAttribute('inputmode'));
+    field.type = 'text';
+    field.inputMode = 'text';
+  });
+
+  document.addEventListener('focusin', function(event){
+    var field = event.target;
+    if (!originalModes.has(field)) return;
+    clearTimeout(timers.get(field));
+    if (field.type === 'number') return;
+    timers.set(field, setTimeout(function(){
+      if (document.activeElement !== field) return;
+      field.type = 'number';
+      field.inputMode = originalModes.get(field);
+      // Some mobile browsers drop focus when a focused input changes type.
+      if (document.activeElement !== field) field.focus({preventScroll:true});
+    }, 120));
+  });
+
+  document.addEventListener('focusout', function(event){
+    var field = event.target;
+    if (!originalModes.has(field)) return;
+    clearTimeout(timers.get(field));
+    requestAnimationFrame(function(){
+      if (document.activeElement === field) return;
+      field.type = 'text';
+      field.inputMode = 'text';
+    });
+  });
+})();
+</script>
 </body>
 </html>
