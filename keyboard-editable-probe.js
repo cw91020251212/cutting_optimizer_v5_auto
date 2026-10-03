@@ -177,12 +177,42 @@
     editor.focus({ preventScroll: true });
     setTimeout(function () { editor.__preScrollFocus = false; }, 0);
   }
+  let touchCandidate = null;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchMoved = false;
   document.addEventListener('touchstart', function (event) {
-    if (event.target && event.target.closest) {
-      const editor = event.target.closest('.ag-numeric-editor');
-      if (editor) focusAfterPreScroll({ currentTarget: editor, preventDefault: function () { event.preventDefault(); } });
+    const editor = event.target && event.target.closest ? event.target.closest('.ag-numeric-editor') : null;
+    if (!editor || !event.touches || !event.touches[0]) return;
+    touchCandidate = editor;
+    touchStartX = event.touches[0].clientX;
+    touchStartY = event.touches[0].clientY;
+    touchMoved = false;
+  }, { capture: true, passive: true });
+  document.addEventListener('touchmove', function (event) {
+    if (!touchCandidate || !event.touches || !event.touches[0]) return;
+    const dx = event.touches[0].clientX - touchStartX;
+    const dy = event.touches[0].clientY - touchStartY;
+    if (Math.hypot(dx, dy) > 8) {
+      touchMoved = true;
+      touchCandidate = null;
     }
+  }, { capture: true, passive: true });
+  document.addEventListener('touchend', function (event) {
+    const editor = touchCandidate;
+    touchCandidate = null;
+    if (!editor || touchMoved) return;
+    // Wait until touchend confirms this was a tap, not the start of a swipe.
+    // This removes the eager focus/keyboard reaction on a scrolling gesture.
+    focusAfterPreScroll({
+      currentTarget: editor,
+      preventDefault: function () { event.preventDefault(); }
+    });
   }, { capture: true, passive: false });
+  document.addEventListener('touchcancel', function () {
+    touchCandidate = null;
+    touchMoved = false;
+  }, { capture: true, passive: true });
   document.addEventListener('focusin', syncKeyboardChrome);
   document.addEventListener('focusin', function (event) {
     if (event.target && event.target.classList &&
