@@ -1600,6 +1600,21 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
         
 
         @media print {
+            /* Screen-only modal blur must never be rasterized into print output. */
+            html body #contentRoot,
+            html body.modal-open #contentRoot {
+                filter: none !important;
+                -webkit-filter: none !important;
+                transform: none !important;
+                opacity: 1 !important;
+            }
+            html body::before,
+            html body::after,
+            .modal-backdrop {
+                display: none !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
             body>.container-fluid>:not(.card):not(#pageTitle) {
                 display: none;
             }
@@ -3250,7 +3265,8 @@ body.sepia-mode #displayTuneModal .tune-advanced-toggle:hover{ filter: brightnes
 }
 </style>
 <style id="ag-btn-shadow-v4">
-/* </head> 前最後一段，確保覆蓋所有較後 style（包括 sepia-mode 內的 !important）。
+</style>
+</head> 前最後一段，確保覆蓋所有較後 style（包括 sepia-mode 內的 !important）。
    保留：#languageToggle（右上浮動中/英）原本投影。
 */
 :root{
@@ -3370,6 +3386,24 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 /* Performance hints (auto) */
 @media (prefers-reduced-motion: reduce){
   *{ scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+}
+</style>
+<style id="print-sharpness-override">
+@media print {
+  html body #contentRoot,
+  html body.modal-open #contentRoot {
+    filter: none !important;
+    -webkit-filter: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  html body::before,
+  html body::after,
+  html body .modal-backdrop {
+    display: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+  }
 }
 </style>
 </head>
@@ -10004,6 +10038,21 @@ function calculate() {
 
             const modal = bootstrap.Modal.getInstance(document.getElementById("printOptionsModal"));
             if (modal) modal.hide();
+            // Clear the modal helper's page blur before the first print frame.
+            try {
+                if (typeof window.agSetContentBlur === 'function') {
+                    window.agSetContentBlur(false);
+                    window.__agBlurCount = 0;
+                }
+                const root = document.getElementById('contentRoot');
+                if (root) {
+                    root.style.removeProperty('filter');
+                    root.style.removeProperty('-webkit-filter');
+                    root.style.removeProperty('transform');
+                }
+                document.body.classList.remove('modal-open');
+                document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+            } catch (e) {}
 
             window.print();
 
