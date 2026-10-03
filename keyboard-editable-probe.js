@@ -5,7 +5,8 @@
 
   const sources = document.querySelectorAll(
     '#cuttingItems .cutLengthPart, #cuttingItems .cutQty, ' +
-    '#materialItems .materialLengthPart, #materialItems .materialQty'
+    '#materialItems .materialLengthPart, #materialItems .materialQty, ' +
+    '#sawThickness, #cuttingItems .cutPurpose'
   );
   const style = document.createElement('style');
   style.id = 'editable-numeric-probe-style';
@@ -36,16 +37,20 @@
     const editor = document.createElement('div');
     editor.className = source.className + ' ag-numeric-editor';
     editor.setAttribute('contenteditable', 'plaintext-only');
-    editor.setAttribute('inputmode', source.inputMode);
+    editor.setAttribute('inputmode', source.inputMode || 'text');
     editor.setAttribute('role', 'textbox');
     editor.setAttribute('aria-multiline', 'false');
     editor.setAttribute('tabindex', '0');
+    if (source.id) editor.id = source.id;
     if (source.dataset.part) editor.dataset.part = source.dataset.part;
     if (source.placeholder) editor.dataset.placeholder = source.placeholder;
+    const isSawThickness = source.id === 'sawThickness';
+    const isPurpose = source.classList.contains('cutPurpose');
     const isMaterial = !!source.closest('#materialItems');
     const isQuantity = source.classList.contains('cutQty') || source.classList.contains('materialQty');
     editor.setAttribute('aria-label',
-      (isMaterial ? '材料' : '切割') + (isQuantity ? '數量' : '長度'));
+      isSawThickness ? '鋸片厚度' : (isPurpose ? '用途' :
+        (isMaterial ? '材料' : '切割') + (isQuantity ? '數量' : '長度')));
 
     // Existing calculation, edit, reset and unit-conversion code reads/writes
     // .value on the eight controls. Preserve that interface on the div.
