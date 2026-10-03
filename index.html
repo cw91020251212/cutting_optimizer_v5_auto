@@ -3399,10 +3399,11 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   })();
 </script>
 </head>
-<body>
+<body autocomplete="off">
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
 <button aria-label="Language" class="language-toggle fixed-btn" id="languageToggle" type="button">EN</button>
-<div id="contentRoot">
+<form id="appInputForm" autocomplete="off" novalidate onsubmit="return false;">
+<div id="contentRoot" autocomplete="off">
 <div class="container-fluid">
 <h2 class="d-flex justify-content-center align-items-center text-nowrap mb-4" id="pageTitle">
 <span aria-hidden="true" class="title-nut" id="titleNut"></span>
@@ -4028,6 +4029,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 </div>
 </div><!-- /contentRoot -->
+</form><!-- /appInputForm -->
 <!-- 顯示調校（由「宿舍」移植） -->
 <div aria-hidden="true" class="tune-backdrop" id="displayTuneModal" onclick="try{ if(event.target===this){window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}}catch(e){}">
 <div aria-label="顯示調校" aria-modal="true" class="tune-modal" role="dialog">
