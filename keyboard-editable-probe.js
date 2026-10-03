@@ -10,6 +10,13 @@
   const style = document.createElement('style');
   style.id = 'editable-numeric-probe-style';
   style.textContent = `
+    /* Android Chrome moves layout-viewport fixed controls above the IME.
+       They are useful when browsing, but obstruct the keyboard while typing. */
+    body.ag-editable-keyboard-open #ag-info-bar,
+    body.ag-editable-keyboard-open .scroll-nav {
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
     .ag-numeric-editor {
       white-space: nowrap;
       overflow-x: auto;
@@ -69,6 +76,17 @@
       selection.addRange(range);
     });
   });
+
+  function syncKeyboardChrome() {
+    const focused = document.activeElement && document.activeElement.classList &&
+      document.activeElement.classList.contains('ag-numeric-editor');
+    document.body.classList.toggle('ag-editable-keyboard-open', !!focused);
+  }
+  document.addEventListener('focusin', syncKeyboardChrome);
+  document.addEventListener('focusout', function () {
+    setTimeout(syncKeyboardChrome, 80);
+  });
+  syncKeyboardChrome();
 
   window.__editableNumericProbe = { active: true, fields: sources.length };
 })();
