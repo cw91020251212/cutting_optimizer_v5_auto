@@ -14479,5 +14479,29 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+<style id="float-controls-gap-circle-v1">
+/* Keep the two independent floats visibly separated; the gear is always circular. */
+@media (max-width: 767.98px){
+  body #languageToggle.language-toggle{
+    top:calc(10px + env(safe-area-inset-top,0px))!important;
+    right:10px!important;
+  }
+  html body button#stage1HeaderToolsButton:not(.tool-btn):not(.btn-close){
+    top:calc(58px + env(safe-area-inset-top,0px))!important;
+    right:10px!important;
+    left:auto!important;
+    width:2.5rem!important;
+    height:2.5rem!important;
+    min-width:2.5rem!important;
+    min-height:2.5rem!important;
+    aspect-ratio:1/1!important;
+    padding:0!important;
+    border-radius:50%!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+}
+</style>
 </body>
 </html>
