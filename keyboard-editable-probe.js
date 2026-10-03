@@ -110,9 +110,9 @@
       originalBodyPaddingBottom = null;
     }
   }
-  function alignFocusedEditor() {
+  function alignFocusedEditor(allowPreFocus) {
     if (!focusedEditor || !document.body.contains(focusedEditor) ||
-        document.activeElement !== focusedEditor) return;
+        (!allowPreFocus && document.activeElement !== focusedEditor)) return;
     const card = focusedEditor.closest('#settings-card, #cutting-items-card, #materials-card, #results-card');
     const anchor = (card && card.querySelector('.section-header')) || focusedEditor;
     const rect = anchor.getBoundingClientRect();
@@ -152,6 +152,25 @@
       }
     }, 2300));
   }
+  function focusAfterPreScroll(event) {
+    const editor = event.currentTarget;
+    if (!editor || document.activeElement === editor || editor.__preScrollFocus) return;
+    // The IME opens after this handler. Scroll synchronously first, then focus
+    // in the same user gesture so Android cannot freeze the page mid-scroll.
+    editor.__preScrollFocus = true;
+    event.preventDefault();
+    focusedEditor = editor;
+    setKeyboardScrollSpace(true);
+    alignFocusedEditor(true);
+    editor.focus({ preventScroll: true });
+    setTimeout(function () { editor.__preScrollFocus = false; }, 0);
+  }
+  document.addEventListener('touchstart', function (event) {
+    if (event.target && event.target.closest) {
+      const editor = event.target.closest('.ag-numeric-editor');
+      if (editor) focusAfterPreScroll({ currentTarget: editor, preventDefault: function () { event.preventDefault(); } });
+    }
+  }, { capture: true, passive: false });
   document.addEventListener('focusin', syncKeyboardChrome);
   document.addEventListener('focusin', function (event) {
     if (event.target && event.target.classList &&
