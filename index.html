@@ -3372,6 +3372,32 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   *{ scroll-behavior:auto !important; transition:none !important; animation:none !important; }
 }
 </style>
+<script id="ag-disable-browser-autofill">
+  // 這個工具只輸入切割尺寸，不需要密碼、付款或地址自動填寫。
+  // 靜態欄位已設定 autocomplete="off"；呢段亦涵蓋動態新增／編輯列。
+  (function(){
+    function disableAutofill(root){
+      if (!root || !root.querySelectorAll) return;
+      root.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="range"]), textarea').forEach(function(el){
+        el.setAttribute('autocomplete','off');
+        el.setAttribute('autocorrect','off');
+        el.setAttribute('spellcheck','false');
+      });
+    }
+    function init(){
+      disableAutofill(document);
+      new MutationObserver(function(records){
+        records.forEach(function(record){
+          record.addedNodes.forEach(function(node){
+            if (node.nodeType === 1) disableAutofill(node);
+          });
+        });
+      }).observe(document.body, {childList:true, subtree:true});
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
+    else init();
+  })();
+</script>
 </head>
 <body>
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
@@ -3750,7 +3776,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <option value="SizeGrouping">智能優化</option>
 </select>
 <div class="saw-thickness-input equalize saw-control">
-<input class="form-control" id="sawThickness" placeholder="3.2" style="width: 100px;"/>
+<input autocomplete="off" autocorrect="off" class="form-control" id="sawThickness" inputmode="decimal" placeholder="3.2" spellcheck="false" style="width: 100px;"/>
 <span class="unit-label" id="sawThicknessUnitLabel">毫米</span>
 </div>
 <div aria-hidden="true" class="small-hint ag-hint-placeholder algo-hint"> </div>
@@ -3804,16 +3830,16 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label cutLengthLabel">長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
 <label class="small-hint cutLengthHint">米</label>
 <div class="error-message cutLengthError"></div>
 </div>
 <div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
 <label class="small-hint cutLengthHint">厘米</label>
 </div>
 <div class="col">
-<input class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
 <label class="small-hint cutLengthHint">毫米</label>
 </div>
 </div>
@@ -3821,12 +3847,12 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="row g-2 mt-2 cut-qtypurpose-row">
 <div class="col-6">
 <label class="form-label cutQtyLabel">數量:</label>
-<input class="cutQty form-control form-control-sm" min="0" placeholder="0" type="number"/>
+<input autocomplete="off" autocorrect="off" class="cutQty form-control form-control-sm" inputmode="numeric" min="0" placeholder="0" spellcheck="false" type="number"/>
 <div class="small-hint cutQtyHint">例如：5</div>
 </div>
 <div class="col-6">
 <label class="form-label cutPurposeLabel">用途:</label>
-<input class="cutPurpose form-control form-control-sm" placeholder=""/>
+<input autocomplete="off" autocapitalize="none" autocorrect="off" class="cutPurpose form-control form-control-sm" name="cut-purpose" placeholder="" spellcheck="false"/>
 <div class="small-hint cutPurposeHint">例如：邊框</div>
 </div>
 </div>
@@ -3885,23 +3911,23 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label materialLengthLabel">材料長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
 <label class="small-hint materialLengthHint">米</label>
 <div class="error-message materialLengthError"></div>
 </div>
 <div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
 <label class="small-hint materialLengthHint">厘米</label>
 </div>
 <div class="col">
-<input class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" step="0.001" type="number"/>
+<input autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" type="number"/>
 <label class="small-hint materialLengthHint">毫米</label>
 </div>
 </div>
 <div class="row g-2 mt-2 material-qtytype-row">
 <div class="col-6 material-qty-col">
 <label class="form-label materialQtyLabel">數量:</label>
-<input class="materialQty form-control form-control-sm" min="1" type="number" value="1"/>
+<input autocomplete="off" autocorrect="off" class="materialQty form-control form-control-sm" inputmode="numeric" min="1" spellcheck="false" type="number" value="1"/>
 <div class="small-hint materialQtyHint">10</div>
 </div>
 <div class="col-6 material-type-col">
@@ -4134,7 +4160,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="modal-body">
 <div class="mb-3">
 <label class="form-label" for="schemeName" id="schemeNameLabel">方案名稱:</label>
-<input class="form-control" id="schemeName" placeholder="Enter scheme name"/>
+<input autocomplete="off" autocapitalize="none" autocorrect="off" class="form-control" id="schemeName" name="scheme-name" placeholder="Enter scheme name" spellcheck="false"/>
 </div>
 </div>
 <div class="modal-footer">
@@ -4310,7 +4336,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <button class="ag-ar-off-btn btn btn-outline-secondary" data-ar-label-en="OFF (Disable Auto-Replenish)" data-ar-label-zh="OFF（關閉自動補料）" data-ar-len="0" type="button">OFF（關閉自動補料）</button>
 <div class="small text-muted mt-2"><span class="ag-ar-custom-title">自訂</span></div>
 <div class="input-group">
-<input class="form-control" id="autoReplenishCustomLen" inputmode="text" placeholder="e.g., 6 ft / 68 in / 2.5 m / 1500 mm" type="text"/>
+<input autocomplete="off" autocapitalize="none" autocorrect="off" class="form-control" id="autoReplenishCustomLen" inputmode="text" name="custom-length" placeholder="e.g., 6 ft / 68 in / 2.5 m / 1500 mm" spellcheck="false" type="text"/>
 <button class="btn btn-outline-dark" id="autoReplenishCustomApply" type="button">套用</button>
 </div>
 <div class="small text-muted" id="autoReplenishCustomHint">支援：mm/cm/m、尺、寸/吋、分。唔寫單位＝mm。</div>
