@@ -116,11 +116,22 @@
     const anchor = (card && card.querySelector('.section-header')) || focusedEditor;
     const rect = anchor.getBoundingClientRect();
     const viewportTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
-    // Android's status/browser area is outside the page viewport and can cover
-    // a header placed at y=0. Keep the 1/4, 2/4, 3/4 labels below that area.
-    const topClearance = 64;
+    // Use the browser-provided safe-area size instead of guessing a fixed
+    // status-bar height. Android Chrome normally already excludes its status
+    // bar from the page viewport; on notched devices env() may add the inset.
+    const topClearance = Math.max(8, viewportTop + 8, readSafeTopInset() + 8);
     const targetY = Math.max(0, (window.pageYOffset || 0) + rect.top - viewportTop - topClearance);
     window.scrollTo({ top: targetY, behavior: 'auto' });
+  }
+  let safeTopInset = null;
+  function readSafeTopInset() {
+    if (safeTopInset !== null) return safeTopInset;
+    const probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;padding-top:env(safe-area-inset-top, 0px);pointer-events:none;visibility:hidden;';
+    document.body.appendChild(probe);
+    safeTopInset = parseFloat(getComputedStyle(probe).paddingTop) || 0;
+    probe.remove();
+    return safeTopInset;
   }
   function scheduleEditorAlignment(editor) {
     focusedEditor = editor;
