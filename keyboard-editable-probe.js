@@ -92,6 +92,7 @@
 
   let focusedEditor = null;
   let scrollTimers = [];
+  let alignmentInterval = null;
   let originalBodyPaddingBottom = null;
   function setKeyboardScrollSpace(active) {
     if (active) {
@@ -137,9 +138,19 @@
     focusedEditor = editor;
     setKeyboardScrollSpace(true);
     scrollTimers.forEach(clearTimeout);
-    scrollTimers = [0, 100, 260, 520, 850].map(function (delay) {
+    if (alignmentInterval) clearInterval(alignmentInterval);
+    // Android can temporarily lock scroll while the IME animates in. Keep
+    // correcting briefly after focus instead of stopping at the first lock.
+    alignmentInterval = setInterval(alignFocusedEditor, 90);
+    scrollTimers = [0, 120, 280, 520, 900, 1400, 1900].map(function (delay) {
       return setTimeout(alignFocusedEditor, delay);
     });
+    scrollTimers.push(setTimeout(function () {
+      if (alignmentInterval) {
+        clearInterval(alignmentInterval);
+        alignmentInterval = null;
+      }
+    }, 2300));
   }
   document.addEventListener('focusin', syncKeyboardChrome);
   document.addEventListener('focusin', function (event) {
@@ -157,6 +168,10 @@
         setKeyboardScrollSpace(false);
         scrollTimers.forEach(clearTimeout);
         scrollTimers = [];
+        if (alignmentInterval) {
+          clearInterval(alignmentInterval);
+          alignmentInterval = null;
+        }
       }
     }, 80);
   });
