@@ -14391,5 +14391,42 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+<style id="compact-section-headers-v1">
+/* Compact section bars: reclaim vertical space without changing card content. */
+@media (max-width: 767.98px){
+  body #settings-card .section-header,
+  body #cutting-items-card .section-header,
+  body #materials-card .section-header,
+  body #results-card .section-header{
+    padding:.45rem .75rem!important;
+    min-height:0!important;
+    font-size:1.15rem!important;
+    line-height:1.1!important;
+  }
+  body #settings-card .section-header .section-title,
+  body #cutting-items-card .section-header .section-title,
+  body #materials-card .section-header .section-title,
+  body #results-card .section-header .section-title{
+    gap:.45rem!important;
+    line-height:1.1!important;
+  }
+  body #settings-card .section-header .section-title > i,
+  body #cutting-items-card .section-header .section-title > i,
+  body #materials-card .section-header .section-title > i,
+  body #results-card .section-header .section-title > i{
+    margin-right:0!important;
+    font-size:1.1em!important;
+  }
+  body #settings-card .section-header .step-indicator,
+  body #cutting-items-card .section-header .step-indicator,
+  body #materials-card .section-header .step-indicator,
+  body #results-card .section-header .step-indicator{
+    padding:.2rem .65rem!important;
+    font-size:.9rem!important;
+    line-height:1.1!important;
+    border-radius:999px!important;
+  }
+}
+</style>
 </body>
 </html>
