@@ -112,9 +112,14 @@
   function alignFocusedEditor() {
     if (!focusedEditor || !document.body.contains(focusedEditor) ||
         document.activeElement !== focusedEditor) return;
-    const rect = focusedEditor.getBoundingClientRect();
+    const card = focusedEditor.closest('#settings-card, #cutting-items-card, #materials-card, #results-card');
+    const anchor = (card && card.querySelector('.section-header')) || focusedEditor;
+    const rect = anchor.getBoundingClientRect();
     const viewportTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
-    const targetY = Math.max(0, (window.pageYOffset || 0) + rect.top - viewportTop - 8);
+    // Android's status/browser area is outside the page viewport and can cover
+    // a header placed at y=0. Keep the 1/4, 2/4, 3/4 labels below that area.
+    const topClearance = 64;
+    const targetY = Math.max(0, (window.pageYOffset || 0) + rect.top - viewportTop - topClearance);
     window.scrollTo({ top: targetY, behavior: 'auto' });
   }
   function scheduleEditorAlignment(editor) {
