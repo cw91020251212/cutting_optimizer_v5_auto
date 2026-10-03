@@ -14428,5 +14428,56 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+<style id="compact-content-controls-v1">
+/* Compact controls: shorter rows; unit/language buttons size to their labels. */
+@media (max-width: 767.98px){
+  body #settings-card .scheme-actions-row .scheme-left .ag-action-btn,
+  body #cuttingItems .controls-row .ag-action-btn,
+  body #materialItems .controls-row .ag-action-btn{
+    height:2.5rem!important;
+    min-height:2.5rem!important;
+  }
+  body #settings-card .scheme-actions-row,
+  body #cuttingItems .controls-row,
+  body #materialItems .controls-row{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) max-content!important;
+    align-items:stretch!important;
+  }
+  body #settings-card .scheme-actions-row .scheme-right{
+    width:auto!important;
+    min-width:0!important;
+    height:2.5rem!important;
+    min-height:2.5rem!important;
+  }
+  body #settings-card #autoReplenishPickerBtn,
+  body #cuttingItems .controls-row #globalCutUnitBtn,
+  body #materialItems .controls-row #globalMaterialUnitBtn,
+  body #unitPickerBtn{
+    width:auto!important;
+    min-width:2.5rem!important;
+    height:2.5rem!important;
+    min-height:2.5rem!important;
+    padding:0 .45rem!important;
+    white-space:nowrap!important;
+    font-size:1.05rem!important;
+    line-height:1!important;
+  }
+  body #languageToggle.language-toggle,
+  body #stage1HeaderToolsButton{
+    width:auto!important;
+    min-width:2.5rem!important;
+    height:2.5rem!important;
+    min-height:2.5rem!important;
+    padding:0 .5rem!important;
+    font-size:1rem!important;
+    line-height:1!important;
+  }
+  body #settings-card #autoReplenishBtnTitle{
+    width:auto!important;
+    min-width:4.25rem!important;
+    white-space:normal!important;
+  }
+}
+</style>
 </body>
 </html>
