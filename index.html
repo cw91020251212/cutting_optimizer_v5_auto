@@ -14503,5 +14503,17 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
+<style id="numeric-entry-no-resize-v1">
+/* These textareas are intentionally single-line numeric fields, not resizable areas. */
+body textarea.cutLengthPart,
+body textarea.materialLengthPart,
+body textarea.cutQty,
+body textarea.materialQty{
+  resize:none!important;
+  overflow:hidden!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
+}
+</style>
 </body>
 </html>
