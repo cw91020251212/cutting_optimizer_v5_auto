@@ -3372,32 +3372,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   *{ scroll-behavior:auto !important; transition:none !important; animation:none !important; }
 }
 </style>
-<script id="ag-disable-browser-autofill">
-  // 這個工具只輸入切割尺寸，不需要密碼、付款或地址自動填寫。
-  // 靜態欄位已設定 autocomplete="off"；呢段亦涵蓋動態新增／編輯列。
-  (function(){
-    function disableAutofill(root){
-      if (!root || !root.querySelectorAll) return;
-      root.querySelectorAll('input:not([type="hidden"]):not([type="checkbox"]):not([type="range"]), textarea').forEach(function(el){
-        el.setAttribute('autocomplete','off');
-        el.setAttribute('autocorrect','off');
-        el.setAttribute('spellcheck','false');
-      });
-    }
-    function init(){
-      disableAutofill(document);
-      new MutationObserver(function(records){
-        records.forEach(function(record){
-          record.addedNodes.forEach(function(node){
-            if (node.nodeType === 1) disableAutofill(node);
-          });
-        });
-      }).observe(document.body, {childList:true, subtree:true});
-    }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
-    else init();
-  })();
-</script>
 </head>
 <body>
 <!-- 浮動：中/英 + QR（由「宿舍」移植） -->
@@ -3830,16 +3804,16 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label cutLengthLabel">長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<textarea autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" rows="1"></textarea>
+<textarea class="form-control form-control-lg cutLengthPart" data-part="ft" placeholder="0" step="0.001" rows="1"></textarea>
 <label class="small-hint cutLengthHint">米</label>
 <div class="error-message cutLengthError"></div>
 </div>
 <div class="col">
-<textarea autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" rows="1"></textarea>
+<textarea class="form-control form-control-lg cutLengthPart" data-part="in" placeholder="0" step="0.001" rows="1"></textarea>
 <label class="small-hint cutLengthHint">厘米</label>
 </div>
 <div class="col">
-<textarea autocomplete="off" autocorrect="off" class="form-control form-control-lg cutLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" rows="1"></textarea>
+<textarea class="form-control form-control-lg cutLengthPart" data-part="eighth" placeholder="0" step="0.001" rows="1"></textarea>
 <label class="small-hint cutLengthHint">毫米</label>
 </div>
 </div>
@@ -3847,7 +3821,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="row g-2 mt-2 cut-qtypurpose-row">
 <div class="col-6">
 <label class="form-label cutQtyLabel">數量:</label>
-<textarea autocomplete="off" autocorrect="off" class="cutQty form-control form-control-sm" inputmode="numeric" min="0" placeholder="0" spellcheck="false" rows="1"></textarea>
+<textarea class="cutQty form-control form-control-sm" min="0" placeholder="0" rows="1"></textarea>
 <div class="small-hint cutQtyHint">例如：5</div>
 </div>
 <div class="col-6">
@@ -3911,23 +3885,23 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <label class="form-label materialLengthLabel">材料長度:</label>
 <div class="row g-2 length-input-group d-flex align-items-end">
 <div class="col">
-<textarea autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="ft" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" rows="1"></textarea>
+<textarea class="form-control form-control-lg materialLengthPart" data-part="ft" placeholder="0" step="0.001" rows="1"></textarea>
 <label class="small-hint materialLengthHint">米</label>
 <div class="error-message materialLengthError"></div>
 </div>
 <div class="col">
-<textarea autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="in" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" rows="1"></textarea>
+<textarea class="form-control form-control-lg materialLengthPart" data-part="in" placeholder="0" step="0.001" rows="1"></textarea>
 <label class="small-hint materialLengthHint">厘米</label>
 </div>
 <div class="col">
-<textarea autocomplete="off" autocorrect="off" class="form-control form-control-lg materialLengthPart" data-part="eighth" inputmode="decimal" placeholder="0" spellcheck="false" step="0.001" rows="1"></textarea>
+<textarea class="form-control form-control-lg materialLengthPart" data-part="eighth" placeholder="0" step="0.001" rows="1"></textarea>
 <label class="small-hint materialLengthHint">毫米</label>
 </div>
 </div>
 <div class="row g-2 mt-2 material-qtytype-row">
 <div class="col-6 material-qty-col">
 <label class="form-label materialQtyLabel">數量:</label>
-<textarea autocomplete="off" autocorrect="off" class="materialQty form-control form-control-sm" inputmode="numeric" min="1" spellcheck="false" rows="1">1</textarea>
+<textarea class="materialQty form-control form-control-sm" min="1" rows="1">1</textarea>
 <div class="small-hint materialQtyHint">10</div>
 </div>
 <div class="col-6 material-type-col">
