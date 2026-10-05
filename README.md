@@ -1,6 +1,6 @@
-# CutNest — Plywood Cutting Layout
+# CutNest — GitHub project name for 木材切割排版｜夾板簡易排料
 
-CutNest is a browser-based plywood cutting layout planner. It helps plan sheet cuts, compare verified candidate layouts, and reduce material waste.
+The software display name remains **木材切割排版｜夾板簡易排料**. **CutNest** is only the English GitHub/project name used for publishing and sharing. It helps plan sheet cuts, compare verified candidate layouts, and reduce material waste.
 
 ## Highlights
 

@@ -21,7 +21,7 @@
 <meta name="twitter:description" content="Plan plywood cuts, reduce waste, and share your cutting layout easily.">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=0.5">
-<title>CutNest | Plywood Cutting Layout</title>
+<title>木材切割排版｜夾板簡易排料</title>
 <style>
 /* 基本樣式保持不變，添加3D按鈕效果和三格輸入樣式 */
 body{font-family:Arial,sans-serif;margin:0;padding:10px;background:#E0E0E0;box-sizing:border-box;font-size:18px;height:auto;overflow:visible;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative;min-height:100vh}
@@ -810,7 +810,7 @@ select,
 <body>
 <div class="container">
 <div class="header-container">
-<h1 id="mainTitle"><span id="sawIcon">🪚</span>CutNest</h1>
+<h1 id="mainTitle"><span id="sawIcon">🪚</span>木材切割排版</h1>
 
 </div>
 <div class="section" id="section-unit">
@@ -8522,7 +8522,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const c=window.calculator;
   if(!c) return;
   const dict=[
-    ['木材切割排版｜夾板簡易排料','Plywood Cutting Layout | Simple Plywood Planner'],['木材切割排版','CutNest | Plywood Cutting Layout'],['使用說明','Guide'],
+    ['木材切割排版｜夾板簡易排料','Plywood Cutting Layout | Simple Plywood Planner'],['木材切割排版','Plywood Cutting Layout'],['使用說明','Guide'],
     ['夾板底板專用','For plywood panels'],['輸出是候選草排，仍須師傅實際核對。','Results are layout candidates only. Have an experienced woodworker check them before cutting.'],
     ['單位設定','Units'],['先選擇量度單位；一般可沿用通常設定。','Choose a unit system. The default settings are fine for most jobs.'],['單位系統:','Units:'],['公制 (毫米)','Metric (mm)'],['公制(毫米)','Metric (mm)'],['英制 (呎/吋/尺/寸/分)','Imperial (ft / in / 1/8 in)'],['英制(呎/吋/尺/寸/分)','Imperial (ft / in / 1/8 in)'],['Metric(mm)','Metric (mm)'],['Imperial(inch)','Imperial (ft / in / 1/8 in)'],
     ['更多鋸片設定（通常設定已足夠）','More blade settings (defaults are usually fine)'],['鋸縫寬度（預設 3 mm）','Kerf (default: 3 mm)'],['一般沿用 3 mm 即可；亦可輸入 3.2mm 或 1/8in。','The default 3 mm is usually fine. You can also enter 3.2 mm or 1/8 in.'],['鋸片厚度:','Kerf:'],['鋸縫','kerf'],['鋸片厚度','blade thickness'],['鋸縫寬度','kerf width'],['3.2mm 或 1/8in','3.2 mm or 1/8 in'],
@@ -8601,9 +8601,9 @@ window.addEventListener('DOMContentLoaded', () => {
     c.currentLanguage=lang;
     if(persist)saveLanguagePreference(lang);
     document.documentElement.lang=lang==='en'?'en':'zh-Hant';
-    const title=document.getElementById('mainTitle');if(title)title.innerHTML=`<span id="sawIcon" aria-hidden="true">🪚</span>${lang==='en'?'CutNest':'CutNest 木材切割排版'}`;
+    const title=document.getElementById('mainTitle');if(title)title.innerHTML=`<span id="sawIcon" aria-hidden="true">🪚</span>${lang==='en'?'Plywood Cutting Layout':'木材切割排版'}`;
     const button=document.getElementById('languageSwitchButton');if(button)button.textContent=lang==='en'?'中文':'English';
-    const pageTitle=document.querySelector('head title');if(pageTitle)pageTitle.textContent=lang==='en'?'CutNest | Plywood Cutting Layout':'CutNest｜夾板簡易排料';
+    const pageTitle=document.querySelector('head title');if(pageTitle)pageTitle.textContent=lang==='en'?'Plywood Cutting Layout | Simple Plywood Planner':'木材切割排版｜夾板簡易排料';
     if(helpZh)helpZh.style.display=lang==='zh'?'':'none';if(helpEn)helpEn.style.display=lang==='en'?'':'none';
     translateTree(document.body,lang);localizeTables(lang);
     if(redraw&&c.trialPlan&&window.PlywoodTrialUI&&typeof window.PlywoodTrialUI.render==='function'){
@@ -8723,7 +8723,7 @@ h1#mainTitle::before, h1#mainTitle::after {
   @media(max-width:600px){#wood-floating-tools{top:calc(16px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));gap:7px}#wood-floating-tools button,#wood-scroll-nav button{width:38px;height:38px;min-height:38px;font-size:17px}#wood-language-button{font-size:.86rem!important}#wood-settings-panel{top:calc(64px + env(safe-area-inset-top));right:calc(50px + env(safe-area-inset-right));width:min(240px,calc(100vw - 72px))}#wood-info-bar{padding-left:12px;padding-right:12px}}
 </style>
 <div id="wood-floating-tools" aria-label="頁面工具">
-  <button id="cutnest-share-button" type="button" aria-label="分享 CutNest" title="分享 CutNest" data-preserve-user-text="true">↗</button>
+  <button id="cutnest-share-button" type="button" aria-label="分享木材切割排版" title="分享木材切割排版" data-preserve-user-text="true">↗</button>
   <button id="languageSwitchButton" class="language-selector" type="button" aria-label="Language" data-preserve-user-text="true">EN</button>
   <button id="wood-settings-button" type="button" aria-label="設定" aria-expanded="false">⚙</button>
 </div>
@@ -9000,7 +9000,7 @@ h1#mainTitle::before, h1#mainTitle::after {
 
 <script id="cutnest-pwa-share">
 (function(){
-  const APP_NAME='CutNest';
+  const APP_NAME='木材切割排版';
   const APP_DESCRIPTION='Plan plywood cuts, reduce waste, and share your cutting layout.';
   const shareButton=document.getElementById('cutnest-share-button');
   const toast=(message)=>{
