@@ -11,10 +11,10 @@ const CORE_ASSETS = [
   './assets/manifest.webmanifest',
   './assets/favicon.ico',
   './assets/icon-32.png',
-  './assets/cutting-wood-192.png',
+  './assets/icon-192.png',
   './assets/icon-256.png',
-  './assets/cutting-wood-512.png',
-  './assets/cutting-wood-180.png',
+  './assets/icon-512.png',
+  './assets/apple-touch-icon.png',
   './assets/og-preview.png'
 ];
 
