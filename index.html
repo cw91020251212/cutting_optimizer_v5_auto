@@ -8685,7 +8685,9 @@ h1#mainTitle::before, h1#mainTitle::after {
   #wood-settings-panel h3{margin:0 0 9px;font-size:1.05em;color:#234832}
   #wood-settings-panel .wood-setting-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
   #wood-settings-panel button{width:100%;min-height:42px;margin:0!important;padding:7px 9px!important;border-radius:7px!important;border:1px solid rgba(0,0,0,.25)!important;background:linear-gradient(135deg,#4da6ff,#1a75ff)!important;color:#fff!important;box-shadow:0 2px 4px rgba(0,0,0,.3)!important;font-size:.95em!important}
-  #wood-settings-panel #wood-help-open{grid-column:1/-1;background:linear-gradient(135deg,#ffa500,#cc8400)!important}
+  #wood-settings-panel #wood-help-open,#wood-settings-panel #wood-share-button{grid-column:1/-1}
+  #wood-settings-panel #wood-help-open{background:linear-gradient(135deg,#ffa500,#cc8400)!important}
+  #wood-settings-panel #wood-share-button{background:linear-gradient(135deg,#28a745,#1e7e34)!important}
   #wood-settings-panel .wood-setting-note{margin:8px 0 0;font-size:.82em;line-height:1.35;color:#53636a}
   #wood-font-current{display:block;margin:9px 0 0;padding:7px 9px;border-radius:7px;background:rgba(35,72,50,.08);font-size:.9em;font-weight:700;line-height:1.4;color:#234832}
   body.wood-dark-mode #wood-font-current{background:rgba(255,255,255,.09);color:#edf2f7}
@@ -8717,6 +8719,7 @@ h1#mainTitle::before, h1#mainTitle::after {
 <div id="wood-settings-panel" role="dialog" aria-label="設定" aria-hidden="true">
   <h3 id="wood-settings-title">設定</h3>
   <button id="wood-help-open" type="button">使用說明</button>
+  <button id="wood-share-button" type="button">分享連結</button>
   <div class="wood-setting-row"><button id="wood-font-increase" type="button">字體 A+</button><button id="wood-font-decrease" type="button">字體 A−</button></div>
   <div class="wood-setting-row"><button id="wood-theme-toggle" type="button">深色模式</button></div>
   <output id="wood-font-current" aria-live="polite">目前字級：100%（預設）</output>
@@ -8980,6 +8983,34 @@ h1#mainTitle::before, h1#mainTitle::after {
 </script>
 
 
+
+
+<script id="wood-settings-share-script">
+(function(){
+  const button=document.getElementById('wood-share-button');
+  if(!button)return;
+  const toast=(message)=>{
+    const node=document.createElement('div'); node.textContent=message;
+    node.style.cssText='position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(20,20,20,.9);color:#fff;padding:9px 15px;border-radius:9px;z-index:10000;font-size:14px';
+    document.body.appendChild(node); setTimeout(()=>node.remove(),2200);
+  };
+  const fallback=async(url)=>{
+    try{
+      if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(url);
+      else {const area=document.createElement('textarea');area.value=url;area.style.cssText='position:fixed;opacity:0';document.body.appendChild(area);area.select();document.execCommand('copy');area.remove();}
+      toast('已複製連結');
+    }catch(_){toast('請自行複製連結');}
+  };
+  button.addEventListener('click',async()=>{
+    const url=location.href.split('#')[0];
+    if(navigator.share){
+      try{await navigator.share({title:document.title,text:'木材切割排版｜夾板簡易排料',url});return;}
+      catch(error){if(error&&error.name==='AbortError')return;}
+    }
+    await fallback(url);
+  });
+})();
+</script>
 
 </body>
 </html>
