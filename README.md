@@ -8,8 +8,6 @@ The software display name remains **木材切割排版｜夾板簡易排料**. *
 - Plywood parts, sheets, kerf and edge-trim settings
 - Candidate layout validation and cut-by-cut details
 - Save/load project JSON and print reports
-- **Native Web Share API**: use the share button to open the phone's system share sheet
-- **PWA share target**: installed CutNest can receive shared links from other apps
 - Offline-ready service worker and installable app icon
 
 ## Live app
