@@ -1,12 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+<meta name="application-name" content="木材切割排版">
 <meta name="theme-color" content="#8b4513">
 <meta name="description" content="CutNest — Plywood cutting layout planner for practical, verified sheet optimization.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="木材切割排版">
 <link rel="manifest" href="assets/manifest.webmanifest">
 <link rel="icon" type="image/svg+xml" href="assets/cutnest-icon.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="木材切割排版">
+<meta property="og:title" content="木材切割排版｜夾板簡易排料">
+<meta property="og:description" content="Plan plywood cuts, reduce waste, and share your cutting layout easily.">
+<meta property="og:image" content="assets/og-preview.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="木材切割排版｜夾板簡易排料">
+<meta name="twitter:description" content="Plan plywood cuts, reduce waste, and share your cutting layout easily.">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=3.0, minimum-scale=0.5">
 <title>木材切割排版｜夾板簡易排料</title>
@@ -8711,6 +8723,7 @@ h1#mainTitle::before, h1#mainTitle::after {
   @media(max-width:600px){#wood-floating-tools{top:calc(16px + env(safe-area-inset-top));right:calc(8px + env(safe-area-inset-right));gap:7px}#wood-floating-tools button,#wood-scroll-nav button{width:38px;height:38px;min-height:38px;font-size:17px}#wood-language-button{font-size:.86rem!important}#wood-settings-panel{top:calc(64px + env(safe-area-inset-top));right:calc(50px + env(safe-area-inset-right));width:min(240px,calc(100vw - 72px))}#wood-info-bar{padding-left:12px;padding-right:12px}}
 </style>
 <div id="wood-floating-tools" aria-label="頁面工具">
+  <button id="cutnest-share-button" type="button" aria-label="分享木材切割排版" title="分享木材切割排版" data-preserve-user-text="true">↗</button>
   <button id="languageSwitchButton" class="language-selector" type="button" aria-label="Language" data-preserve-user-text="true">EN</button>
   <button id="wood-settings-button" type="button" aria-label="設定" aria-expanded="false">⚙</button>
 </div>
@@ -8965,6 +8978,11 @@ h1#mainTitle::before, h1#mainTitle::after {
 
 
 
+<style id="cutnest-brand-share-style">
+  #wood-floating-tools #cutnest-share-button{background:linear-gradient(135deg,#ffe6a7 0%,#f5b942 55%,#d88916 100%)!important;color:#4a2600!important;font-size:24px!important}
+  #wood-floating-tools #cutnest-share-button:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px}
+  #cutnest-share-button.is-copied{background:linear-gradient(135deg,#bff0cf,#43b874)!important}
+</style>
 
 <!-- file:// 安全後備：即使本地瀏覽器拒絕儲存權限，齒輪仍可開關設定面板。 -->
 <script id="wood-file-url-fallback">
@@ -8980,6 +8998,46 @@ h1#mainTitle::before, h1#mainTitle::after {
 </script>
 
 
+<script id="cutnest-pwa-share">
+(function(){
+  const APP_NAME='木材切割排版';
+  const APP_DESCRIPTION='Plan plywood cuts, reduce waste, and share your cutting layout.';
+  const shareButton=document.getElementById('cutnest-share-button');
+  const toast=(message)=>{
+    const node=document.createElement('div'); node.textContent=message;
+    node.style.cssText='position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:rgba(20,20,20,.9);color:#fff;padding:9px 15px;border-radius:9px;z-index:10000;font-size:14px;box-shadow:0 3px 12px rgba(0,0,0,.3)';
+    document.body.appendChild(node); setTimeout(()=>node.remove(),2200);
+  };
+  const copyLink=async(url)=>{
+    try{
+      if(navigator.clipboard&&window.isSecureContext) await navigator.clipboard.writeText(url);
+      else { const area=document.createElement('textarea'); area.value=url; area.style.cssText='position:fixed;opacity:0'; document.body.appendChild(area); area.select(); document.execCommand('copy'); area.remove(); }
+      if(shareButton){shareButton.classList.add('is-copied');setTimeout(()=>shareButton.classList.remove('is-copied'),1200);}
+      toast('Link copied');
+    }catch(_){ toast('Copy failed — please copy the URL manually'); }
+  };
+  const share=async(event)=>{
+    event&&event.preventDefault();
+    const url=location.href.split('#')[0];
+    const data={title:document.title||APP_NAME,text:APP_DESCRIPTION,url};
+    if(navigator.share){
+      try{ await navigator.share(data); return; }catch(error){ if(error&&error.name==='AbortError') return; }
+    }
+    await copyLink(url);
+  };
+  if(shareButton) shareButton.addEventListener('click',share);
+  // PWA share_target: show a small confirmation when another app shares a link/text to CutNest.
+  const params=new URLSearchParams(location.search);
+  const incoming=params.get('url')||params.get('text');
+  if(incoming && /^https?:\/\//i.test(incoming)){
+    setTimeout(()=>toast('Shared link received by CutNest'),500);
+    history.replaceState({},'',location.pathname+location.hash);
+  }
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'}).catch(()=>{}));
+  }
+})();
+</script>
 
 </body>
 </html>
