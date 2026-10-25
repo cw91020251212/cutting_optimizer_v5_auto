@@ -4034,10 +4034,38 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div aria-hidden="true" class="tune-backdrop" id="displayTuneModal" onclick="try{ if(event.target===this){window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}}catch(e){}">
 <div aria-label="顯示調校" aria-modal="true" class="tune-modal" role="dialog">
 <div class="tune-header">
-<div class="tune-title" id="tuneTitle">顯示調校</div>
+<div class="tune-title" id="tuneTitle">設定</div>
 <button aria-label="關閉" class="tune-close" id="tuneClose" onclick="try{window.__closeDisplayTune&amp;&amp;window.__closeDisplayTune();}catch(e){}" type="button">×</button>
 </div>
 <div class="tune-body">
+<section aria-label="設定" class="reference-settings" id="referenceSettings">
+<div class="settings-actions">
+<button class="settings-action settings-help" id="settingsHelpButton" type="button">使用說明</button>
+<button class="settings-action settings-share" id="settingsShareButton" type="button">分享連結</button>
+<div class="settings-font-row"><button class="settings-action settings-blue" id="settingsFontIncrease" type="button">字體 A+</button><button class="settings-action settings-blue" id="settingsFontDecrease" type="button">字體 A−</button></div>
+<button class="settings-action settings-blue settings-theme" id="settingsThemeToggle" type="button">深色模式</button>
+<button class="settings-action settings-restore" id="settingsRestoreDefaults" type="button">還原預設設定</button>
+<p class="settings-restore-note" id="settingsRestoreNote">重設語言、字級、主題及工具透明度，並關閉已開啟視窗和展開區塊；不會清除工程資料或排料結果。</p>
+<div class="settings-extra-actions"><button class="settings-action settings-extra" id="settingsExamplesButton" type="button">使用案例</button><button class="settings-action settings-extra" id="settingsQrButton" type="button">QR 碼</button></div>
+</div>
+<div class="wood-opacity-setting">
+<label id="settingsOpacityLabel">上下箭咀透明度</label>
+<div class="wood-opacity-targets" id="settingsOpacityTargets" role="group" aria-label="選擇要調整的工具">
+<button aria-pressed="true" class="wood-opacity-target is-selected" data-opacity-target="scroll" id="settingsOpacityTargetScroll" type="button">上下箭咀</button>
+<button aria-pressed="false" class="wood-opacity-target" data-opacity-target="floating" id="settingsOpacityTargetFloating" type="button">EN／設定</button>
+<button aria-pressed="false" class="wood-opacity-target" data-opacity-target="layout" id="settingsOpacityTargetLayout" type="button">方案遙控器</button>
+</div>
+<div class="wood-opacity-levels" id="settingsOpacityLevels" role="group" aria-label="上下箭咀透明度級數">
+<button aria-pressed="false" class="wood-opacity-level" data-opacity-level="1" type="button">1</button>
+<button aria-pressed="false" class="wood-opacity-level" data-opacity-level="2" type="button">2</button>
+<button aria-pressed="true" class="wood-opacity-level is-selected" data-opacity-level="3" type="button">3</button>
+<button aria-pressed="false" class="wood-opacity-level" data-opacity-level="4" type="button">4</button>
+<button aria-pressed="false" class="wood-opacity-level" data-opacity-level="5" type="button">5</button>
+</div>
+<output aria-live="polite" id="settingsOpacityCurrent">目前透明度：3／5</output>
+</div>
+</section>
+<div class="tune-section-heading" id="tuneDisplaySectionTitle">顯示調校</div>
 <!-- 預設：平時最常用，放最頂（唔使捲到最底） -->
 <div aria-label="顯示調校預設" class="tune-presets">
 <span class="preset-label" id="tunePresetLabel">預設：</span>
@@ -12678,7 +12706,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function syncTuneTexts(){
     var zh=isZh();
     var set=function(id, z, en){ var el=document.getElementById(id); if(el) el.textContent = zh?z:en; };
-    set('tuneTitle','顯示調校','Display Tuning');
+    set('tuneTitle','設定','Settings');
     set('tuneBrightnessLabel','亮度','Brightness');
     set('tuneContrastLabel','對比','Contrast');
     set('tuneSaturateLabel','飽和度','Saturation');
@@ -13995,7 +14023,15 @@ window.__agScrollTo = window.__agScrollTo || function(el){
       button.setAttribute('aria-expanded', String(open));
       document.body.style.overflow = open ? 'hidden' : '';
     }
-    button.addEventListener('click', function(){ setOpen(!drawer.classList.contains('is-open')); });
+    button.addEventListener('click', function(){
+      setOpen(false);
+      if(typeof window.__openDisplayTune==='function'){
+        window.__openDisplayTune();
+        if(typeof window.__syncReferenceSettingsPanel==='function') window.__syncReferenceSettingsPanel();
+      }else{
+        setOpen(true);
+      }
+    });
     drawer.querySelector('.stage1-tools-close').addEventListener('click', function(){ setOpen(false); });
     backdrop.addEventListener('click', function(){ setOpen(false); });
   }
@@ -14566,6 +14602,487 @@ window.__agScrollTo = window.__agScrollTo || function(el){
 </style>
 <script src="./keyboard-editable-probe.js?v=gesture-tap-1"></script>
 
+<style id="display-tune-reference-style-v1">
+/* Visual-only adaptation of the existing display-tuning panel.
+   Keep its presets, sliders, reset/apply behavior, and storage untouched. */
+#displayTuneModal.tune-backdrop{
+  z-index:10010!important;
+  background:rgba(17,31,48,.52)!important;
+}
+#displayTuneModal .tune-modal{
+  box-sizing:border-box!important;
+  width:min(460px,calc(100vw - 24px))!important;
+  max-height:min(88vh,740px)!important;
+  max-height:min(88dvh,740px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  border:1px solid #a9b9c8!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  color:#263238!important;
+  box-shadow:0 5px 0 rgba(18,43,65,.13),0 15px 38px rgba(9,24,40,.30)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+#displayTuneModal .tune-header{
+  flex:0 0 auto!important;
+  padding:11px 14px!important;
+  border-bottom:1px solid #145dc5!important;
+  background:linear-gradient(135deg,#4da6ff,#1a75ff)!important;
+}
+#displayTuneModal .tune-title{
+  color:#fff!important;
+  font-size:1rem!important;
+  font-weight:800!important;
+  text-shadow:none!important;
+}
+#displayTuneModal .tune-close{
+  width:34px!important;
+  height:34px!important;
+  border:1px solid rgba(20,93,197,.48)!important;
+  border-radius:50%!important;
+  background:linear-gradient(135deg,#fff,#e8f3ff)!important;
+  color:#174c7c!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 2px 4px rgba(0,0,0,.16)!important;
+}
+#displayTuneModal .tune-header button#tuneClose{
+  color:#174c7c!important;
+  -webkit-text-fill-color:#174c7c!important;
+  font-size:22px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  padding:0!important;
+  text-indent:0!important;
+}
+#displayTuneModal .tune-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  padding:12px 14px 14px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  background:#fff!important;
+  color:#263238!important;
+}
+#displayTuneModal .tune-presets{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin:7px 0 8px!important;
+}
+#displayTuneModal .tune-presets .preset-label{
+  margin:0 0 2px!important;
+  padding:0 2px 6px!important;
+  border-bottom:1px solid #d9e2ea!important;
+  color:#263238!important;
+  font-size:.92rem!important;
+  line-height:1.2!important;
+}
+#displayTuneModal .tune-presets .tune-preset{
+  min-height:42px!important;
+  padding:7px 8px!important;
+  border:1px solid rgba(26,117,255,.38)!important;
+  border-radius:10px!important;
+  font-size:.88rem!important;
+  line-height:1.1!important;
+  text-shadow:none!important;
+  box-shadow:0 2px 0 rgba(0,0,0,.13),inset 0 1px 0 rgba(255,255,255,.58)!important;
+}
+#displayTuneModal .tune-advanced-toggle{
+  width:100%!important;
+  min-height:42px!important;
+  margin:8px 0 4px!important;
+  padding:8px 10px!important;
+  border:1px solid #145dc5!important;
+  border-radius:10px!important;
+  background:linear-gradient(135deg,#4da6ff,#1a75ff)!important;
+  color:#fff!important;
+  font-weight:800!important;
+  text-shadow:none!important;
+  box-shadow:0 3px 0 rgba(20,75,130,.22),inset 0 1px 0 rgba(255,255,255,.34)!important;
+}
+#displayTuneModal .tune-row{
+  grid-template-columns:82px minmax(0,1fr) 50px!important;
+  gap:8px!important;
+  margin:8px 0!important;
+  padding:7px 8px!important;
+  border:1px solid #dce5ed!important;
+  border-radius:10px!important;
+  background:#f7faff!important;
+}
+#displayTuneModal .tune-row label{
+  color:#263238!important;
+  font-size:.84rem!important;
+  line-height:1.15!important;
+  text-shadow:none!important;
+}
+#displayTuneModal .tune-row input[type="range"]{
+  width:100%!important;
+  min-width:0!important;
+  justify-self:stretch!important;
+  accent-color:#1a75ff!important;
+}
+#displayTuneModal .tune-val{
+  padding:3px 5px!important;
+  border:1px solid #d0dfec!important;
+  border-radius:7px!important;
+  background:#eaf4ff!important;
+  color:#174c7c!important;
+  font-size:.86rem!important;
+  text-align:center!important;
+  text-shadow:none!important;
+}
+#displayTuneModal .tune-hint{
+  margin:9px 0 0!important;
+  padding:8px 10px!important;
+  border-left:3px solid #4da6ff!important;
+  border-radius:0 8px 8px 0!important;
+  background:#f3f7fb!important;
+  color:#53636a!important;
+  font-size:.82rem!important;
+  line-height:1.35!important;
+  text-shadow:none!important;
+}
+#displayTuneModal .tune-actions{
+  position:sticky!important;
+  bottom:0!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-items:stretch!important;
+  gap:8px!important;
+  margin:10px 0 0!important;
+  padding:10px 0 4px!important;
+  border-top:1px solid #d9e2ea!important;
+  background:#fff!important;
+  z-index:2!important;
+}
+#displayTuneModal .tune-actions .btn{
+  width:100%!important;
+  min-width:0!important;
+  min-height:42px!important;
+  height:auto!important;
+  padding:8px 10px!important;
+  border-radius:10px!important;
+  font-size:.96rem!important;
+  font-weight:800!important;
+  line-height:1.15!important;
+  text-shadow:none!important;
+}
+#displayTuneModal #tuneReset.btn-warning{
+  border:1px solid #91b69d!important;
+  background:linear-gradient(135deg,#edf8f0,#c9e5d1)!important;
+  color:#28543b!important;
+  box-shadow:0 2px 0 rgba(35,84,56,.18),inset 0 1px 0 rgba(255,255,255,.8)!important;
+}
+#displayTuneModal #tuneDone.btn-success{
+  border:1px solid #145dc5!important;
+  background:linear-gradient(135deg,#4da6ff,#1a75ff)!important;
+  color:#fff!important;
+  box-shadow:0 2px 0 rgba(20,75,130,.22),inset 0 1px 0 rgba(255,255,255,.28)!important;
+}
+body.sepia-mode #displayTuneModal .tune-modal,
+body.sepia-mode #displayTuneModal .tune-body,
+body.sepia-mode #displayTuneModal .tune-actions{
+  background:#fffaf1!important;
+}
+body.sepia-mode #displayTuneModal .tune-modal{border-color:#d7bf9c!important;color:#493b26!important;}
+body.sepia-mode #displayTuneModal .tune-row{background:#fbf4e8!important;border-color:#e3d4ba!important;}
+body.sepia-mode #displayTuneModal .tune-row label,
+body.sepia-mode #displayTuneModal .tune-presets .preset-label{color:#493b26!important;}
+body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:#64563e!important;}
+@media(max-width:600px){
+  #displayTuneModal.tune-backdrop{
+    align-items:flex-start!important;
+    justify-content:center!important;
+    overflow-y:auto!important;
+    padding:calc(78px + env(safe-area-inset-top,0px)) 12px calc(48px + env(safe-area-inset-bottom,0px))!important;
+  }
+  #displayTuneModal .tune-modal{
+    max-height:min(calc(100vh - 126px),740px)!important;
+    max-height:min(calc(100dvh - 126px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)),740px)!important;
+  }
+}
+@media(max-width:360px){
+  #displayTuneModal .tune-body{padding:11px!important;}
+  #displayTuneModal .tune-row{grid-template-columns:78px minmax(0,1fr) 48px!important;gap:7px!important;}
+  #displayTuneModal .tune-row label{font-size:.80rem!important;}
+  #displayTuneModal .tune-presets{gap:6px!important;}
+}
+</style>
+
+<style id="reference-settings-panel-style">
+  #displayTuneModal .tune-modal{display:flex!important;flex-direction:column!important;}
+  #displayTuneModal .tune-body{flex:1 1 auto!important;min-height:0!important;}
+  #displayTuneModal .reference-settings{margin:0 0 14px!important;padding:0 0 12px!important;border-bottom:1px solid #d9e2ea!important;}
+  #displayTuneModal .settings-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
+  #displayTuneModal .settings-action{width:100%!important;min-width:0!important;min-height:46px!important;padding:8px 10px!important;border:1px solid rgba(20,93,197,.52)!important;border-radius:11px!important;background:linear-gradient(135deg,#4da6ff,#1a75ff)!important;color:#fff!important;font-size:.94rem!important;font-weight:800!important;line-height:1.15!important;text-align:center!important;text-shadow:none!important;box-shadow:0 3px 0 rgba(20,75,130,.20),inset 0 1px 0 rgba(255,255,255,.32)!important;}
+  #displayTuneModal .settings-help,#displayTuneModal .settings-share,#displayTuneModal .settings-restore,#displayTuneModal .settings-restore-note,#displayTuneModal .settings-extra-actions{grid-column:1/-1!important;}
+  #displayTuneModal .settings-help{min-height:50px!important;background:linear-gradient(135deg,#ffb21a,#e88900)!important;border-color:#b86d00!important;font-size:1rem!important;}
+  #displayTuneModal .settings-share{min-height:50px!important;background:linear-gradient(135deg,#20b65a,#087f37)!important;border-color:#08622d!important;font-size:1rem!important;}
+  #displayTuneModal .settings-font-row{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
+  #displayTuneModal .settings-theme{justify-self:start!important;width:calc(100% - 4px)!important;}
+  #displayTuneModal .settings-restore{min-height:48px!important;background:linear-gradient(135deg,#e5f3e8,#c8e2d0)!important;border-color:#8cae96!important;color:#28543b!important;font-size:.98rem!important;}
+  #displayTuneModal .settings-restore-note{margin:0!important;padding:0 2px 3px!important;color:#53636a!important;font-size:.82rem!important;line-height:1.42!important;text-shadow:none!important;}
+  #displayTuneModal .settings-extra-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
+  #displayTuneModal .settings-extra{min-height:40px!important;background:linear-gradient(135deg,#f8fbff,#e8f1f8)!important;border-color:#b8cad9!important;color:#234832!important;font-size:.86rem!important;}
+  #displayTuneModal .wood-opacity-setting{margin-top:14px!important;padding-top:11px!important;border-top:1px solid #d9e2ea!important;}
+  #displayTuneModal #settingsOpacityLabel{display:block!important;margin:0 0 8px!important;color:#263238!important;font-size:1rem!important;font-weight:800!important;line-height:1.25!important;}
+  #displayTuneModal .wood-opacity-targets{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-bottom:8px!important;}
+  #displayTuneModal .wood-opacity-target{min-width:0!important;min-height:40px!important;padding:5px 4px!important;border:1px solid #b8cad9!important;border-radius:10px!important;background:#edf5fb!important;color:#234832!important;font-size:.78rem!important;font-weight:700!important;line-height:1.15!important;white-space:normal!important;text-shadow:none!important;box-shadow:0 2px 0 rgba(0,0,0,.08)!important;}
+  #displayTuneModal .wood-opacity-target.is-selected{border-color:#4d8fbd!important;background:#d8edff!important;color:#14508a!important;font-weight:800!important;}
+  #displayTuneModal .wood-opacity-levels{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;}
+  #displayTuneModal .wood-opacity-level{min-width:0!important;min-height:40px!important;padding:4px 0!important;border:1px solid #b8cad9!important;border-radius:9px!important;background:#eaf2f8!important;color:#234832!important;font-size:.95rem!important;font-weight:800!important;text-shadow:none!important;box-shadow:0 2px 0 rgba(0,0,0,.08)!important;}
+  #displayTuneModal .wood-opacity-level.is-selected{border-color:#145dc5!important;background:#0879e8!important;color:#fff!important;}
+  #displayTuneModal #settingsOpacityCurrent{display:block!important;margin-top:7px!important;color:#53636a!important;font-size:.84rem!important;line-height:1.25!important;}
+  #displayTuneModal .tune-section-heading{margin:10px 0 4px!important;padding-top:10px!important;border-top:1px solid #d9e2ea!important;color:#263238!important;font-size:1rem!important;font-weight:800!important;}
+  body.sepia-mode #displayTuneModal .reference-settings{border-bottom-color:#e3d4ba!important;}
+  body.sepia-mode #displayTuneModal .settings-restore-note,body.sepia-mode #displayTuneModal #settingsOpacityCurrent{color:#64563e!important;}
+  body.sepia-mode #displayTuneModal #settingsOpacityLabel,body.sepia-mode #displayTuneModal .tune-section-heading{color:#493b26!important;}
+  body.sepia-mode #displayTuneModal .wood-opacity-setting,body.sepia-mode #displayTuneModal .tune-section-heading{border-color:#e3d4ba!important;}
+  body.sepia-mode #displayTuneModal .wood-opacity-target,body.sepia-mode #displayTuneModal .wood-opacity-level{background:#fbf4e8!important;border-color:#d8c9ae!important;color:#493b26!important;}
+  body.sepia-mode #displayTuneModal .wood-opacity-target.is-selected,body.sepia-mode #displayTuneModal .wood-opacity-level.is-selected{background:#d8edff!important;border-color:#4d8fbd!important;color:#14508a!important;}
+  @media(max-width:360px){
+    #displayTuneModal .settings-actions,#displayTuneModal .settings-font-row,#displayTuneModal .settings-extra-actions{gap:7px!important;}
+    #displayTuneModal .settings-action{min-height:42px!important;padding:7px 7px!important;font-size:.88rem!important;}
+    #displayTuneModal .settings-help,#displayTuneModal .settings-share{min-height:46px!important;font-size:.96rem!important;}
+    #displayTuneModal .wood-opacity-targets,#displayTuneModal .wood-opacity-levels{gap:5px!important;}
+    #displayTuneModal .wood-opacity-target{min-height:38px!important;font-size:.73rem!important;}
+  }
+
+  /* Match the reference panel: opacity changes control backgrounds, not content or shadows. */
+  html body button#btnToTop.scroll-btn,
+  html body button#btnToBottom.scroll-btn{
+    background:linear-gradient(135deg,rgb(255 255 255 / var(--wood-scroll-opacity,.56)) 0%,rgb(248 250 252 / var(--wood-scroll-opacity,.56)) 55%,rgb(241 245 249 / var(--wood-scroll-opacity,.56)) 100%)!important;
+  }
+  html body #languageToggle.language-toggle{
+    background:linear-gradient(135deg,rgb(191 240 207 / var(--wood-floating-opacity,.56)) 0%,rgb(123 211 154 / var(--wood-floating-opacity,.56)) 55%,rgb(67 184 116 / var(--wood-floating-opacity,.56)) 100%)!important;
+  }
+  @media(max-width:767.98px){
+    html body button#stage1HeaderToolsButton{background:rgb(18 29 46 / var(--wood-floating-opacity,.56))!important;}
+  }
+  @media(min-width:768px){
+    html body .top-tools #displayTuneBtn{
+      background:linear-gradient(135deg,rgb(230 251 255 / var(--wood-floating-opacity,.56)) 0%,rgb(201 245 255 / var(--wood-floating-opacity,.56)) 55%,rgb(174 238 255 / var(--wood-floating-opacity,.56)) 100%)!important;
+    }
+  }
+  html body #schemeSelector #schemeButtons button{opacity:var(--wood-layout-remote-opacity,.56)!important;}
+
+  /* Wood-work outer-control skin: matching circular shells, inset highlights and raised shadows. */
+  html body button#btnToTop.scroll-btn,
+  html body button#btnToBottom.scroll-btn,
+  html body #languageToggle.language-toggle,
+  html body button#stage1HeaderToolsButton,
+  html body .top-tools #displayTuneBtn{
+    min-width:44px!important;min-height:44px!important;width:44px!important;height:44px!important;
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    margin:0!important;padding:0!important;border:1px solid rgba(38,51,45,.72)!important;
+    border-radius:50%!important;outline:none!important;text-shadow:none!important;
+    box-shadow:inset -2px 2px 4px rgba(255,255,255,.75),inset 3px -4px 7px rgba(0,0,0,.10),inset 0 0 0 1px rgba(255,255,255,.35),-8px 11px 0 0 rgba(0,0,0,.18)!important;
+    transition:none!important;transform:none!important;filter:none!important;
+  }
+  html body button#btnToTop.scroll-btn,html body button#btnToBottom.scroll-btn{color:#123258!important;font-size:20px!important;font-weight:800!important;line-height:1!important;}
+  html body #languageToggle.language-toggle{color:#0b2b16!important;font-size:.92rem!important;font-weight:800!important;}
+  html body button#stage1HeaderToolsButton,html body .top-tools #displayTuneBtn{color:#123258!important;font-size:20px!important;}
+  html body button#stage1HeaderToolsButton i,html body .top-tools #displayTuneBtn i{color:#123258!important;opacity:1!important;}
+  @media(max-width:767.98px){
+    html body button#btnToTop.scroll-btn,html body button#btnToBottom.scroll-btn,
+    html body #languageToggle.language-toggle,html body button#stage1HeaderToolsButton{
+      min-width:38px!important;min-height:38px!important;width:38px!important;height:38px!important;
+    }
+    html body button#btnToTop.scroll-btn,html body button#btnToBottom.scroll-btn{font-size:17px!important;}
+    html body #languageToggle.language-toggle{font-size:.86rem!important;}
+    html body button#stage1HeaderToolsButton{font-size:17px!important;}
+  }
+  @media(max-width:767.98px){
+    html body button#stage1HeaderToolsButton{
+      background:linear-gradient(135deg,rgb(216 232 255 / var(--wood-floating-opacity,.56)) 0%,rgb(134 183 241 / var(--wood-floating-opacity,.56)) 55%,rgb(77 143 219 / var(--wood-floating-opacity,.56)) 100%)!important;
+    }
+  }
+  @media(min-width:768px){
+    html body .top-tools #displayTuneBtn{
+      background:linear-gradient(135deg,rgb(216 232 255 / var(--wood-floating-opacity,.56)) 0%,rgb(134 183 241 / var(--wood-floating-opacity,.56)) 55%,rgb(77 143 219 / var(--wood-floating-opacity,.56)) 100%)!important;
+    }
+  }
+  /* Compact mobile action buttons: icon left, two-line label, no clipping. */
+  @media(max-width:390px){
+    html[data-lang="en"] body #cuttingItems .controls-row .ag-action-btn,
+    html[data-lang="en"] body #materialItems .controls-row .ag-action-btn{
+      height:40px!important;min-height:40px!important;max-height:40px!important;
+      display:inline-flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:center!important;gap:4px!important;
+      overflow:visible!important;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important;
+      padding:.1rem .2rem!important;font-size:.72rem!important;line-height:1!important;text-align:center!important;
+    }
+    html[data-lang="en"] body #cuttingItems .controls-row .ag-action-btn i,
+    html[data-lang="en"] body #materialItems .controls-row .ag-action-btn i{
+      flex:0 0 auto!important;margin:0!important;font-size:.85rem!important;
+    }
+  }
+</style>
+<script id="reference-settings-panel-script">
+(function(){
+  'use strict';
+  var $=function(id){return document.getElementById(id);};
+  var opacityValues={1:.24,2:.40,3:.56,4:.72,5:.88};
+  var opacityOptions={
+    scroll:{key:'wood-scroll-opacity',css:'--wood-scroll-opacity',zh:'上下箭咀透明度',en:'Arrow opacity',zhName:'上下箭咀',enName:'Up/down arrows'},
+    floating:{key:'wood-floating-opacity',css:'--wood-floating-opacity',zh:'EN／設定按鈕透明度',en:'EN / Settings opacity',zhName:'EN／設定',enName:'EN / Settings'},
+    layout:{key:'wood-layout-remote-opacity',css:'--wood-layout-remote-opacity',zh:'方案遙控器透明度',en:'Layout remote opacity',zhName:'方案遙控器',enName:'Layout remote'}
+  };
+  var opacityTarget='scroll';
+  var store={get:function(key){try{return window.localStorage.getItem(key);}catch(_){return null;}},set:function(key,value){try{window.localStorage.setItem(key,String(value));}catch(_){}}};
+  var levelFor=function(key){var n=Number(store.get(opacityOptions[key].key));return Number.isInteger(n)&&n>=1&&n<=5?n:3;};
+  var isEnglish=function(){var lang=$('language');return !!(lang&&lang.value==='en');};
+  var localized=function(zh,en){return isEnglish()?en:zh;};
+  function syncOpacityUi(){
+    var option=opacityOptions[opacityTarget]||opacityOptions.scroll;
+    var zhName=isEnglish()?option.enName:option.zhName;
+    var label=$('settingsOpacityLabel');
+    if(label)label.textContent=isEnglish()?option.en:option.zh;
+    var group=$('settingsOpacityTargets');
+    if(group){
+      group.setAttribute('aria-label',localized('選擇要調整的工具','Choose a control to adjust'));
+      group.querySelectorAll('.wood-opacity-target').forEach(function(button){
+        var key=button.getAttribute('data-opacity-target'),target=opacityOptions[key],selected=key===opacityTarget;
+        button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));
+        button.textContent=isEnglish()?target.enName:target.zhName;
+      });
+    }
+    var level=levelFor(opacityTarget),levelGroup=$('settingsOpacityLevels');
+    if(levelGroup){
+      levelGroup.setAttribute('aria-label',isEnglish()?zhName+' opacity levels':zhName+'透明度級數');
+      levelGroup.querySelectorAll('.wood-opacity-level').forEach(function(button){
+        var n=Number(button.getAttribute('data-opacity-level')),selected=n===level;
+        button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));
+        button.setAttribute('aria-label',isEnglish()?zhName+' opacity level '+n+' of 5':'透明度 '+n+'／5');
+      });
+    }
+    var output=$('settingsOpacityCurrent');
+    if(output)output.textContent=isEnglish()?'Current opacity: '+level+'/5':'目前透明度：'+level+'／5';
+  }
+  function applyOpacity(key,level,save){
+    level=Number(level);if(!opacityValues[level])level=3;
+    document.documentElement.style.setProperty(opacityOptions[key].css,String(opacityValues[level]));
+    if(save)store.set(opacityOptions[key].key,level);
+  }
+  function selectOpacityTarget(key){
+    if(!opacityOptions[key])return;
+    opacityTarget=key;applyOpacity(key,levelFor(key),false);syncOpacityUi();
+  }
+  function applyAllOpacity(){Object.keys(opacityOptions).forEach(function(key){applyOpacity(key,levelFor(key),false);});syncOpacityUi();}
+  function saveAppPreferences(changes){
+    try{
+      var key='aluminum_cut_user_prefs_v1',prefs=JSON.parse(window.localStorage.getItem(key)||'{}');
+      if(!prefs||typeof prefs!=='object'||Array.isArray(prefs))prefs={};
+      Object.keys(changes).forEach(function(name){prefs[name]=changes[name];});
+      window.localStorage.setItem(key,JSON.stringify(prefs));
+    }catch(_){}
+  }
+  function currentFontSize(){return document.documentElement.style.fontSize||'';}
+  function applyOuterButtonSkin(){
+    var mobile=!!(window.matchMedia&&window.matchMedia('(max-width:767.98px)').matches);
+    var shellShadow='inset -2px 2px 4px rgba(255,255,255,.75), inset 3px -4px 7px rgba(0,0,0,.10), inset 0 0 0 1px rgba(255,255,255,.35), -8px 11px 0 rgba(0,0,0,.18)';
+    var controls=Array.prototype.slice.call(document.querySelectorAll('#btnToTop, #btnToBottom, #languageToggle, #stage1HeaderToolsButton'));
+    controls.forEach(function(button){
+      var size=mobile?'38px':'44px';
+      button.style.setProperty('width',size,'important');button.style.setProperty('height',size,'important');
+      button.style.setProperty('min-width',size,'important');button.style.setProperty('min-height',size,'important');
+      button.style.setProperty('border-radius','50%','important');
+      button.style.setProperty('border','1px solid rgba(38,51,45,.72)','important');
+      button.style.setProperty('box-shadow',shellShadow,'important');
+      button.style.setProperty('outline','none','important');button.style.setProperty('text-shadow','none','important');
+      button.style.setProperty('overflow','hidden','important');
+      button.style.setProperty('transition','none','important');button.style.setProperty('transform','none','important');
+      button.style.setProperty('color',button.id==='languageToggle'?'#0b2b16':'#123258','important');
+      var icon=button.querySelector('i');if(icon)icon.style.setProperty('color','#123258','important');
+    });
+    var desktopSettings=document.querySelector('.top-tools #displayTuneBtn');
+    if(desktopSettings){
+      desktopSettings.style.setProperty('width','44px','important');desktopSettings.style.setProperty('height','44px','important');
+      desktopSettings.style.setProperty('min-width','44px','important');desktopSettings.style.setProperty('min-height','44px','important');
+      desktopSettings.style.setProperty('border-radius','50%','important');desktopSettings.style.setProperty('border','1px solid rgba(38,51,45,.72)','important');
+      desktopSettings.style.setProperty('box-shadow',shellShadow,'important');desktopSettings.style.setProperty('outline','none','important');
+      desktopSettings.style.setProperty('text-shadow','none','important');desktopSettings.style.setProperty('overflow','hidden','important');
+      var desktopIcon=desktopSettings.querySelector('i');if(desktopIcon)desktopIcon.style.setProperty('color','#123258','important');
+    }
+  }
+  function syncPanelTexts(){
+    var en=isEnglish();
+    var texts={
+      tuneTitle:en?'Settings':'設定',referenceSettings:en?'Settings':'設定',
+      settingsHelpButton:en?'User Guide':'使用說明',settingsShareButton:en?'Share link':'分享連結',
+      settingsFontIncrease:en?'Font A+':'字體 A+',settingsFontDecrease:en?'Font A−':'字體 A−',
+      settingsRestoreDefaults:en?'Restore defaults':'還原預設設定',
+      settingsRestoreNote:en?'Resets language, font size, theme and tool opacity, and closes open dialogs and expanded sections. Project data and layouts are not cleared.':'重設語言、字級、主題及工具透明度，並關閉已開啟視窗和展開區塊；不會清除工程資料或排料結果。',
+      settingsExamplesButton:en?'Examples':'使用案例',settingsQrButton:en?'QR Code':'QR 碼',
+      tuneDisplaySectionTitle:en?'Display tuning':'顯示調校'
+    };
+    Object.keys(texts).forEach(function(id){var el=$(id);if(el){if(id==='referenceSettings')el.setAttribute('aria-label',texts[id]);else el.textContent=texts[id];}});
+    var help=$('tuneHint');
+    if(help)help.textContent=en?'Tip: To make the display darker, increase contrast or saturation slightly, then fine-tune brightness.':'提示：想「深色啲」通常加少少對比／飽和度，再微調亮度。';
+    var modal=$('displayTuneModal');if(modal)modal.setAttribute('aria-label',en?'Settings':'設定');
+    var close=$('tuneClose');if(close)close.setAttribute('aria-label',en?'Close settings':'關閉設定');
+    var tuneButton=$('displayTuneBtn');if(tuneButton){tuneButton.title=en?'Settings and display tuning':'設定及顯示調校';tuneButton.setAttribute('aria-label',tuneButton.title);}
+    var themeButton=$('settingsThemeToggle');
+    if(themeButton){var light=document.body.classList.contains('sepia-mode');themeButton.textContent=en?(light?'Dark mode':'Light mode'):(light?'深色模式':'光明模式');}
+    syncOpacityUi();
+  }
+  function closeSettingsPanel(){try{if(typeof window.__closeDisplayTune==='function')window.__closeDisplayTune();}catch(_){}}
+  function closeOpenUi(){
+    closeSettingsPanel();
+    var drawer=$('stage1ToolsDrawer'),backdrop=$('stage1ToolsBackdrop');
+    if(drawer)drawer.classList.remove('is-open');if(backdrop)backdrop.classList.remove('is-open');
+    document.querySelectorAll('.modal.show').forEach(function(modal){
+      try{if(window.bootstrap&&bootstrap.Modal){var instance=bootstrap.Modal.getInstance(modal)||bootstrap.Modal.getOrCreateInstance(modal);instance.hide();}else{modal.classList.remove('show');modal.style.display='none';}}catch(_){}
+    });
+    document.querySelectorAll('details[open]').forEach(function(el){el.open=false;});
+    document.querySelectorAll('.collapse.show').forEach(function(el){try{if(window.bootstrap&&bootstrap.Collapse){var instance=bootstrap.Collapse.getInstance(el)||bootstrap.Collapse.getOrCreateInstance(el);instance.hide();}else el.classList.remove('show');}catch(_){el.classList.remove('show');}});
+    var advanced=$('tuneAdvanced');if(advanced)advanced.hidden=true;
+    var advancedButton=$('tuneAdvancedToggle');if(advancedButton)advancedButton.setAttribute('aria-expanded','false');
+    document.body.style.overflow='';
+  }
+  function restoreDefaults(){
+    var lang=$('language');if(lang){lang.value='zh';if(typeof window.updateLanguage==='function')window.updateLanguage();}
+    document.documentElement.style.removeProperty('font-size');
+    document.body.classList.remove('sepia-mode','light-mode','dark-mode','dark-beauty-mode');
+    store.set('theme_light_mode','0');
+    Object.keys(opacityOptions).forEach(function(key){store.set(opacityOptions[key].key,3);});
+    applyAllOpacity();
+    try{if(typeof window.saveSettings==='function')window.saveSettings();}catch(_){}
+    saveAppPreferences({language:'zh',fontSize:'',theme:'normal'});
+    var resetTune=$('tuneReset');if(resetTune)resetTune.click();
+    closeOpenUi();
+  }
+  function bind(){
+    document.querySelectorAll('#settingsOpacityTargets .wood-opacity-target').forEach(function(button){button.addEventListener('click',function(){selectOpacityTarget(button.getAttribute('data-opacity-target'));});});
+    document.querySelectorAll('#settingsOpacityLevels .wood-opacity-level').forEach(function(button){button.addEventListener('click',function(){applyOpacity(opacityTarget,button.getAttribute('data-opacity-level'),true);syncOpacityUi();});});
+    var inc=$('settingsFontIncrease'),dec=$('settingsFontDecrease');
+    if(inc)inc.addEventListener('click',function(){if(typeof window.adjustFontSize==='function')window.adjustFontSize(1);saveAppPreferences({fontSize:currentFontSize()});});
+    if(dec)dec.addEventListener('click',function(){if(typeof window.adjustFontSize==='function')window.adjustFontSize(-1);saveAppPreferences({fontSize:currentFontSize()});});
+    var theme=$('settingsThemeToggle');if(theme)theme.addEventListener('click',function(){var button=$('themeToggleBtn');if(button)button.click();else if(typeof window.toggleTheme==='function')window.toggleTheme();syncPanelTexts();});
+    var reset=$('settingsRestoreDefaults');if(reset)reset.addEventListener('click',restoreDefaults);
+    var actions=[['settingsHelpButton','newHelpBtn'],['settingsShareButton','ag-share-link'],['settingsExamplesButton','ag-case-help-btn'],['settingsQrButton','qrBtn']];
+    actions.forEach(function(pair){var button=$(pair[0]);if(button)button.addEventListener('click',function(){closeSettingsPanel();var target=$(pair[1]);if(target)target.click();});});
+    var lang=$('language');if(lang)lang.addEventListener('change',syncPanelTexts);
+    var tuneButton=$('displayTuneBtn');if(tuneButton)tuneButton.addEventListener('click',syncPanelTexts);
+    if(typeof window.updateLanguage==='function'&&!window.updateLanguage.__referenceSettingsWrapped){
+      var original=window.updateLanguage;
+      var wrapped=function(){var result=original.apply(this,arguments);syncPanelTexts();return result;};
+      wrapped.__referenceSettingsWrapped=true;window.updateLanguage=wrapped;
+    }
+    try{new MutationObserver(syncPanelTexts).observe(document.body,{attributes:true,attributeFilter:['class']});}catch(_){}
+  }
+  window.__syncReferenceSettingsPanel=syncPanelTexts;
+  window.__applyWoodOuterButtonSkin=applyOuterButtonSkin;
+  applyAllOpacity();applyOuterButtonSkin();syncPanelTexts();bind();
+  window.addEventListener('resize',applyOuterButtonSkin);
+  if(window.matchMedia&&window.matchMedia('(max-width:767.98px)').matches&&!$('stage1HeaderToolsButton')){
+    try{
+      var skinObserver=new MutationObserver(function(){if($('stage1HeaderToolsButton')){applyOuterButtonSkin();skinObserver.disconnect();}});
+      skinObserver.observe(document.body,{childList:true,subtree:true});
+    }catch(_){}
+  }
+})();
+</script>
 <style id="app-brand-logo-title-style">
   /* Compact brand mark beside the main title; keep the text group centered. */
   #contentRoot #pageTitle .app-brand-icon{
@@ -14591,6 +15108,14 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   /* Replace the old decorative nut/ruler with the compact brand mark. */
   #contentRoot #pageTitle{display:flex!important;justify-content:center!important;align-items:center!important;gap:0!important;}
   #contentRoot #pageTitle .app-brand-icon{position:static!important;inset:auto!important;}
+</style>
+<style id="floating-controls-flush-right">
+  /* Put all four mobile floating controls directly against the viewport's right edge. */
+  @media(max-width:767.98px){
+    html body #languageToggle.language-toggle{right:0!important;margin-right:0!important;}
+    html body button#stage1HeaderToolsButton:not(.tool-btn):not(.btn-close){right:0!important;left:auto!important;margin-right:0!important;}
+    html body .scroll-nav{right:0!important;padding-right:0!important;margin-right:0!important;}
+  }
 </style>
 </body>
 </html>
