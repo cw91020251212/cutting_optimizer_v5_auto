@@ -2311,12 +2311,26 @@ h2#pageTitle .fa-ruler-combined{
   margin-left: 0 !important;
 }
 body.lang-zh h2#pageTitle #titleText { white-space: nowrap !important; }
-body.lang-en h2#pageTitle #titleText { white-space: normal !important; max-width: 18ch; line-height: 1.1; }
+/* English title: keep the intended two-line grouping on narrow screens. */
+body.lang-en h2#pageTitle #titleText {
+  white-space: normal !important;
+  max-width: none !important;
+  line-height: 1.08;
+}
 
 @media (max-width: 767.98px) {
   h2#pageTitle { grid-template-columns: 70px 1fr 70px !important; min-height: 56px !important; padding: 4px 10px !important; }
   h2#pageTitle .title-nut { width: 70px !important; height: 70px !important; }
   h2#pageTitle #titleText { font-size: 1.6rem !important; }
+  body.lang-en h2#pageTitle {
+    grid-template-columns: 58px minmax(0, 1fr) 58px !important;
+    column-gap: 4px !important;
+  }
+  body.lang-en h2#pageTitle #titleText {
+    font-size: 1.22rem !important;
+    line-height: 1.05 !important;
+    max-width: none !important;
+  }
   /* (cleanup) removed: #buildStamp not present */
 }
 
@@ -5650,7 +5664,7 @@ button.btn-sm{
         const elements = {
             titleText: {
                 zh: "鋁材切割排版",
-                en: "Aluminum Cutting<br>Optimization"
+                en: "Aluminum&nbsp;Cutting<br>Optimization"
             },
             settingsTitle: {
                 zh: "設置",
