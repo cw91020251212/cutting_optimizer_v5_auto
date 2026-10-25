@@ -1,0 +1,313 @@
+/* Local review: desktop/tablet only. Mobile rules and original icon assets stay unchanged. */
+@media screen and (min-width: 768px) {
+  html.desktop-workspace,
+  html.desktop-workspace body {
+    height: 100%;
+    overflow: hidden !important;
+  }
+  html.desktop-workspace body {
+    box-sizing: border-box;
+    height: 100vh;
+    height: 100dvh;
+    padding: 12px 12px 46px !important;
+  }
+  html.desktop-workspace #contentRoot {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+  html.desktop-workspace #contentRoot > .container-fluid {
+    --desktop-operations-width: clamp(340px, 30vw, 400px);
+    display: grid !important;
+    grid-template-columns: var(--desktop-operations-width) minmax(0, 1fr);
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding: 0 !important;
+    align-items: stretch;
+  }
+  html.desktop-workspace #desktopOperations,
+  html.desktop-workspace #desktopResults {
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-top: 12px;
+  }
+  html.desktop-workspace #desktopOperations {
+    padding: 0 8px 18px 0;
+    border-right: 1px solid rgba(255, 255, 255, .22);
+  }
+  html.desktop-workspace #desktopResults {
+    padding: 0 0 18px;
+  }
+  html.desktop-workspace #desktopOperations:focus-visible,
+  html.desktop-workspace #desktopResults:focus-visible {
+    outline: 2px solid #84c8ff;
+    outline-offset: -2px;
+  }
+  html.desktop-workspace #desktopOperations #pageTitle {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 84px !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    margin: 0 0 8px !important;
+  }
+  html.desktop-workspace #desktopOperations #pageTitle .app-brand-icon {
+    flex-basis: 62px !important;
+    width: 62px !important;
+    height: 62px !important;
+    margin-right: 10px !important;
+  }
+  html.desktop-workspace #desktopOperations #pageTitle #titleText {
+    min-width: 0;
+    font-size: 1.25rem !important;
+    line-height: 1.15 !important;
+  }
+  html.desktop-workspace.lang-zh #desktopOperations #pageTitle #titleText,
+  html.desktop-workspace body.lang-zh #desktopOperations #pageTitle #titleText {
+    font-size: 1.4rem !important;
+  }
+  html.desktop-workspace .desktop-utility-row {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 8px;
+    padding: 3px 0;
+    pointer-events: none;
+  }
+  html.desktop-workspace #desktopQuickToggle {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 38px;
+    padding: 6px 12px;
+    border: 1px solid #587897;
+    border-radius: 19px;
+    background: #e7f1fa;
+    color: #173b60;
+    font-weight: 700;
+    font-size: .88rem;
+    pointer-events: auto;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .15);
+  }
+  html.desktop-workspace #desktopQuickToggle[aria-expanded="true"] {
+    background: #c9e3ff;
+  }
+  html.desktop-workspace #desktopOperations .card {
+    width: 100%;
+    margin-bottom: 12px !important;
+  }
+  html.desktop-workspace #desktopOperations .section-header {
+    min-height: 42px;
+    padding: 9px 12px !important;
+    font-size: 1rem !important;
+  }
+  html.desktop-workspace #desktopOperations .section-title {
+    min-width: 0;
+    gap: 5px;
+    font-size: 1rem !important;
+  }
+  html.desktop-workspace #desktopOperations .step-indicator {
+    flex: 0 0 auto;
+    padding: 3px 10px;
+    font-size: .86rem;
+  }
+  html.desktop-workspace #desktopOperations .card-body {
+    padding: 14px 12px !important;
+  }
+  html.desktop-workspace #desktopOperations .ag-main-cards-row {
+    --bs-gutter-x: 0px;
+    --bs-gutter-y: 0px;
+    display: block;
+    width: 100%;
+    margin: 0;
+  }
+  html.desktop-workspace #desktopOperations .ag-main-cards-row > .col-md-6,
+  html.desktop-workspace #desktopOperations .settings-top-row > .col-md-3,
+  html.desktop-workspace #desktopOperations .settings-top-row > .col-md-6 {
+    flex: 0 0 100%;
+    width: 100%;
+    max-width: 100%;
+  }
+  html.desktop-workspace #desktopOperations .ag-main-cards-row > .col-md-6 {
+    padding: 0;
+  }
+  html.desktop-workspace #desktopOperations .settings-top-row {
+    row-gap: 8px !important;
+    margin-bottom: 18px !important;
+  }
+  html.desktop-workspace #desktopOperations #settings-card .settings-top-row > .col-md-3 > .d-flex {
+    align-items: flex-end !important;
+    text-align: right;
+  }
+  html.desktop-workspace #desktopOperations #unitPickerBtn {
+    width: 72px !important;
+    white-space: nowrap;
+    font-size: 1rem !important;
+  }
+  html.desktop-workspace #desktopOperations #globalCutUnitBtn,
+  html.desktop-workspace #desktopOperations #globalMaterialUnitBtn {
+    width: 64px !important;
+    white-space: nowrap;
+    font-size: .84rem !important;
+  }
+  html.desktop-workspace #desktopOperations .algo-saw-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 12px;
+  }
+  html.desktop-workspace #desktopOperations .algo-saw-grid > * {
+    min-width: 0;
+  }
+  html.desktop-workspace #desktopOperations #algorithmSelector {
+    width: 100%;
+    min-width: 0;
+    padding-left: 7px;
+    font-size: .88rem;
+  }
+  html.desktop-workspace #desktopOperations .saw-thickness-input {
+    width: 100%;
+    min-width: 0;
+  }
+  html.desktop-workspace #desktopOperations #sawThickness {
+    width: 100% !important;
+    min-width: 0;
+  }
+  html.desktop-workspace #desktopOperations .scheme-left {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+  html.desktop-workspace #desktopOperations .scheme-actions-row .scheme-left .ag-action-btn {
+    min-width: 0;
+    padding: 7px 5px !important;
+    font-size: .86rem !important;
+  }
+  html.desktop-workspace #desktopOperations .scheme-actions-row .scheme-right {
+    flex: 0 0 48px;
+    margin-left: 5px;
+  }
+  html.desktop-workspace #desktopOperations #autoReplenishPickerBtn {
+    width: 48px;
+  }
+  html.desktop-workspace #desktopOperations .scheme-actions-row .auto-replenish-title {
+    font-size: .75rem;
+  }
+  html.desktop-workspace #desktopOperations .length-input-group > .col {
+    min-width: 0;
+  }
+  html.desktop-workspace #desktopOperations .form-control.cutQty,
+  html.desktop-workspace #desktopOperations .form-control.materialQty {
+    max-width: 100%;
+  }
+  html.desktop-workspace #desktopOperations .controls-row .ag-action-btn {
+    min-width: 0;
+    padding: 7px 5px !important;
+    font-size: .86rem !important;
+    gap: 3px !important;
+  }
+  html.desktop-workspace #desktopOperations .table-responsive {
+    overflow-x: auto;
+  }
+  html.desktop-workspace #desktopCommandCard .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+  }
+  html.desktop-workspace #desktopCommandCard .button-group > .btn {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    margin: 0 !important;
+    font-size: .95rem;
+    padding: 9px 7px;
+  }
+  html.desktop-workspace #desktopResults:not(.has-results) #results-card {
+    display: none !important;
+  }
+  html.desktop-workspace #desktopResults #results-card {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 !important;
+  }
+  html.desktop-workspace #desktopResults #results-card > .card-body {
+    min-width: 0;
+    padding-top: 8px;
+  }
+  html.desktop-workspace body > #stage1HeaderToolsButton {
+    display: none !important;
+  }
+  html.desktop-workspace #desktopQuickActions {
+    position: fixed;
+    z-index: 10000;
+    box-sizing: border-box;
+    width: 300px;
+    max-height: calc(100dvh - 40px);
+    padding: 15px;
+    overflow: auto;
+    border: 1px solid #a7bdd1;
+    border-radius: 14px;
+    background: #f4f8fc;
+    color: #173b60;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, .3);
+  }
+  html.desktop-workspace #desktopQuickActions[hidden] {
+    display: none !important;
+  }
+  html.desktop-workspace #desktopQuickActions .top-tools {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    justify-items: center;
+    gap: 14px 8px !important;
+    width: 100% !important;
+    margin: 0 0 14px !important;
+  }
+  html.desktop-workspace #desktopQuickActions .desktop-quick-extra {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid #c8d6e2;
+  }
+  html.desktop-workspace #desktopQuickActions #languageToggle {
+    position: static !important;
+    inset: auto !important;
+    margin: 0 !important;
+    flex: 0 0 auto;
+  }
+  html.desktop-workspace #desktopQuickActions .scroll-nav {
+    position: static !important;
+    inset: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 18px !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: none !important;
+  }
+  html.desktop-workspace #desktopQuickActions .scroll-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+}
+/* Printing remains an unbounded document rather than two clipped screen panes. */
+@media print {
+  html.desktop-workspace #desktopOperations,
+  html.desktop-workspace #desktopResults {
+    display: contents;
+  }
+  #desktopCommandCard,
+  #desktopQuickActions,
+  .desktop-utility-row {
+    display: none !important;
+  }
+}

@@ -14049,6 +14049,7 @@ window.__agScrollTo = window.__agScrollTo || function(el){
     drawer.querySelector('.stage1-tools-close').addEventListener('click', function(){ setOpen(false); });
     backdrop.addEventListener('click', function(){ setOpen(false); });
   }
+  window.__initStage1HeaderTools = initStage1HeaderTools;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(initStage1HeaderTools, 0); }, {once:true});
   else setTimeout(initStage1HeaderTools, 0);
 })();
@@ -15129,5 +15130,7 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     html body .scroll-nav{right:0!important;padding-right:0!important;margin-right:0!important;}
   }
 </style>
+<link rel="stylesheet" href="./desktop-workspace.css">
+<script src="./desktop-workspace.js"></script>
 </body>
 </html>
