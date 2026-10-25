@@ -242,6 +242,23 @@
     min-width: 0;
     padding-top: 8px;
   }
+  /*
+   * 每條材料的切割圖必須獨佔一行。
+   * 明確使用 block／100% 寬，避免寬螢幕或外部樣式令材料卡片左右並排，
+   * 讓同一塊版材的切割次序保持由上而下、容易閱讀。
+   */
+  html.desktop-workspace #desktopResults #agResultsContainer {
+    display: block !important;
+    width: 100% !important;
+  }
+  html.desktop-workspace #desktopResults #agResultsContainer > .opt-material-box {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    clear: both !important;
+  }
   html.desktop-workspace body > #stage1HeaderToolsButton {
     display: none !important;
   }
