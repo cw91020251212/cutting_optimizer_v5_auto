@@ -6,7 +6,7 @@
   var phoneDevice = Boolean(navigator.userAgentData && navigator.userAgentData.mobile) ||
     /iPhone|iPod|Android[^\n]*Mobile/i.test(navigator.userAgent);
   var active = false, moved = [], operations, results, quickPanel, quickToggle, utilityRow, commandCard;
-  var resultObserver, languageObserver;
+  var resultObserver, languageObserver, emptyState;
   var originalScrollTo = window.__agScrollTo;
 
   function byId(id) { return document.getElementById(id); }
@@ -20,11 +20,14 @@
   function english() { return byId('language') && byId('language').value === 'en'; }
   function syncLabels() {
     if (!active) return;
-    quickToggle.querySelector('span').textContent = english() ? 'Tools' : '工具';
-    quickToggle.setAttribute('aria-label', english() ? 'Quick tools' : '快捷工具');
-    quickPanel.setAttribute('aria-label', english() ? 'Quick tools' : '快捷工具');
+    quickToggle.querySelector('span').textContent = english() ? 'More' : '更多';
+    quickToggle.setAttribute('aria-label', english() ? 'More options' : '更多操作');
+    quickPanel.setAttribute('aria-label', english() ? 'More options' : '更多操作');
     operations.setAttribute('aria-label', english() ? 'Operations' : '操作區');
     results.setAttribute('aria-label', english() ? 'Cutting results' : '切割結果');
+    emptyState.innerHTML = english()
+      ? '<i class="fa-solid fa-ruler-combined" aria-hidden="true"></i><h2>Ready to plan a cut?</h2><p>Add cutting items and available material, then click Calculate to view your layout.</p>'
+      : '<i class="fa-solid fa-ruler-combined" aria-hidden="true"></i><h2>準備開始排版</h2><p>先加入切割項目與可用材料，再按「計算」查看排版結果。</p>';
   }
   function positionQuickPanel() {
     if (!active || quickPanel.hidden) return;
@@ -75,6 +78,10 @@
     active = true;
     operations = document.createElement('section'); operations.id = 'desktopOperations'; operations.tabIndex = 0;
     results = document.createElement('section'); results.id = 'desktopResults'; results.tabIndex = 0;
+    emptyState = document.createElement('div'); emptyState.className = 'desktop-empty-state';
+    emptyState.setAttribute('role', 'status'); emptyState.setAttribute('aria-live', 'polite');
+    emptyState.setAttribute('aria-atomic', 'true');
+    results.appendChild(emptyState);
     utilityRow = document.createElement('div'); utilityRow.className = 'desktop-utility-row';
     quickToggle = document.createElement('button');
     quickToggle.id = 'desktopQuickToggle'; quickToggle.type = 'button';
@@ -85,7 +92,7 @@
     quickPanel = document.createElement('section'); quickPanel.id = 'desktopQuickActions'; quickPanel.hidden = true;
     document.body.appendChild(quickPanel);
     var extra = document.createElement('div'); extra.className = 'desktop-quick-extra';
-    move(document.querySelector('.top-tools'), quickPanel);
+    move(document.querySelector('.top-tools'), utilityRow);
     quickPanel.appendChild(extra);
     move(byId('languageToggle'), extra);
     move(document.querySelector('.scroll-nav'), extra);

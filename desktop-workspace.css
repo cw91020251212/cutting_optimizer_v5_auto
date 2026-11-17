@@ -17,7 +17,7 @@
     min-height: 0;
   }
   html.desktop-workspace #contentRoot > .container-fluid {
-    --desktop-operations-width: clamp(340px, 30vw, 400px);
+    --desktop-operations-width: clamp(420px, 35vw, 520px);
     display: grid !important;
     grid-template-columns: var(--desktop-operations-width) minmax(0, 1fr);
     gap: 16px;
@@ -79,7 +79,9 @@
     top: 0;
     z-index: 15;
     display: flex;
-    justify-content: flex-end;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
     margin: 0 0 8px;
     padding: 3px 0;
     pointer-events: none;
@@ -298,6 +300,184 @@
     opacity: 1 !important;
     pointer-events: auto !important;
   }
+  #desktopOperations .desktop-utility-row .top-tools {
+    display: flex !important;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+  #desktopOperations .desktop-utility-row .top-tools .tool-btn {
+    display: inline-flex !important;
+    flex: 0 0 40px;
+    align-items: center;
+    justify-content: center;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+  html.desktop-workspace #desktopQuickToggle {
+    min-height: 40px;
+    white-space: nowrap;
+    pointer-events: auto !important;
+  }
+  #desktopResults:not(.has-results) .desktop-empty-state {
+    box-sizing: border-box;
+    display: grid;
+    min-height: min(64vh, 620px);
+    place-content: center;
+    justify-items: center;
+    gap: 12px;
+    padding: 32px;
+    border: 1px dashed #94a3b8;
+    border-radius: 16px;
+    background: rgba(248, 250, 252, .82);
+    color: #334155;
+    text-align: center;
+  }
+  #desktopResults:not(.has-results) .desktop-empty-state i {
+    color: #2563eb;
+    font-size: 2.5rem;
+  }
+  #desktopResults:not(.has-results) .desktop-empty-state h2 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  #desktopResults:not(.has-results) .desktop-empty-state p {
+    max-width: 34rem;
+    margin: 0;
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  #desktopResults.has-results .desktop-empty-state {
+    display: none !important;
+  }
+  html.desktop-workspace #desktopOperations #materialItemsTable {
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+  html.desktop-workspace #desktopOperations #materialItemsTable th:nth-child(2),
+  html.desktop-workspace #desktopOperations #materialItemsTable td:nth-child(2) { width: 60px !important; }
+  html.desktop-workspace #desktopOperations #materialItemsTable th:nth-child(3),
+  html.desktop-workspace #desktopOperations #materialItemsTable td:nth-child(3) { width: 64px !important; }
+  html.desktop-workspace #desktopOperations #materialItemsTable th:nth-child(4),
+  html.desktop-workspace #desktopOperations #materialItemsTable td:nth-child(4) { width: 82px !important; }
+  html.desktop-workspace #desktopOperations #materialItemsTable th:nth-child(5),
+  html.desktop-workspace #desktopOperations #materialItemsTable td:nth-child(5) { width: 96px !important; }
+  html.desktop-workspace #desktopOperations #materialItemsTable td { overflow-wrap: anywhere; }
+  html.desktop-workspace body:not(.sepia-mode) #desktopOperations .card,
+  html.desktop-workspace body:not(.sepia-mode) #desktopResults #results-card {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .12) !important;
+    color: #1f2937 !important;
+  }
+  html.desktop-workspace body:not(.sepia-mode) #desktopOperations .card-body,
+  html.desktop-workspace body:not(.sepia-mode) #desktopResults #results-card .card-body {
+    background: #f8fafc !important;
+    background-image: none !important;
+    color: #1f2937 !important;
+  }
+  html.desktop-workspace body:not(.sepia-mode) #desktopOperations .section-header,
+  html.desktop-workspace body:not(.sepia-mode) #desktopResults .section-header {
+    background: linear-gradient(90deg, #1d4ed8, #3b82f6) !important;
+    border-bottom: 1px solid #bfdbfe !important;
+  }
+  html.desktop-workspace body:not(.sepia-mode) #desktopOperations .section-header::before,
+  html.desktop-workspace body:not(.sepia-mode) #desktopResults .section-header::before {
+    display: none !important;
+  }
+  html.desktop-workspace body #desktopOperations .btn:not(.btn-close):not(.tool-btn):not(#languageToggle),
+  html.desktop-workspace body #desktopCommandCard .btn:not(.btn-close):not(.tool-btn):not(#languageToggle) {
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .16) !important;
+    text-shadow: none !important;
+  }
+  #desktopOperations .btn::before,
+  #desktopOperations .btn::after,
+  #desktopCommandCard .btn::before,
+  #desktopCommandCard .btn::after {
+    display: none !important;
+    content: none !important;
+    animation: none !important;
+  }
+  #desktopOperations .btn-success,
+  #desktopCommandCard .btn-success,
+  #desktopOperations .btn-primary,
+  #desktopCommandCard .btn-primary,
+  #desktopOperations .save-scheme-btn,
+  #desktopOperations .load-scheme-btn {
+    background: #2563eb !important;
+    border-color: #1d4ed8 !important;
+    color: #fff !important;
+  }
+  #desktopCommandCard #calculateButton {
+    background: #2563eb !important;
+    background-image: none !important;
+    border: 1px solid #1d4ed8 !important;
+    color: #fff !important;
+  }
+  #desktopCommandCard #calculateButton:hover { background: #1d4ed8 !important; }
+  #desktopResults #colorLegend > h4 {
+    margin: 0 0 12px !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(90deg, #1d4ed8, #3b82f6) !important;
+    color: #fff !important;
+    font-size: 1.05rem !important;
+    box-shadow: none !important;
+  }
+  #desktopResults .opt-summary-box > div {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)) !important;
+    gap: 12px !important;
+    font-size: 14px !important;
+  }
+  #desktopResults .opt-summary-box > div > div {
+    padding: 12px 10px;
+    border: 1px solid #cce3d0;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .7);
+    text-align: center;
+  }
+  #desktopResults .opt-summary-box > div > div > strong {
+    display: inline-block;
+    color: #334155 !important;
+    font-size: 14px !important;
+    line-height: 1.4;
+  }
+  #desktopResults .opt-summary-box > div > div > span { font-size: 28px !important; line-height: 1.15; }
+  html.desktop-workspace #desktopOperations .mclass-badge.mclass-scrap {
+    background: #f1f5f9 !important;
+    background-image: none !important;
+    border-color: #cbd5e1 !important;
+    color: #334155 !important;
+    box-shadow: none !important;
+  }
+  html.desktop-workspace #desktopOperations .mclass-badge.mclass-original {
+    background: #ecfdf5 !important;
+    background-image: none !important;
+    border-color: #bbf7d0 !important;
+    color: #166534 !important;
+    box-shadow: none !important;
+  }
+  html.desktop-workspace #desktopOperations #materialItemsTable td:nth-child(4) span {
+    color: #15803d !important;
+    font-size: 16px !important;
+    font-weight: 600;
+  }
 }
 /* Printing remains an unbounded document rather than two clipped screen panes. */
 @media print {
@@ -309,5 +489,10 @@
   #desktopQuickActions,
   .desktop-utility-row {
     display: none !important;
+  }
+}
+@media screen and (max-width: 767.98px) {
+  html body #contentRoot > .container-fluid {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
