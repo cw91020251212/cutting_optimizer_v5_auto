@@ -3454,7 +3454,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <ol class="ag-case-steps">
 <li><b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。</li>
 <li><b>注意：</b>當有切割項目長度超出材料尺寸，系統自動製造補料，不依用家設定。</li>
-<li><b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。</li>
+<li><b>輸入切割項目：</b>喺「切割項目區」逐行填尺寸 + 數量。</li>
 <li><b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。</li>
 <li><b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。</li>
 </ol>
@@ -3465,8 +3465,8 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <p class="ag-case-sub"><b>適用情況：</b>貨倉有碎料想先用晒，唔夠先補新料，盡量慳成本。</p>
 <ol class="ag-case-steps">
 <li><b>排版設定改做「碎料優先」：</b>呢步最重要，等於直接同系統講「先用舊料」。</li>
-<li><b>輸入部件需求：</b>喺「部件區」填尺寸 + 數量。</li>
-<li><b>輸入現有碎料：</b>喺「材料／物料區」如實填碎料尺寸 + 數量。</li>
+<li><b>輸入切割項目：</b>喺「切割項目區」填尺寸 + 數量。</li>
+<li><b>輸入現有碎料：</b>喺「材料區」如實填碎料尺寸 + 數量。</li>
 <li><b>按「計算」睇排版圖：</b>畫面會清楚展示點樣優先用碎料；唔夠嘅部分會由「自動補料」補標準新料。</li>
 </ol>
 </section>
@@ -3598,7 +3598,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
       steps1: [
         '<b>設定標準材料長度：</b>揀計算單位，設定自動補料嘅標準長度（例：木材 8 尺、鋁材 3 米）。',
         '<b>注意：</b>當有切割項目長度超出材料尺寸，系統自動製造補料，不依用家設定。',
-        '<b>輸入部件需求：</b>喺「部件區」逐行填尺寸 + 數量。',
+        '<b>輸入切割項目：</b>喺「切割項目區」逐行填尺寸 + 數量。',
         '<b>材料區只輸入 1 條標準料：</b>因為你係做預算，先入 1 條；系統會靠「自動補料」幫你推算總共要幾多條。',
         '<b>按「計算」睇排版圖：</b>排版圖會顯示最佳切割安排，你一眼就知道大概需要幾多條材料。'
       ],
@@ -3607,8 +3607,8 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
       sub2: '<b>適用情況：</b>貨倉有碎料想先用晒，唔夠先補新料，盡量慳成本。',
       steps2: [
         '<b>排版設定改做「碎料優先」：</b>呢步最重要，等於直接同系統講「先用舊料」。',
-        '<b>輸入部件需求：</b>喺「部件區」填尺寸 + 數量。',
-        '<b>輸入現有碎料：</b>喺「材料／物料區」如實填碎料尺寸 + 數量。',
+        '<b>輸入切割項目：</b>喺「切割項目區」填尺寸 + 數量。',
+        '<b>輸入現有碎料：</b>喺「材料區」如實填碎料尺寸 + 數量。',
         '<b>按「計算」睇排版圖：</b>畫面會清楚展示點樣優先用碎料；唔夠嘅部分會由「自動補料」補標準新料。'
       ]
     },
@@ -3815,14 +3815,35 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <span class="action-icon" aria-hidden="true"><i class="fas fa-folder-open"></i></span><span class="action-label">方案</span>
     </button>
 </div>
-<!-- 自動補料（新制）：右邊對稱、按下彈出選單 -->
-<div class="scheme-right" id="autoReplenishWrap">
-<div class="auto-replenish-title" id="autoReplenishBtnTitle"><span id="autoReplenishTitleMain">自動<br/>補料</span><span aria-live="polite" class="ag-ar-warn-text" id="autoReplenishWarnText" style="display:none;">（長度不足）</span></div>
-<button aria-label="自動補料" class="btn btn-success btn-sm" data-bs-target="#autoReplenishModal" data-bs-toggle="modal" id="autoReplenishPickerBtn" title="自動補料" type="button">OFF</button>
+</div>
+</div>
+ </div>
+<div class="row g-3 mt-2" id="autoReplenishSettingsRow">
+<div class="col-12">
+<div class="auto-replenish-setting" id="autoReplenishWrap">
+<div class="auto-replenish-copy">
+<div class="auto-replenish-title" id="autoReplenishBtnTitle"><span id="autoReplenishTitleMain">自動補料</span></div>
+<div class="auto-replenish-description" id="autoReplenishDescription">選擇標準補料長度；關閉時會保留上次選擇。</div>
+</div>
+<div class="auto-replenish-controls">
+<span aria-live="polite" id="autoReplenishState" role="status">載入設定中…</span>
+<button aria-controls="autoReplenishModal" aria-label="自動補料設定" aria-pressed="false" class="btn btn-secondary" data-bs-target="#autoReplenishModal" data-bs-toggle="modal" id="autoReplenishPickerBtn" title="自動補料設定" type="button">OFF</button>
+</div>
+<div aria-live="polite" hidden id="autoReplenishWarning" role="status"></div>
 <!-- 保留舊 checkbox 作相容（隱藏），供既有程式用 checked 判斷 -->
 <input checked="" id="autoReplenishToggle" style="display:none !important;" type="checkbox"/>
 <span class="visually-hidden" id="autoReplenishA11yLabel">Auto-Replenish</span>
 </div>
+</div>
+</div>
+<div class="row mt-2" id="displayQuickSettingsRow">
+<div class="col-12">
+<div aria-label="顯示與主題" class="display-quick-settings" role="group">
+<span class="display-quick-title" id="displayQuickSettingsTitle">顯示與主題</span>
+<button class="btn btn-outline-secondary" id="settingsFontIncreaseDirect" type="button" aria-label="放大字體">A+</button>
+<button class="btn btn-outline-secondary" id="settingsFontDecreaseDirect" type="button" aria-label="縮小字體">A−</button>
+<button class="btn btn-outline-secondary" id="settingsThemeDirect" type="button">主題：深色</button>
+<button class="btn btn-outline-primary" id="settingsTuneDirect" type="button">進階顯示設定</button>
 </div>
 </div>
 </div>
@@ -4320,6 +4341,7 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 </div>
 <div class="modal-body" id="helpContent"></div>
 <div class="modal-footer">
+<button class="btn btn-outline-primary" id="helpExamplesButton" type="button">查看使用案例</button>
 <button class="btn btn-secondary" data-bs-dismiss="modal" id="helpCloseBtn" type="button">關閉</button>
 </div>
 </div>
@@ -8109,7 +8131,7 @@ button.btn-sm{
 
     const title = l==='zh'?'⚠️ 材料長度不足（無法完成排版）':'⚠️ Material too short (layout not feasible)';
     const sub = l==='zh'
-      ? ('受影響原料：' + (list.length?('#'+list.join(', #')):'-'))
+      ? ('受影響材料：' + (list.length?('#'+list.join(', #')):'-'))
       : ('Affected bars: ' + (list.length?(''+list.join(', ')):'-'));
 
     let table='';
@@ -8118,7 +8140,7 @@ button.btn-sm{
         + '<table style="width:100%; border-collapse:collapse; font-size:12px;">'
         + '<thead><tr>'
         + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">#</th>'
-        + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'原料長度':'Bar')+'</th>'
+        + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'材料長度':'Bar')+'</th>'
         + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'需要(含鋸縫)':'Required (incl. kerf)')+'</th>'
         + '<th style="text-align:left; border-bottom:1px solid rgba(0,0,0,.15); padding:6px;">'+(l==='zh'?'短缺':'Short by')+'</th>'
         + '</tr></thead><tbody>'
@@ -8458,7 +8480,7 @@ function calculate() {
                               bin.mclass = 'auto';
                             } else {
                               throw new Error(_lang==='zh'
-                                ? ('材料長度不足：原料 #' + (bi+1) + ' 長度=' + (Number(bin.length)||0).toFixed(1) + 'mm，但需要=' + requiredTotal.toFixed(1) + 'mm。\n\n解決方法：增加更長材料 或 開啟自動補料。')
+                                ? ('材料長度不足：材料 #' + (bi+1) + ' 長度=' + (Number(bin.length)||0).toFixed(1) + 'mm，但需要=' + requiredTotal.toFixed(1) + 'mm。\n\n解決方法：增加更長材料 或 開啟自動補料。')
                                 : ('Material too short: Bar #' + (bi+1) + ' length=' + (Number(bin.length)||0).toFixed(1) + 'mm, required=' + requiredTotal.toFixed(1) + 'mm.\n\nFix: add longer material or enable Auto-Replenish.'));
                             }
                           }
@@ -8735,7 +8757,7 @@ function calculate() {
                         bin.mclass = 'auto';
                       } else {
                         throw new Error((document.getElementById('language')?document.getElementById('language').value:'zh')==='zh'
-                          ? '材料長度不足：有切件長度(含鋸縫)大於原料長度。請檢查：單位/材料/鋸縫，或開啟自動補料。'
+                          ? '材料長度不足：切割項目長度（含鋸縫）大於材料長度。請檢查：單位/材料/鋸縫，或開啟自動補料。'
                           : 'Material too short: some cuts (incl. kerf) exceed bar length. Check unit/material/kerf, or enable Auto-Replenish.');
                       }
                     }
@@ -8907,7 +8929,7 @@ function calculate() {
             }
             let uniqueLengths = Array.from(uniqueSet).filter(v=>isFinite(v)).sort((a,b)=>b-a);
 
-            const colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2"];
+            const colors = ["#1D4ED8", "#047857", "#C2410C", "#6D28D9", "#0E7490", "#BE185D", "#334155", "#4D7C0F"];
             const lengthColorMap = {};
             const lengthLabelMap = {};
 
@@ -9020,8 +9042,14 @@ function calculate() {
               summary: _rLang==='zh'?'📊 優化摘要':'📊 Optimization Summary',
               bars:    _rLang==='zh'?'所需支數':'Bars Needed',
               util:    _rLang==='zh'?'利用率':'Utilization',
-              waste:   _rLang==='zh'?'總餘料':'Total Waste'
+              waste:   _rLang==='zh'?'總餘料':'Total Waste',
+              gradient:_rLang==='zh'?'排版圖顏色樣式':'Layout color style',
+              depth:   _rLang==='zh'?'立體':'Depth',
+              metal:   _rLang==='zh'?'金屬':'Metal',
+              soft:    _rLang==='zh'?'柔和':'Soft',
+              flat:    _rLang==='zh'?'純色':'Flat'
             };
+            const _activeGradientMode = window.__agGradientMode || 'standard';
             // 記錄最近一次渲染，方便切換漸變色即時重繪
             try{
               window.__agLastRender = {
@@ -9033,11 +9061,14 @@ function calculate() {
 
             let html = `
                 <div class="opt-summary-box" style="margin-bottom: 20px; padding: 15px; background: #e8f5e9; border-radius: 8px; border-left: 4px solid #4caf50;">
-                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 10px 0;">
+                    <div class="ag-summary-header" style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin: 0 0 10px 0;">
                       <h4 style="margin: 0; color: #1b5e20;">${_t.summary}</h4>
-                      <button type="button" class="btn btn-sm btn-outline-success" onclick="try{window.__cycleGradientMode&&window.__cycleGradientMode();}catch(e){}" style="font-weight:800;">
-                        ${_rLang==='zh'?'漸變風格：':'Gradient: '}<span id="agGradModeLabel">${(window.__getGradientModeLabel?window.__getGradientModeLabel(_rLang):(_rLang==='zh'?'立體':'Depth'))}</span>
-                      </button>
+                      <div class="ag-gradient-controls" role="group" aria-label="${_t.gradient}">
+                        <button type="button" class="ag-gradient-choice" data-gradient-mode="standard" aria-pressed="${_activeGradientMode==='standard'}" onclick="window.__setGradientMode('standard')">${_t.depth}</button>
+                        <button type="button" class="ag-gradient-choice" data-gradient-mode="metal" aria-pressed="${_activeGradientMode==='metal'}" onclick="window.__setGradientMode('metal')">${_t.metal}</button>
+                        <button type="button" class="ag-gradient-choice" data-gradient-mode="soft" aria-pressed="${_activeGradientMode==='soft'}" onclick="window.__setGradientMode('soft')">${_t.soft}</button>
+                        <button type="button" class="ag-gradient-choice" data-gradient-mode="flat" aria-pressed="${_activeGradientMode==='flat'}" onclick="window.__setGradientMode('flat')">${_t.flat}</button>
+                      </div>
                     </div>
                     <div style="display: flex; justify-content: space-around; font-size: 14px;">
                         <div>
@@ -9066,7 +9097,7 @@ function calculate() {
                     <div style="margin: 12px 0 18px 0; padding: 12px; background-color: #fff3cd; border: 1px solid #ffecb5; border-radius: 6px; color: #856404;">
                       <strong><i class="fa-solid fa-triangle-exclamation"></i> ${_rLang==='zh'?'警告：部份材料長度不夠（已避免用負數顯示）':'Warning: Some bars are too short (negative values are not used)'}</strong><br>
                       ${_rLang==='zh'?
-                        ('受影響原料：'+list+'。請檢查：材料長度／鋸縫／單位換算。'):
+                        ('受影響材料：'+list+'。請檢查：材料長度／鋸縫／單位換算。'):
                         ('Affected bars: '+list+'. Please check material length / kerf / unit conversion.')}
                     </div>
                   `;
@@ -9106,10 +9137,10 @@ function calculate() {
               let h = `
                 <div class="opt-material-box" style="margin-bottom: 15px; padding: 12px; border-radius: 6px; background: #f9f9f9; border: 1px solid var(--ag-outline);">
                   <div style="font-weight: bold; margin-bottom: 8px; color: #333;">
-                    ${_rLang==='zh'?'原料':'Bar'} #${binIndex + 1} - ${formatLengthForDisplay(bin.length, unit)}
-                    ${bin.autoAdded ? ' <span style="color: #f57c00; font-size: 0.9em;">['+(_rLang==='zh'?'自動添加':'Auto Added')+']</span>' : ''}
+                    ${_rLang==='zh'?'材料':'Bar'} #${binIndex + 1} - ${formatLengthForDisplay(bin.length, unit)}
+                    ${bin.autoAdded ? ' <span style="color: #f57c00; font-size: 0.9em;">['+(_rLang==='zh'?'自動補料':'Auto Added')+']</span>' : ''}
                   </div>
-                  <div style="display: flex; height: 50px; border: 1px solid var(--ag-outline); border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: white;">`;
+                  <div class="cut-bar-chart" style="display: flex; height: 50px; border: 1px solid var(--ag-outline); border-radius: 4px; overflow: hidden; margin-bottom: 8px; background: white;">`;
 
               for (let ci=0; ci<cuts.length; ci++){
                 const cut = cuts[ci];
@@ -9118,23 +9149,23 @@ function calculate() {
                 const color = lengthColorMap[roundedLength];
                 const label = lengthLabelMap[roundedLength];
                 h += `
-                    <div style="width: ${percentage.toFixed(1)}%; background: ${(window.__agPartFill ? window.__agPartFill(color) : color)}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);"
-                         title="${formatLengthForDisplay(cut.length, unit)}">${label}</div>`;
+                    <div class="cut-segment" style="width: ${percentage.toFixed(1)}%; background: ${(window.__agPartFill ? window.__agPartFill(color) : color)}; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px; padding: 0 4px; text-align: center; border-right: 1px solid var(--ag-outline);"
+                         title="${formatLengthForDisplay(cut.length, unit)}" aria-label="${_rLang==='zh'?'長度':'Length'} ${formatLengthForDisplay(cut.length, unit)}">${label}</div>`;
               }
 
               if (wasteSafe > 0) {
                 const wastePercentageVisual = (bin.length>0) ? (wasteSafe / bin.length) * 100 : 0;
                 h += `
-                    <div style="width: ${wastePercentageVisual.toFixed(1)}%; background: repeating-linear-gradient(45deg, #ffcccc 0px, #ffcccc 5px, #ff9999 5px, #ff9999 10px); display: flex; align-items: center; justify-content: center; color: #a00; font-weight: bold; font-size: 11px; border-left: 1px solid var(--ag-outline); padding: 0 4px;">${_rLang==='zh'?'餘料':'Waste'}</div>`;
+                    <div class="cut-waste" style="width: ${wastePercentageVisual.toFixed(1)}%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; border-left: 1px solid var(--ag-outline); padding: 0 4px;" title="${_rLang==='zh'?'餘料':'Waste'} ${formatLengthForDisplay(wasteSafe, unit)}" aria-label="${_rLang==='zh'?'餘料':'Waste'} ${formatLengthForDisplay(wasteSafe, unit)}">${_rLang==='zh'?'餘料':'Waste'}</div>`;
               }
 
               h += `
                   </div>
-                  <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                  <div class="cut-details" style="font-size: 12px; color: #666; margin-bottom: 5px;">
                     <strong>${_rLang==='zh'?'使用長度':'Used Length'}：</strong> ${formatLengthForDisplay(usedLength + kerfLength, unit)} |
                     <strong>${_rLang==='zh'?'餘料':'Waste'}：</strong> ${formatLengthForDisplay(wasteSafe, unit)} (${wastePercentage}%)
                   </div>
-                  <div style="font-size: 11px; color: #666;">
+                  <div class="cut-order" style="font-size: 11px; color: #666;">
                     <strong>${_rLang==='zh'?'切割順序':'Cut Order'}：</strong>
                     ${cuts.map(cut => formatLengthForDisplay(Math.round((Number(cut.length)||0) * 10) / 10, unit)).join(' → ')}
                   </div>
@@ -14020,7 +14051,31 @@ window.__agScrollTo = window.__agScrollTo || function(el){
     drawer.innerHTML = '<div class="stage1-tools-header"><span>工具</span><button type="button" class="stage1-tools-close" aria-label="關閉">×</button></div>';
     document.body.appendChild(backdrop);
     document.body.appendChild(drawer);
+    const movedNodes = [];
+    function rememberAndMove(node){
+      if(!node || !node.parentNode) return;
+      const marker = document.createComment('stage1-tools-origin');
+      node.parentNode.insertBefore(marker, node);
+      movedNodes.push({node:node, marker:marker});
+      drawer.appendChild(node);
+    }
+    const toolsMarker = document.createComment('stage1-tools-origin');
+    tools.parentNode.insertBefore(toolsMarker, tools);
+    movedNodes.push({node:tools, marker:toolsMarker});
     drawer.appendChild(tools);
+    const languageToggle = document.getElementById('languageToggle');
+    const scrollNav = document.querySelector('.scroll-nav');
+    rememberAndMove(languageToggle);
+    rememberAndMove(scrollNav);
+
+    function syncHeaderLabels(){
+      const en = (document.getElementById('language')||{}).value === 'en';
+      const title = drawer.querySelector('.stage1-tools-header span');
+      const close = drawer.querySelector('.stage1-tools-close');
+      button.setAttribute('aria-label', en ? 'Open tools' : '開啟工具');
+      if(title) title.textContent = en ? 'Tools' : '工具';
+      if(close) close.setAttribute('aria-label', en ? 'Close tools' : '關閉工具');
+    }
 
     function setOpen(open){
       drawer.classList.toggle('is-open', open);
@@ -14038,16 +14093,35 @@ window.__agScrollTo = window.__agScrollTo || function(el){
       document.body.style.overflow = open ? 'hidden' : '';
     }
     button.addEventListener('click', function(){
-      setOpen(false);
-      if(typeof window.__openDisplayTune==='function'){
-        window.__openDisplayTune();
-        if(typeof window.__syncReferenceSettingsPanel==='function') window.__syncReferenceSettingsPanel();
-      }else{
-        setOpen(true);
-      }
+      const open = !drawer.classList.contains('is-open');
+      setOpen(open);
+      if(open) drawer.querySelector('.stage1-tools-close').focus();
     });
     drawer.querySelector('.stage1-tools-close').addEventListener('click', function(){ setOpen(false); });
     backdrop.addEventListener('click', function(){ setOpen(false); });
+    drawer.addEventListener('click', function(event){
+      if(event.target.closest('.tool-btn, #languageToggle, .scroll-btn')) setOpen(false);
+    });
+    document.addEventListener('keydown', function(event){ if(event.key === 'Escape' && drawer.classList.contains('is-open')) setOpen(false); });
+    if(languageToggle) languageToggle.addEventListener('click', function(){ setTimeout(syncHeaderLabels, 0); });
+    const langSelect = document.getElementById('language');
+    if(langSelect) langSelect.addEventListener('change', syncHeaderLabels);
+    syncHeaderLabels();
+
+    function restore(){
+      if(document.documentElement.dataset.stage1HeaderTools !== '1') return;
+      setOpen(false);
+      movedNodes.slice().reverse().forEach(function(entry){
+        if(entry.marker.parentNode) entry.marker.parentNode.insertBefore(entry.node, entry.marker);
+        entry.marker.remove();
+      });
+      button.remove(); backdrop.remove(); drawer.remove();
+      delete document.documentElement.dataset.stage1HeaderTools;
+      window.__restoreStage1HeaderTools = null;
+      window.__stage1HeaderToolsDrawer = null;
+    }
+    window.__restoreStage1HeaderTools = restore;
+    window.__stage1HeaderToolsDrawer = drawer;
   }
   window.__initStage1HeaderTools = initStage1HeaderTools;
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(initStage1HeaderTools, 0); }, {once:true});
@@ -15132,5 +15206,6 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
 </style>
 <link rel="stylesheet" href="./desktop-workspace.css">
 <script src="./desktop-workspace.js"></script>
+<script src="./ui-review-followup.js"></script>
 </body>
 </html>

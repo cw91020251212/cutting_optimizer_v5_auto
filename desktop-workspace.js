@@ -72,6 +72,7 @@
   };
   function enterDesktop() {
     if (active) return;
+    if (typeof window.__restoreStage1HeaderTools === 'function') window.__restoreStage1HeaderTools();
     var container = document.querySelector('#contentRoot > .container-fluid');
     var resultCard = byId('results-card');
     if (!container || !resultCard) return;
