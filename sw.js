@@ -3,14 +3,11 @@
  * The version is intentionally changed whenever the application bundle changes so
  * installed PWA clients do not keep an old index.html after a release.
  */
-const APP_VERSION = '2026-11-18-ui-review-followup-1';
+const APP_VERSION = '2026-10-24-logo-title-1';
 const CACHE_NAME = `cutting-optimizer-${APP_VERSION}`;
 const CORE_ASSETS = [
   './',
   './index.html',
-  './desktop-workspace.css',
-  './desktop-workspace.js',
-  './ui-review-followup.js',
   './assets/manifest.webmanifest',
   './assets/favicon.ico',
   './assets/icon-32.png',
