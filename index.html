@@ -11749,7 +11749,14 @@ document.addEventListener('DOMContentLoaded', function() {
           return '';
         })()
       };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+      let mergedSettings = {};
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const parsed = saved ? JSON.parse(saved) : null;
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) mergedSettings = parsed;
+      } catch(e) {}
+      Object.assign(mergedSettings, settings);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedSettings));
     } catch(e) {}
   }
 
@@ -12693,16 +12700,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (settings.warmth==null) settings.warmth=0;
     if (settings.paperTint==null) settings.paperTint=0.65;
     if (settings.paperStrength==null) settings.paperStrength=0.65;
-
-    // 需求：『顯示進階滑桿』每次都保持關上（不記憶狀態）
-    settings.tuneAdvanced=false;
+    if (settings.tuneAdvanced==null) settings.tuneAdvanced=false;
   }
   function writeTune(){
-    // 不把 tuneAdvanced 寫入 localStorage
     try{
-      var s = Object.assign({}, settings);
-      delete s.tuneAdvanced;
-      localStorage.setItem(KEY, JSON.stringify(s));
+      localStorage.setItem(KEY, JSON.stringify(settings));
     }catch(e){}
   }
   function applyTune(){
@@ -12800,14 +12802,14 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function openTune(){
-    // 每次開啟都重新讀取一次；同時『進階滑桿』固定為關上（不記憶）
+    // 每次開啟都重新讀取並還原顯示調校偏好。
     readTune();
 
     var modal=document.getElementById('displayTuneModal');
     if(!modal) return;
     syncTuneTexts();
     setSliderValues();
-    setAdvanced(false, false);
+    setAdvanced(settings.tuneAdvanced, false);
     modal.style.display='flex';
     modal.setAttribute('aria-hidden','false');
     // 自製彈窗：手動加背景模糊
@@ -15133,19 +15135,25 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
 <link rel="stylesheet" href="./desktop-workspace.css">
 <style id="section-collapse-controls">
   .section-header-actions{display:flex;align-items:center;gap:.45rem;flex:0 0 auto;margin-left:.6rem;}
+  body #settings-card .section-header,
+  body #cutting-items-card .section-header,
+  body #materials-card .section-header,
+  body #results-card .section-header{
+    box-sizing:border-box!important;min-height:44px!important;padding:0 .65rem!important;
+  }
   .section-header .section-collapse-toggle{
-    width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;
-    padding:0!important;margin:0!important;border:1px solid rgba(255,255,255,.72)!important;
-    border-radius:50%!important;background:rgba(255,255,255,.16)!important;color:#fff!important;
+    width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
+    padding:0!important;margin:0!important;border:0!important;
+    border-radius:0!important;background:transparent!important;color:#fff!important;
     box-shadow:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
     line-height:1!important;font-size:1rem!important;opacity:1!important;
   }
-  .section-header .section-collapse-toggle:hover{background:rgba(255,255,255,.28)!important;filter:none!important;transform:none!important;}
+  .section-header .section-collapse-toggle:hover{background:transparent!important;filter:none!important;transform:none!important;}
   .section-header .section-collapse-toggle:focus-visible{outline:3px solid #fff!important;outline-offset:2px;}
-  .section-header .section-collapse-toggle i{pointer-events:none;}
+  .section-header .section-collapse-toggle i{pointer-events:none;font-size:.85rem!important;}
   @media(max-width:767.98px){
     .section-header-actions{gap:.35rem;margin-left:.4rem;}
-    .section-header .section-collapse-toggle{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;}
+    .section-header .section-collapse-toggle{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;}
   }
 </style>
 <script id="section-collapse-behavior">
@@ -15157,6 +15165,7 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     {card:'materials-card',title:'materialTitle'},
     {card:'results-card',title:'resultTitle'}
   ];
+  var preferenceKey='aluminum_cut_user_prefs_v1';
   function english(){var language=document.getElementById('language');return language&&language.value==='en';}
   function labelFor(title,expanded){
     var name=title.textContent.trim();
@@ -15171,6 +15180,23 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
       button.setAttribute('aria-label',label);
       button.title=label;
     });
+  }
+  var savedExpanded={};
+  try{
+    var savedPreferences=JSON.parse(localStorage.getItem(preferenceKey)||'{}');
+    if(savedPreferences&&savedPreferences.sectionExpanded&&typeof savedPreferences.sectionExpanded==='object')savedExpanded=savedPreferences.sectionExpanded;
+  }catch(_){}
+  function saveSectionState(){
+    try{
+      var preferences=JSON.parse(localStorage.getItem(preferenceKey)||'{}');
+      if(!preferences||typeof preferences!=='object'||Array.isArray(preferences))preferences={};
+      preferences.sectionExpanded={};
+      sections.forEach(function(section){
+        var button=document.querySelector('#'+section.card+' [data-section-toggle]');
+        if(button)preferences.sectionExpanded[section.card]=button.getAttribute('aria-expanded')==='true';
+      });
+      localStorage.setItem(preferenceKey,JSON.stringify(preferences));
+    }catch(_){}
   }
   sections.forEach(function(section){
     var card=document.getElementById(section.card);
@@ -15193,12 +15219,17 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     icon.className='fa-solid fa-chevron-up';
     icon.setAttribute('aria-hidden','true');
     button.appendChild(icon);
+    var expanded=savedExpanded[section.card]!==false;
+    content.hidden=!expanded;
+    button.setAttribute('aria-expanded',String(expanded));
+    icon.className='fa-solid '+(expanded?'fa-chevron-up':'fa-chevron-down');
     button.addEventListener('click',function(){
       var expanded=button.getAttribute('aria-expanded')!=='true';
       content.hidden=!expanded;
       button.setAttribute('aria-expanded',String(expanded));
       icon.className='fa-solid '+(expanded?'fa-chevron-up':'fa-chevron-down');
       updateLabels();
+      saveSectionState();
     });
     actions.appendChild(button);
     header.appendChild(actions);

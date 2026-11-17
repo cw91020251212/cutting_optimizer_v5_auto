@@ -108,8 +108,8 @@
     margin-bottom: 12px !important;
   }
   html.desktop-workspace #desktopOperations .section-header {
-    min-height: 42px;
-    padding: 9px 12px !important;
+    min-height: 44px;
+    padding: 0 10px !important;
     font-size: 1rem !important;
   }
   html.desktop-workspace #desktopOperations .section-title {
