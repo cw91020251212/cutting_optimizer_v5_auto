@@ -15139,21 +15139,23 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
   body #cutting-items-card .section-header,
   body #materials-card .section-header,
   body #results-card .section-header{
-    box-sizing:border-box!important;min-height:44px!important;padding:0 .65rem!important;
+    box-sizing:border-box!important;min-height:0!important;padding:.15rem .65rem!important;
   }
-  .section-header .section-collapse-toggle{
-    width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;
-    padding:0!important;margin:0!important;border:0!important;
-    border-radius:0!important;background:transparent!important;color:#fff!important;
-    box-shadow:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
-    line-height:1!important;font-size:1rem!important;opacity:1!important;
+  body #settings-card .section-header button.section-collapse-toggle,
+  body #cutting-items-card .section-header button.section-collapse-toggle,
+  body #materials-card .section-header button.section-collapse-toggle,
+  body #results-card .section-header button.section-collapse-toggle{
+    width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;flex:0 0 auto!important;
+    padding:0!important;margin:0!important;border:0!important;border-radius:0!important;
+    appearance:none!important;background:transparent!important;color:#fff!important;box-shadow:none!important;
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    line-height:1!important;font-size:.85rem!important;opacity:1!important;text-shadow:none!important;
   }
-  .section-header .section-collapse-toggle:hover{background:transparent!important;filter:none!important;transform:none!important;}
-  .section-header .section-collapse-toggle:focus-visible{outline:3px solid #fff!important;outline-offset:2px;}
-  .section-header .section-collapse-toggle i{pointer-events:none;font-size:.85rem!important;}
+  .section-header .section-collapse-toggle:hover{background:transparent!important;filter:none!important;transform:none!important;box-shadow:none!important;}
+  .section-header .section-collapse-toggle:focus-visible{outline:2px solid #fff!important;outline-offset:2px;}
+  .section-header .section-collapse-toggle i{pointer-events:none;font-size:.85rem!important;line-height:1!important;filter:none!important;text-shadow:none!important;}
   @media(max-width:767.98px){
     .section-header-actions{gap:.35rem;margin-left:.4rem;}
-    .section-header .section-collapse-toggle{width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;}
   }
 </style>
 <script id="section-collapse-behavior">
