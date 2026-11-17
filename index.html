@@ -15131,6 +15131,91 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
   }
 </style>
 <link rel="stylesheet" href="./desktop-workspace.css">
+<style id="section-collapse-controls">
+  .section-header-actions{display:flex;align-items:center;gap:.45rem;flex:0 0 auto;margin-left:.6rem;}
+  .section-header .section-collapse-toggle{
+    width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;
+    padding:0!important;margin:0!important;border:1px solid rgba(255,255,255,.72)!important;
+    border-radius:50%!important;background:rgba(255,255,255,.16)!important;color:#fff!important;
+    box-shadow:none!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    line-height:1!important;font-size:1rem!important;opacity:1!important;
+  }
+  .section-header .section-collapse-toggle:hover{background:rgba(255,255,255,.28)!important;filter:none!important;transform:none!important;}
+  .section-header .section-collapse-toggle:focus-visible{outline:3px solid #fff!important;outline-offset:2px;}
+  .section-header .section-collapse-toggle i{pointer-events:none;}
+  @media(max-width:767.98px){
+    .section-header-actions{gap:.35rem;margin-left:.4rem;}
+    .section-header .section-collapse-toggle{width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;}
+  }
+</style>
+<script id="section-collapse-behavior">
+(function(){
+  'use strict';
+  var sections=[
+    {card:'settings-card',title:'settingsTitle'},
+    {card:'cutting-items-card',title:'cuttingItemsTitle'},
+    {card:'materials-card',title:'materialTitle'},
+    {card:'results-card',title:'resultTitle'}
+  ];
+  function english(){var language=document.getElementById('language');return language&&language.value==='en';}
+  function labelFor(title,expanded){
+    var name=title.textContent.trim();
+    return english()?(expanded?'Collapse ':'Expand ')+name:(expanded?'收起':'展開')+name;
+  }
+  function updateLabels(){
+    sections.forEach(function(section){
+      var button=document.querySelector('#'+section.card+' [data-section-toggle]');
+      var title=document.getElementById(section.title);
+      if(!button||!title)return;
+      var label=labelFor(title,button.getAttribute('aria-expanded')==='true');
+      button.setAttribute('aria-label',label);
+      button.title=label;
+    });
+  }
+  sections.forEach(function(section){
+    var card=document.getElementById(section.card);
+    if(!card)return;
+    var header=card.querySelector(':scope > .section-header');
+    var content=card.querySelector(':scope > .card-body');
+    if(!header||!content)return;
+    if(!content.id)content.id=section.card+'-body';
+    var actions=document.createElement('div');
+    actions.className='section-header-actions';
+    var step=header.querySelector(':scope > .step-indicator');
+    if(step)actions.appendChild(step);
+    var button=document.createElement('button');
+    button.type='button';
+    button.className='tool-btn section-collapse-toggle';
+    button.setAttribute('data-section-toggle','');
+    button.setAttribute('aria-controls',content.id);
+    button.setAttribute('aria-expanded','true');
+    var icon=document.createElement('i');
+    icon.className='fa-solid fa-chevron-up';
+    icon.setAttribute('aria-hidden','true');
+    button.appendChild(icon);
+    button.addEventListener('click',function(){
+      var expanded=button.getAttribute('aria-expanded')!=='true';
+      content.hidden=!expanded;
+      button.setAttribute('aria-expanded',String(expanded));
+      icon.className='fa-solid '+(expanded?'fa-chevron-up':'fa-chevron-down');
+      updateLabels();
+    });
+    actions.appendChild(button);
+    header.appendChild(actions);
+  });
+  var originalUpdateLanguage=window.updateLanguage;
+  if(typeof originalUpdateLanguage==='function'&&!originalUpdateLanguage.__sectionCollapseWrapped){
+    var wrappedUpdateLanguage=function(){
+      var result=originalUpdateLanguage.apply(this,arguments);
+      updateLabels();
+      return result;
+    };
+    wrappedUpdateLanguage.__sectionCollapseWrapped=true;
+    window.updateLanguage=wrappedUpdateLanguage;
+  }
+  updateLabels();
+})();
+</script>
 <script src="./desktop-workspace.js"></script>
 </body>
 </html>
