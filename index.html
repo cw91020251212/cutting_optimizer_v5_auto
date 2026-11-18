@@ -612,7 +612,6 @@ body.sepia-mode{
   .scheme-hub-action .sha-sub{ font-size: .88rem; }
 }
 
-/* === AnyGen patch: button 3D + modal blur (v2) === */
 
 /* Button 3D style — follow #calculateButton look (highlight + inset depth), not heavy drop-shadows */
 
@@ -754,7 +753,6 @@ body.modal-open #contentRoot{
   box-shadow: 0 20px 70px rgba(0,0,0,.35);
 }
 
-/* === AnyGen patch: compact header + tool buttons spacing (2026-02-24) === */
 
 /* Make the big title banner shorter but keep visual balance */
 #pageTitle{
@@ -850,7 +848,6 @@ button:not(#languageToggle):active,
 
   /* 視覺分隔線／輪廓線：深色但唔用純黑 */
   --ag-outline: #5a3d2e;           /* 深啡 */
-  --ag-outline-strong: #3f2a20;    /* 更深（必要時） */
 }
 
 
@@ -2440,9 +2437,7 @@ html.no-transitions, html.no-transitions * {
   animation: none !important;
 }
 </style>
-<!-- AnyGen: 案例彈窗樣式（香港用語） -->
 <style id="ag-case-help-style">
-  /* === AnyGen: Use-cases modal (beautified) === */
   :root{
     --ag-case-bg: #ffffff;
     --ag-case-text: #0f172a;
@@ -2450,7 +2445,6 @@ html.no-transitions, html.no-transitions * {
     --ag-case-border: rgba(15,23,42,.10);
     --ag-case-shadow: 0 22px 70px rgba(0,0,0,.42);
     --ag-case-accent: #2563eb;
-    --ag-case-accent-2: #10b981;
   }
 
   /* keep the round tool button consistent */
@@ -3271,7 +3265,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   outline: none !important;
 }
 </style>
-<!-- AnyGen patch: 統一頂部 7 粒功能鍵配色（光/暗同一套） -->
 <style id="ag-top-tools-unified-colors">
   /* 目標：無論 light/dark mode，都用同一套工具鍵顏色，避免黑底黑字/白底白字 */
   .top-tools .tool-btn,
@@ -3334,7 +3327,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <button aria-controls="ag-case-help-overlay" aria-haspopup="dialog" aria-label="Examples" class="btn tool-btn tool-btn-soft" id="ag-case-help-btn" onclick="showCaseHelp()" title="Examples" type="button"><span style="font-size:12px;font-weight:700;line-height:1;">例</span></button>
 <button aria-label="QR Code" class="btn tool-btn tool-btn-soft" id="qrBtn" onclick="try{ if(window.showQr) showQr(); else { var m=document.getElementById('qrModal'); if(m&amp;&amp;window.bootstrap&amp;&amp;bootstrap.Modal) bootstrap.Modal.getOrCreateInstance(m).show(); }}catch(e){}" title="QR Code" type="button"><span class="tool-text" style="font-size:12px;font-weight:700;line-height:1;">QR</span></button>
 </div>
-<!-- AnyGen: 案例彈窗（兩個案例） -->
 <div aria-label="Use cases" aria-modal="true" id="ag-case-help-overlay" role="dialog">
 <a aria-label="Close use cases dialog" href="#" id="ag-case-help-backdrop"></a>
 <div id="ag-case-help-modal">
@@ -3648,7 +3640,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
   // 初次載入：初始化為「案例一」+ 生成步驟編號
   try { setTab('case1'); } catch(e) {}
 
-  // v23：改用 CSS :target 開關彈窗，避免 anygen.io 預覽禁用 JS
   //（保留腳本但唔再依賴 click 綁定 / 插入）
 })();
 </script>
@@ -5097,7 +5088,6 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
 /* === AnyGen patch: 按鈕硬邊投影（全檔最終覆寫 v3 / 2026-03-28） ===
    原因：此檔案在 <body> 內仍有多段 <style>（含 !important）會覆蓋 <head> 的設定。
    做法：把最終覆寫放到 
-<!-- AnyGen patch: 最終覆寫兩粒重置掣（白字 + 最幼邊線） -->
 <style id="ag-reset-white-final">
   /* 需求修正：你講「白色」係指字體。
      所以：保留原本底色（橙/黃漸變），只改：
@@ -5123,7 +5113,6 @@ body.sepia-mode #materialItems .controls-row .ag-action-btn{
     border: 0.5px solid rgba(0,0,0,0.22) !important;
   }
 </style>
-<!-- AnyGen patch: 只為4粒按鈕鎖定硬邊投影（避免再被其他CSS蓋走） -->
 <style id="ag-btn-radius-final">
 /* === AnyGen patch: buttons radius slightly rounder ===
    需求：所有按鈕圓角再圓少少，但唔好太圓。
@@ -5202,7 +5191,6 @@ button.btn-sm{
   }
 </style>
 
-<!-- AnyGen patch: Custom alert/confirm (for background blur) -->
 <div aria-hidden="true" class="modal fade" id="agAlertModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content">
@@ -5233,7 +5221,6 @@ button.btn-sm{
 </div>
 </div>
 
-<!-- AnyGen: 底部資訊欄（參考 index_宿舍：結構/字體/顏色） -->
 <style id="ag-bottom-infobar-style">
   :root{ --ag-infobar-h: 46px; }
 
@@ -5330,13 +5317,9 @@ button.btn-sm{
 </div>
 </div>
 
-<!-- AnyGen add: 統一即時狀態列 API（帶時間戳，避免停留舊狀態） -->
 
-<!-- AnyGen add: 主要操作即時狀態列提示（中英文） -->
 
-<!-- AnyGen fix: 讓自製彈窗可用的背景模糊（由 openTune/closeTune 呼叫） -->
 
-<!-- AnyGen patch v2: 強制頂部7鍵兩模式同色（最後覆寫，確保贏晒） -->
 <style id="ag-top-tools-unified-colors-v2">
   body .top-tools button.tool-btn,
   body .top-tools .btn.tool-btn{
@@ -5362,7 +5345,6 @@ button.btn-sm{
     background: #f1f5f9 !important;
   }
 </style>
-<!-- AnyGen patch v3: 統一「頂部7鍵彈出內容」配色（所有模式同一套） -->
 <style id="ag-unify-top-tools-content-colors-v3">
   :root{
     --ag-modal-bg: #ffffff;
@@ -7562,7 +7544,6 @@ button.btn-sm{
         }
 
         
-        // === AnyGen patch: run calculation in Web Worker (anti-freeze) ===
         (function(){
           function ensureWorker(){
             try { if (window.__calcWorker) return window.__calcWorker; } catch(e) {}
@@ -7764,7 +7745,6 @@ button.btn-sm{
           } catch(e) {}
         })();
 
-        // === AnyGen patch: scroll to layout after calculate ===
         // 參考舊檔做法：唔喺呢度 hard reset 結果，避免 cancel/清 flag 令滾動失效
         function calculateAndScroll() {
             // 用戶手動按「計算」：解除抑制自動計算
@@ -8658,7 +8638,6 @@ function calculate() {
             }
         }
 
-        // === AnyGen experiment: parts gradient rendering (多風格可切換) ===
         (function(){
           if(window.__agGradHelpersInited) return;
           window.__agGradHelpersInited = true;
@@ -12023,7 +12002,6 @@ document.addEventListener('DOMContentLoaded', function() {
   else init();
 })();
 </script><script>
-// === AnyGen patch: ensure blur triggers with Bootstrap modal events ===
 (function(){
   function on(){
         if(window.agSetContentBlur) window.agSetContentBlur(true);
@@ -12037,7 +12015,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('hidden.bs.modal', off);
 })();
 </script><script>
-// === AnyGen patch: bootstrap modal 防殘留（避免 modal-backdrop / modal-open 卡住） ===
 (function(){
   function cleanup(){
     try{
@@ -12055,7 +12032,6 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('hidden.bs.modal', function(){ setTimeout(cleanup, 0); });
 })();
 </script><script>
-// === AnyGen patch: unit picker wiring (multi-target) ===
 (function(){
   const modal = document.getElementById('unitPickerModal');
   if(!modal) return;
@@ -12139,7 +12115,6 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 })();
 </script><script>
-// === AnyGen patch: native select blur (mobile system pickers) v3 ===
 // 目的：手機開啟系統 SELECT picker 時，都令背景模糊。
 (function(){
   let lastOpenAt = 0;
