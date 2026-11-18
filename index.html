@@ -2379,22 +2379,48 @@ body:not(.sepia-mode) {
 
 /* v9：已移除舊多層背景（拉絲/格仔等），改用上方精簡版 */
 
+/* 還原深灰背景原有麻布紋，面板及輸入欄不套用紋理。 */
+:root{
+  --ag-burlap-weave-light: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27320%27%20height%3D%27320%27%20viewBox%3D%270%200%20320%20320%27%3E%3Cdefs%3E%3Cpattern%20id%3D%27w%27%20width%3D%2732%27%20height%3D%2732%27%20patternUnits%3D%27userSpaceOnUse%27%3E%3Cg%20opacity%3D%270.85%27%3E%3Cpath%20d%3D%27M0%208%20H32%27%20stroke%3D%27rgba(255,255,255,0.38)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M0%2024%20H32%27%20stroke%3D%27rgba(255,255,255,0.30)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M8%200%20V32%27%20stroke%3D%27rgba(255,255,255,0.30)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M24%200%20V32%27%20stroke%3D%27rgba(255,255,255,0.24)%27%20stroke-width%3D%272%27/%3E%3Cpath%20d%3D%27M0%2016%20H32%27%20stroke%3D%27rgba(255,255,255,0.18)%27%20stroke-width%3D%271%27/%3E%3Cpath%20d%3D%27M16%200%20V32%27%20stroke%3D%27rgba(255,255,255,0.16)%27%20stroke-width%3D%271%27/%3E%3C/g%3E%3C/pattern%3E%3Cfilter%20id%3D%27d%27%20x%3D%27-15%25%27%20y%3D%27-15%25%27%20width%3D%27130%25%27%20height%3D%27130%25%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.9%27%20numOctaves%3D%272%27%20seed%3D%277%27%20result%3D%27n%27/%3E%3CfeDisplacementMap%20in%3D%27SourceGraphic%27%20in2%3D%27n%27%20scale%3D%271.6%27%20xChannelSelector%3D%27R%27%20yChannelSelector%3D%27G%27/%3E%3C/filter%3E%3C/defs%3E%3Crect%20width%3D%27320%27%20height%3D%27320%27%20fill%3D%27url(%23w)%27%20filter%3D%27url(%23d)%27/%3E%3C/svg%3E");
+  --ag-bg-texture-size: 110px;
+  --ag-bg-texture-opacity-dark: 0.44;
+  --ag-bg-texture-relief: contrast(240%) brightness(1.06) saturate(1.02);
+}
+@media (max-width: 520px){
+  :root{ --ag-bg-texture-size: 150px; }
+}
+
 body{ position: relative; }
 
-/* 深色主題：全頁只保留一層低對比水平細線 */
+/* 深色主題（預設）：overlay 更有「麻布凹凸」立體感 */
 body:not(.sepia-mode)::before{
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background-image: repeating-linear-gradient(
-    0deg,
-    rgba(255,255,255,0.035) 0px,
-    rgba(255,255,255,0.035) 1px,
-    transparent 1px,
-    transparent 8px
-  );
+
+  background-image:
+    var(--ag-burlap-weave-light),
+    var(--ag-burlap-weave-light),
+    repeating-linear-gradient(90deg,
+      rgba(255,255,255,0.055) 0px,
+      rgba(255,255,255,0.055) 1px,
+      rgba(0,0,0,0.020) 2px,
+      rgba(255,255,255,0.000) 5px
+    );
+  background-size:
+    var(--ag-bg-texture-size) var(--ag-bg-texture-size),
+    calc(var(--ag-bg-texture-size) * 0.82) calc(var(--ag-bg-texture-size) * 0.82),
+    7px 7px;
+  background-position:
+    0 0,
+    5px 5px,
+    0 0;
+
+  opacity: var(--ag-bg-texture-opacity-dark);
+  mix-blend-mode: overlay;
+  filter: var(--ag-bg-texture-relief);
 }
 
 /* 光明版 / sepia：同樣只用一層低對比水平細線 */
