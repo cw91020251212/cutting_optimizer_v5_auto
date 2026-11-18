@@ -53,7 +53,7 @@ class SectionCollapseBrowserTests(unittest.TestCase):
             if page.locator(f"#{card_id} [data-section-toggle]").is_visible()
         ]
 
-    def test_arrow_button_is_only_a_compact_unstyled_chevron_target(self):
+    def test_chevron_remains_compact_and_can_toggle_the_section(self):
         for width, expected_visible in ((1280, 3), (390, 4)):
             with self.subTest(viewport=width):
                 page = self.open_page(width)
@@ -90,23 +90,31 @@ class SectionCollapseBrowserTests(unittest.TestCase):
                     self.assertTrue(page.locator(f"#{card_id} > .card-body").evaluate("el => el.hidden"))
                 page.close()
 
-    def test_collapsed_header_restores_from_anywhere_without_expanded_header_toggling(self):
+    def test_header_toggles_both_directions_from_anywhere_on_desktop_and_mobile(self):
         for width in (1280, 390):
             with self.subTest(viewport=width):
                 page = self.open_page(width)
                 for card_id in CARDS:
                     with self.subTest(card=card_id):
                         card = page.locator(f"#{card_id}")
+                        if not card.locator("[data-section-toggle]").is_visible():
+                            card.evaluate("el => el.style.setProperty('display', 'block', 'important')")
                         header = card.locator(":scope > .section-header")
                         button = header.locator("[data-section-toggle]")
                         title = header.locator(".section-title")
                         body = card.locator(":scope > .card-body")
-                        if not button.is_visible():
-                            continue
+                        header.scroll_into_view_if_needed()
 
-                        button.click()
-                        self.assertEqual(button.get_attribute("aria-expanded"), "false")
                         title.click()
+                        self.assertEqual(button.get_attribute("aria-expanded"), "false")
+                        self.assertTrue(body.evaluate("el => el.hidden"))
+                        self.assertFalse(page.evaluate(
+                            "id => JSON.parse(localStorage.getItem('aluminum_cut_user_prefs_v1'))"
+                            ".sectionExpanded[id]", card_id
+                        ))
+
+                        box = header.bounding_box()
+                        page.mouse.click(box["x"] + 4, box["y"] + box["height"] / 2)
                         self.assertEqual(button.get_attribute("aria-expanded"), "true")
                         self.assertFalse(body.evaluate("el => el.hidden"))
                         self.assertTrue(page.evaluate(
@@ -114,14 +122,10 @@ class SectionCollapseBrowserTests(unittest.TestCase):
                             ".sectionExpanded[id]", card_id
                         ))
 
+                        page.mouse.click(box["x"] + box["width"] - 4, box["y"] + box["height"] / 2)
+                        self.assertEqual(button.get_attribute("aria-expanded"), "false")
+                        self.assertTrue(body.evaluate("el => el.hidden"))
                         button.click()
-                        box = header.bounding_box()
-                        page.mouse.click(box["x"] + box["width"] - 4, box["y"] + box["height"] / 2)
-                        self.assertEqual(button.get_attribute("aria-expanded"), "true")
-                        self.assertFalse(body.evaluate("el => el.hidden"))
-
-                        title.click()
-                        page.mouse.click(box["x"] + box["width"] - 4, box["y"] + box["height"] / 2)
                         self.assertEqual(button.get_attribute("aria-expanded"), "true")
                         button.click()
                         self.assertEqual(button.get_attribute("aria-expanded"), "false")

@@ -15234,7 +15234,7 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
       saveSectionState();
     });
     header.addEventListener('click',function(event){
-      if(!button.contains(event.target)&&button.getAttribute('aria-expanded')==='false')button.click();
+      if(!button.contains(event.target))button.click();
     });
     actions.appendChild(button);
     header.appendChild(actions);
