@@ -3977,11 +3977,14 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
 <div class="settings-extra-actions"><button class="settings-action settings-extra" id="settingsExamplesButton" type="button">使用案例</button><button class="settings-action settings-extra" id="settingsQrButton" type="button">QR 碼</button></div>
 </div>
 <div class="wood-opacity-setting">
+<div class="wood-adjust-modes" id="settingsAdjustModes" role="group" aria-label="選擇調整項目">
+<button aria-pressed="true" class="wood-opacity-target is-selected" data-adjust-mode="opacity" id="settingsModeOpacity" type="button">透明度</button>
+<button aria-pressed="false" class="wood-opacity-target" data-adjust-mode="size" id="settingsModeSize" type="button">大小</button>
+</div>
 <label id="settingsOpacityLabel">上下箭咀透明度</label>
 <div class="wood-opacity-targets" id="settingsOpacityTargets" role="group" aria-label="選擇要調整的工具">
 <button aria-pressed="true" class="wood-opacity-target is-selected" data-opacity-target="scroll" id="settingsOpacityTargetScroll" type="button">上下箭咀</button>
 <button aria-pressed="false" class="wood-opacity-target" data-opacity-target="floating" id="settingsOpacityTargetFloating" type="button">EN／設定</button>
-<button aria-pressed="false" class="wood-opacity-target" data-opacity-target="layout" id="settingsOpacityTargetLayout" type="button">方案遙控器</button>
 </div>
 <div class="wood-opacity-levels" id="settingsOpacityLevels" role="group" aria-label="上下箭咀透明度級數">
 <button aria-pressed="false" class="wood-opacity-level" data-opacity-level="1" type="button">1</button>
@@ -13925,12 +13928,16 @@ window.__agScrollTo = window.__agScrollTo || function(el){
 
 <script id="stage1-header-tools-script">
 (function(){
+  var phoneDevice = Boolean(navigator.userAgentData && navigator.userAgentData.mobile) || /iPhone|iPod|Android[^\n]*Mobile/i.test(navigator.userAgent);
+  var toolsHome = null;
   function initStage1HeaderTools(){
     if (!window.matchMedia || !window.matchMedia('(max-width: 767.98px)').matches) return;
     if (document.documentElement.dataset.stage1HeaderTools === '1') return;
     const title = document.getElementById('pageTitle');
     const tools = document.querySelector('.top-tools');
     if (!title || !tools) return;
+    toolsHome = document.createComment('mobile-tools-home');
+    tools.parentNode.insertBefore(toolsHome, tools);
     document.documentElement.dataset.stage1HeaderTools = '1';
 
     const button = document.createElement('button');
@@ -13979,6 +13986,22 @@ window.__agScrollTo = window.__agScrollTo || function(el){
     backdrop.addEventListener('click', function(){ setOpen(false); });
   }
   window.__initStage1HeaderTools = initStage1HeaderTools;
+  window.addEventListener('resize', function(){
+    if (!phoneDevice || !window.matchMedia) return;
+    if (window.matchMedia('(max-width: 767.98px)').matches){
+      initStage1HeaderTools();
+      if (typeof window.__applyWoodOuterButtonSkin === 'function') window.__applyWoodOuterButtonSkin();
+      return;
+    }
+    if (!toolsHome || !toolsHome.parentNode) return;
+    var drawer = document.getElementById('stage1ToolsDrawer');
+    var tools = drawer && drawer.querySelector('.top-tools');
+    if (tools) toolsHome.parentNode.insertBefore(tools, toolsHome);
+    toolsHome.remove(); toolsHome = null;
+    if (drawer && drawer.classList.contains('is-open')) document.body.style.overflow = '';
+    [drawer, document.getElementById('stage1ToolsBackdrop'), document.getElementById('stage1HeaderToolsButton')].forEach(function(el){if(el)el.remove();});
+    delete document.documentElement.dataset.stage1HeaderTools;
+  });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(initStage1HeaderTools, 0); }, {once:true});
   else setTimeout(initStage1HeaderTools, 0);
 })();
@@ -14768,8 +14791,9 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
   #displayTuneModal .settings-extra-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;}
   #displayTuneModal .settings-extra{min-height:40px!important;background:linear-gradient(135deg,#f8fbff,#e8f1f8)!important;border-color:#b8cad9!important;color:#234832!important;font-size:.86rem!important;}
   #displayTuneModal .wood-opacity-setting{margin-top:14px!important;padding-top:11px!important;border-top:1px solid #d9e2ea!important;}
+  #displayTuneModal .wood-adjust-modes{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-bottom:9px!important;}
   #displayTuneModal #settingsOpacityLabel{display:block!important;margin:0 0 8px!important;color:#263238!important;font-size:1rem!important;font-weight:800!important;line-height:1.25!important;}
-  #displayTuneModal .wood-opacity-targets{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;margin-bottom:8px!important;}
+  #displayTuneModal .wood-opacity-targets{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-bottom:8px!important;}
   #displayTuneModal .wood-opacity-target{min-width:0!important;min-height:40px!important;padding:5px 4px!important;border:1px solid #b8cad9!important;border-radius:10px!important;background:#edf5fb!important;color:#234832!important;font-size:.78rem!important;font-weight:700!important;line-height:1.15!important;white-space:normal!important;text-shadow:none!important;box-shadow:0 2px 0 rgba(0,0,0,.08)!important;}
   #displayTuneModal .wood-opacity-target.is-selected{border-color:#4d8fbd!important;background:#d8edff!important;color:#14508a!important;font-weight:800!important;}
   #displayTuneModal .wood-opacity-levels{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:7px!important;}
@@ -14807,7 +14831,6 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
       background:linear-gradient(135deg,rgb(230 251 255 / var(--wood-floating-opacity,.56)) 0%,rgb(201 245 255 / var(--wood-floating-opacity,.56)) 55%,rgb(174 238 255 / var(--wood-floating-opacity,.56)) 100%)!important;
     }
   }
-  html body #schemeSelector #schemeButtons button{opacity:var(--wood-layout-remote-opacity,.56)!important;}
 
   /* Wood-work outer-control skin: matching circular shells, inset highlights and raised shadows. */
   html body button#btnToTop.scroll-btn,
@@ -14867,19 +14890,34 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
   var opacityValues={1:.24,2:.40,3:.56,4:.72,5:.88};
   var opacityOptions={
     scroll:{key:'wood-scroll-opacity',css:'--wood-scroll-opacity',zh:'上下箭咀透明度',en:'Arrow opacity',zhName:'上下箭咀',enName:'Up/down arrows'},
-    floating:{key:'wood-floating-opacity',css:'--wood-floating-opacity',zh:'EN／設定按鈕透明度',en:'EN / Settings opacity',zhName:'EN／設定',enName:'EN / Settings'},
-    layout:{key:'wood-layout-remote-opacity',css:'--wood-layout-remote-opacity',zh:'方案遙控器透明度',en:'Layout remote opacity',zhName:'方案遙控器',enName:'Layout remote'}
+    floating:{key:'wood-floating-opacity',css:'--wood-floating-opacity',zh:'EN／設定按鈕透明度',en:'EN / Settings opacity',zhName:'EN／設定',enName:'EN / Settings'}
   };
+  var sizeKeys={scroll:'wood-scroll-size',floating:'wood-floating-size'};
   var opacityTarget='scroll';
-  var store={get:function(key){try{return window.localStorage.getItem(key);}catch(_){return null;}},set:function(key,value){try{window.localStorage.setItem(key,String(value));}catch(_){}}};
-  var levelFor=function(key){var n=Number(store.get(opacityOptions[key].key));return Number.isInteger(n)&&n>=1&&n<=5?n:3;};
+  var adjustMode='opacity';
+  var fallbackValues={};
+  var store={
+    get:function(key){if(Object.prototype.hasOwnProperty.call(fallbackValues,key))return fallbackValues[key];try{return window.localStorage.getItem(key);}catch(_){return null;}},
+    set:function(key,value){try{window.localStorage.setItem(key,String(value));delete fallbackValues[key];}catch(_){fallbackValues[key]=String(value);}}
+  };
+  var levelFor=function(key,mode){var storageKey=mode==='size'?sizeKeys[key]:opacityOptions[key].key;var n=Number(store.get(storageKey));return Number.isInteger(n)&&n>=1&&n<=5?n:3;};
   var isEnglish=function(){var lang=$('language');return !!(lang&&lang.value==='en');};
   var localized=function(zh,en){return isEnglish()?en:zh;};
   function syncOpacityUi(){
     var option=opacityOptions[opacityTarget]||opacityOptions.scroll;
     var zhName=isEnglish()?option.enName:option.zhName;
+    var sizeMode=adjustMode==='size';
+    var modes=$('settingsAdjustModes');
+    if(modes){
+      modes.setAttribute('aria-label',localized('選擇調整項目','Choose what to adjust'));
+      modes.querySelectorAll('[data-adjust-mode]').forEach(function(button){
+        var mode=button.getAttribute('data-adjust-mode'),selected=mode===adjustMode;
+        button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));
+        button.textContent=mode==='size'?localized('大小','Size'):localized('透明度','Opacity');
+      });
+    }
     var label=$('settingsOpacityLabel');
-    if(label)label.textContent=isEnglish()?option.en:option.zh;
+    if(label)label.textContent=sizeMode?zhName+localized('大小',' size'):(isEnglish()?option.en:option.zh);
     var group=$('settingsOpacityTargets');
     if(group){
       group.setAttribute('aria-label',localized('選擇要調整的工具','Choose a control to adjust'));
@@ -14889,17 +14927,17 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
         button.textContent=isEnglish()?target.enName:target.zhName;
       });
     }
-    var level=levelFor(opacityTarget),levelGroup=$('settingsOpacityLevels');
+    var level=levelFor(opacityTarget,adjustMode),levelGroup=$('settingsOpacityLevels');
     if(levelGroup){
-      levelGroup.setAttribute('aria-label',isEnglish()?zhName+' opacity levels':zhName+'透明度級數');
+      levelGroup.setAttribute('aria-label',isEnglish()?zhName+(sizeMode?' size levels':' opacity levels'):zhName+(sizeMode?'大小級數':'透明度級數'));
       levelGroup.querySelectorAll('.wood-opacity-level').forEach(function(button){
         var n=Number(button.getAttribute('data-opacity-level')),selected=n===level;
         button.classList.toggle('is-selected',selected);button.setAttribute('aria-pressed',String(selected));
-        button.setAttribute('aria-label',isEnglish()?zhName+' opacity level '+n+' of 5':'透明度 '+n+'／5');
+        button.setAttribute('aria-label',isEnglish()?zhName+(sizeMode?' size level ':' opacity level ')+n+' of 5':(sizeMode?'大小 ':'透明度 ')+n+'／5');
       });
     }
     var output=$('settingsOpacityCurrent');
-    if(output)output.textContent=isEnglish()?'Current opacity: '+level+'/5':'目前透明度：'+level+'／5';
+    if(output)output.textContent=isEnglish()?(sizeMode?'Current size: ':'Current opacity: ')+level+'/5':(sizeMode?'目前大小：':'目前透明度：')+level+'／5';
   }
   function applyOpacity(key,level,save){
     level=Number(level);if(!opacityValues[level])level=3;
@@ -14909,6 +14947,11 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
   function selectOpacityTarget(key){
     if(!opacityOptions[key])return;
     opacityTarget=key;applyOpacity(key,levelFor(key),false);syncOpacityUi();
+  }
+  function applySize(key,level,save){
+    level=Number(level);if(!Number.isInteger(level)||level<1||level>5)level=3;
+    if(save)store.set(sizeKeys[key],level);
+    applyOuterButtonSkin();
   }
   function applyAllOpacity(){Object.keys(opacityOptions).forEach(function(key){applyOpacity(key,levelFor(key),false);});syncOpacityUi();}
   function saveAppPreferences(changes){
@@ -14925,9 +14968,11 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     var shellShadow='inset -2px 2px 4px rgba(255,255,255,.75), inset 3px -4px 7px rgba(0,0,0,.10), inset 0 0 0 1px rgba(255,255,255,.35), -8px 11px 0 rgba(0,0,0,.18)';
     var controls=Array.prototype.slice.call(document.querySelectorAll('#btnToTop, #btnToBottom, #languageToggle, #stage1HeaderToolsButton'));
     controls.forEach(function(button){
-      var size=mobile?'38px':'44px';
+      var baseSize=mobile?38:44,arrow=button.id==='btnToTop'||button.id==='btnToBottom';
+      var numericSize=baseSize+(levelFor(arrow?'scroll':'floating','size')-3)*4,size=numericSize+'px';
       button.style.setProperty('width',size,'important');button.style.setProperty('height',size,'important');
       button.style.setProperty('min-width',size,'important');button.style.setProperty('min-height',size,'important');
+      button.style.setProperty('font-size',button.id==='languageToggle'?((mobile ? 0.86 : 0.92)*numericSize/baseSize)+'rem':((mobile?17:20)*numericSize/baseSize)+'px','important');
       button.style.setProperty('border-radius','50%','important');
       button.style.setProperty('border','1px solid rgba(38,51,45,.72)','important');
       button.style.setProperty('box-shadow',shellShadow,'important');
@@ -14939,8 +14984,10 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     });
     var desktopSettings=document.querySelector('.top-tools #displayTuneBtn');
     if(desktopSettings){
-      desktopSettings.style.setProperty('width','44px','important');desktopSettings.style.setProperty('height','44px','important');
-      desktopSettings.style.setProperty('min-width','44px','important');desktopSettings.style.setProperty('min-height','44px','important');
+      var desktopSize=44+(levelFor('floating','size')-3)*4;
+      desktopSettings.style.setProperty('width',desktopSize+'px','important');desktopSettings.style.setProperty('height',desktopSize+'px','important');
+      desktopSettings.style.setProperty('min-width',desktopSize+'px','important');desktopSettings.style.setProperty('min-height',desktopSize+'px','important');
+      desktopSettings.style.setProperty('font-size',(20*desktopSize/44)+'px','important');
       desktopSettings.style.setProperty('border-radius','50%','important');desktopSettings.style.setProperty('border','1px solid rgba(38,51,45,.72)','important');
       desktopSettings.style.setProperty('box-shadow',shellShadow,'important');desktopSettings.style.setProperty('outline','none','important');
       desktopSettings.style.setProperty('text-shadow','none','important');desktopSettings.style.setProperty('overflow','hidden','important');
@@ -14954,7 +15001,7 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
       settingsHelpButton:en?'User Guide':'使用說明',settingsShareButton:en?'Share link':'分享連結',
       settingsFontIncrease:en?'Font A+':'字體 A+',settingsFontDecrease:en?'Font A−':'字體 A−',
       settingsRestoreDefaults:en?'Restore defaults':'還原預設設定',
-      settingsRestoreNote:en?'Resets language, font size, theme and tool opacity, and closes open dialogs and expanded sections. Project data and layouts are not cleared.':'重設語言、字級、主題及工具透明度，並關閉已開啟視窗和展開區塊；不會清除工程資料或排料結果。',
+      settingsRestoreNote:en?'Resets language, font size, theme, tool opacity and size, and closes open dialogs and expanded sections. Project data and layouts are not cleared.':'重設語言、字級、主題及工具透明度和大小，並關閉已開啟視窗和展開區塊；不會清除工程資料或排料結果。',
       settingsExamplesButton:en?'Examples':'使用案例',settingsQrButton:en?'QR Code':'QR 碼',
       tuneDisplaySectionTitle:en?'Display tuning':'顯示調校'
     };
@@ -14988,6 +15035,8 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     document.body.classList.remove('sepia-mode','light-mode','dark-mode','dark-beauty-mode');
     store.set('theme_light_mode','0');
     Object.keys(opacityOptions).forEach(function(key){store.set(opacityOptions[key].key,3);});
+    Object.keys(sizeKeys).forEach(function(key){store.set(sizeKeys[key],3);});
+    adjustMode='opacity';opacityTarget='scroll';applyOuterButtonSkin();
     applyAllOpacity();
     try{if(typeof window.saveSettings==='function')window.saveSettings();}catch(_){}
     saveAppPreferences({language:'zh',fontSize:'',theme:'normal'});
@@ -14995,8 +15044,9 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     closeOpenUi();
   }
   function bind(){
+    document.querySelectorAll('#settingsAdjustModes [data-adjust-mode]').forEach(function(button){button.addEventListener('click',function(){adjustMode=button.getAttribute('data-adjust-mode');syncOpacityUi();});});
     document.querySelectorAll('#settingsOpacityTargets .wood-opacity-target').forEach(function(button){button.addEventListener('click',function(){selectOpacityTarget(button.getAttribute('data-opacity-target'));});});
-    document.querySelectorAll('#settingsOpacityLevels .wood-opacity-level').forEach(function(button){button.addEventListener('click',function(){applyOpacity(opacityTarget,button.getAttribute('data-opacity-level'),true);syncOpacityUi();});});
+    document.querySelectorAll('#settingsOpacityLevels .wood-opacity-level').forEach(function(button){button.addEventListener('click',function(){var level=button.getAttribute('data-opacity-level');if(adjustMode==='size')applySize(opacityTarget,level,true);else applyOpacity(opacityTarget,level,true);syncOpacityUi();});});
     var inc=$('settingsFontIncrease'),dec=$('settingsFontDecrease');
     if(inc)inc.addEventListener('click',function(){if(typeof window.adjustFontSize==='function')window.adjustFontSize(1);saveAppPreferences({fontSize:currentFontSize()});});
     if(dec)dec.addEventListener('click',function(){if(typeof window.adjustFontSize==='function')window.adjustFontSize(-1);saveAppPreferences({fontSize:currentFontSize()});});
@@ -15055,6 +15105,9 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
     html body #languageToggle.language-toggle{right:0!important;margin-right:0!important;}
     html body button#stage1HeaderToolsButton:not(.tool-btn):not(.btn-close){right:0!important;left:auto!important;margin-right:0!important;}
     html body .scroll-nav{right:0!important;padding-right:0!important;margin-right:0!important;}
+  }
+  @media(max-width:767.98px) and (max-height:240px){
+    html body .scroll-nav{left:0!important;right:auto!important;}
   }
 </style>
 <link rel="stylesheet" href="./desktop-workspace.css">
