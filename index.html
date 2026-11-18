@@ -12614,16 +12614,6 @@ document.addEventListener('DOMContentLoaded', function() {
             helpBtn.innerHTML = '<i class="fas fa-question"></i>';
             themeBtn.parentNode.insertBefore(helpBtn, themeBtn.nextSibling);
 
-            if (false && !document.getElementById('qrBtn')) {
-              var qrBtn = document.createElement('button');
-              qrBtn.id = 'qrBtn';
-              qrBtn.className = themeBtn.className;
-              qrBtn.onclick = function(){ if(window.showQr) showQr(); };
-              qrBtn.title = (lang === 'zh') ? 'QR碼' : 'QR Code';
-              qrBtn.innerHTML = '<span style="font-size:12px;font-weight:700;line-height:1;">QR</span>';
-              helpBtn.parentNode.insertBefore(qrBtn, helpBtn.nextSibling);
-            }
-
             if (typeof window.updateLanguage === 'function') {
               setTimeout(function(){ try{ window.updateLanguage(); }catch(e){} }, 0);
             }
@@ -14210,7 +14200,6 @@ window.__agScrollTo = window.__agScrollTo || function(el){
 <style id="stage1-vertical-float-correction">
 @media (max-width: 767.98px){
   /* Independent vertical floats: language above, gear below. */
-  body #languageToggle.language-toggle{right:10px!important;top:calc(10px + env(safe-area-inset-top,0px))!important;}
   body #stage1HeaderToolsButton{right:10px!important;top:calc(48px + env(safe-area-inset-top,0px))!important;left:auto!important;}
 }
 </style>
@@ -14648,7 +14637,6 @@ window.__agScrollTo = window.__agScrollTo || function(el){
   }
 }
 </style>
-<script src="./keyboard-editable-probe.js?v=gesture-tap-1"></script>
 
 <style id="display-tune-reference-style-v1">
 /* Visual-only adaptation of the existing display-tuning panel.
