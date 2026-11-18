@@ -10788,10 +10788,20 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     });
   }
+  function setupMaterialZeroReplacement(){
+    document.querySelectorAll('.materialLengthPart').forEach(el => {
+      el.addEventListener('focus', function(){
+        if (this.value !== '0') return;
+        this.value = '';
+        try { this.setSelectionRange(0, 0); } catch(e) {}
+      });
+    });
+  }
 
   function init(){
     setupImperialZeroClear('.cutLengthPart');
     setupImperialZeroClear('.materialLengthPart');
+    setupMaterialZeroReplacement();
     setupImperialZeroClear('#sawThickness');
   }
 
