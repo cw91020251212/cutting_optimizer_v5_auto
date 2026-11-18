@@ -15153,7 +15153,7 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
   }
   .section-header .section-collapse-toggle:hover{background:transparent!important;filter:none!important;transform:none!important;box-shadow:none!important;}
   .section-header .section-collapse-toggle:focus-visible{outline:2px solid #fff!important;outline-offset:2px;}
-  .section-header .section-collapse-toggle i{pointer-events:none;font-size:.85rem!important;line-height:1!important;filter:none!important;text-shadow:none!important;}
+  .section-header .section-collapse-toggle i{pointer-events:none;font-size:.85rem!important;line-height:1!important;filter:none!important;text-shadow:none!important;transform:translateY(-1px)!important;}
   @media(max-width:767.98px){
     .section-header-actions{gap:.35rem;margin-left:.4rem;}
   }
@@ -15232,6 +15232,9 @@ body.sepia-mode #displayTuneModal .tune-hint{background:#f7efdf!important;color:
       icon.className='fa-solid '+(expanded?'fa-chevron-up':'fa-chevron-down');
       updateLabels();
       saveSectionState();
+    });
+    header.addEventListener('click',function(event){
+      if(!button.contains(event.target)&&button.getAttribute('aria-expanded')==='false')button.click();
     });
     actions.appendChild(button);
     header.appendChild(actions);
