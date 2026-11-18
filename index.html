@@ -1609,7 +1609,6 @@ button:not(#languageToggle):not(.tool-btn):not(.btn-close):hover,
                 opacity: 1 !important;
             }
             html body::before,
-            html body::after,
             .modal-backdrop {
                 display: none !important;
                 filter: none !important;
@@ -2435,38 +2434,23 @@ body:not(.sepia-mode) {
 
 body{ position: relative; }
 
-/* 深色主題（預設）：overlay 更有「麻布凹凸」立體感 */
+/* 深色主題：全頁只保留一層低對比水平細線 */
 body:not(.sepia-mode)::before{
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 0;
-
-  background-image:
-    var(--ag-burlap-weave-light),
-    var(--ag-burlap-weave-light),
-    repeating-linear-gradient(90deg,
-      rgba(255,255,255,0.055) 0px,
-      rgba(255,255,255,0.055) 1px,
-      rgba(0,0,0,0.020) 2px,
-      rgba(255,255,255,0.000) 5px
-    );
-  background-size:
-    var(--ag-bg-texture-size) var(--ag-bg-texture-size),
-    calc(var(--ag-bg-texture-size) * 0.82) calc(var(--ag-bg-texture-size) * 0.82),
-    7px 7px;
-  background-position:
-    0 0,
-    5px 5px,
-    0 0;
-
-  opacity: var(--ag-bg-texture-opacity-dark);
-  mix-blend-mode: overlay;
-  filter: var(--ag-bg-texture-relief);
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.035) 0px,
+    rgba(255,255,255,0.035) 1px,
+    transparent 1px,
+    transparent 8px
+  );
 }
 
-/* 光明版 / sepia：multiply 先喺淺底睇得出質地 */
+/* 光明版 / sepia：同樣只用一層低對比水平細線 */
 body.sepia-mode::before,
 html.preload-sepia body::before{
   content: "";
@@ -2474,45 +2458,13 @@ html.preload-sepia body::before{
   inset: 0;
   pointer-events: none;
   z-index: 0;
-
-  background-image:
-    var(--ag-burlap-weave-dark),
-    var(--ag-burlap-weave-dark),
-    repeating-linear-gradient(90deg,
-      rgba(0,0,0,0.040) 0px,
-      rgba(0,0,0,0.040) 1px,
-      rgba(255,255,255,0.00) 5px
-    );
-  background-size:
-    var(--ag-bg-texture-size) var(--ag-bg-texture-size),
-    calc(var(--ag-bg-texture-size) * 0.82) calc(var(--ag-bg-texture-size) * 0.82),
-    7px 7px;
-  background-position:
-    0 0,
-    5px 5px,
-    0 0;
-
-  opacity: var(--ag-bg-texture-opacity-light);
-  mix-blend-mode: multiply;
-  filter: var(--ag-bg-texture-relief-light);
-}
-
-/* 輕微暗角：增加凹凸感（唔會太搶） */
-body::after{
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background: radial-gradient(1200px 800px at 50% 30%, rgba(255,255,255,0.06), rgba(0,0,0,0.22));
-  opacity: 0.22;
-  mix-blend-mode: soft-light;
-}
-body.sepia-mode::after,
-html.preload-sepia body::after{
-  background: radial-gradient(1200px 800px at 50% 30%, rgba(255,255,255,0.70), rgba(0,0,0,0.10));
-  opacity: 0.12;
-  mix-blend-mode: multiply;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(101,67,33,0.045) 0px,
+    rgba(101,67,33,0.045) 1px,
+    transparent 1px,
+    transparent 8px
+  );
 }
 
 /* 低性能模式：減低合成成本，避免手機掉幀 */
@@ -2520,10 +2472,6 @@ html.ag-low-perf body::before{
   mix-blend-mode: normal !important;
   filter: none !important;
   opacity: 0.18 !important;
-}
-html.ag-low-perf body::after{
-  mix-blend-mode: normal !important;
-  opacity: 0.10 !important;
 }
 
 /* 確保內容永遠喺紋理層之上 */
@@ -3408,7 +3356,6 @@ body .btn.tool-btn:not(#languageToggle):not(.btn-close):active{
     opacity: 1 !important;
   }
   html body::before,
-  html body::after,
   html body .modal-backdrop {
     display: none !important;
     filter: none !important;
@@ -4708,15 +4655,8 @@ body.sepia-mode * {
 body.sepia-mode {
     background-color: var(--ag-sepia-bg-fallback) !important;
     background: var(--ag-sepia-bg-main) fixed !important;
-    background-image:
-      /* 主漸變：上淺下深（可一鍵換色） */
-      var(--ag-sepia-bg-main),
-      /* 第二色調：淡淡青綠陰影 */
-      radial-gradient(1200px 700px at 20% 85%, rgba(34,97,89,0.18) 0%, rgba(34,97,89,0) 60%),
-      /* 微細紋理：紙張/金屬質感（細紋） */
-      repeating-linear-gradient(90deg, rgba(255,255,255,0.065) 0px, rgba(255,255,255,0.065) 1px, rgba(0,0,0,0.040) 2px, rgba(255,255,255,0.000) 4px),
-      repeating-linear-gradient(0deg,  rgba(255,255,255,0.040) 0px, rgba(255,255,255,0.040) 1px, rgba(0,0,0,0.022) 2px, rgba(255,255,255,0.000) 6px) !important;
-    background-size: 100% 100%, auto, 7px 7px, 9px 9px !important;
+    background-image: var(--ag-sepia-bg-main) !important;
+    background-size: 100% 100% !important;
     background-attachment: fixed !important;
     color: #4a3a2a !important;
 }
