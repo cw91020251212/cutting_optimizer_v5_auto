@@ -6533,6 +6533,7 @@ button.btn-sm{
                 }
             });
             template.querySelector(".materialQty").value = "1";
+            template.querySelector(".materialQty").dataset._materialQtyDefault = "1";
             
             // 載入方案後：唔好自動 focus 落數字輸入，避免彈出數字鍵盤（下一步通常係按「計算」）
             if (!window.__ag_suppress_autofocus) {
@@ -10729,7 +10730,21 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function setup(el){
+    const isMaterialQuantity = el.classList && el.classList.contains('materialQty');
+    if (isMaterialQuantity && el.value === getDefaultFor(el)) {
+      el.dataset._materialQtyDefault = '1';
+    }
     el.addEventListener('focus', function(){
+      const materialForm = this.closest('.material-item');
+      if (this.classList.contains('materialQty')
+          && this.dataset._materialQtyDefault === '1'
+          && materialForm
+          && !materialForm.classList.contains('edit-mode')) {
+        this.value = '';
+        delete this.dataset._materialQtyDefault;
+        try { this.setSelectionRange(0, 0); } catch(e) {}
+        return;
+      }
       if (this.value === '0' && !this.dataset._clearedOnce) {
         this.value = '';
         this.dataset._clearedOnce = '1';
@@ -10748,8 +10763,14 @@ document.addEventListener("DOMContentLoaded", function() {
       const v = this.value.trim();
       if (v === '') {
         this.value = getDefaultFor(this);
+        if (this.classList.contains('materialQty')) {
+          this.dataset._materialQtyDefault = '1';
+        }
       } else {
         this.value = normalizeNumericString(v);
+        if (this.classList.contains('materialQty')) {
+          delete this.dataset._materialQtyDefault;
+        }
       }
     });
   }
